@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using static GH_Toolkit_GUI.Ghproj;
 using static GH_Toolkit_Core.QB.QBConstants;
+using GH_Toolkit_Core.Audio;
 using Newtonsoft.Json;
 using System.Reflection;
 using System.Security.Policy;
@@ -95,7 +96,7 @@ namespace GH_Toolkit_GUI
             {
                 LoadGhproj(StartupProject);
             }
-            
+
         }
         private void SetAll()
         {
@@ -640,21 +641,48 @@ namespace GH_Toolkit_GUI
         }
 
         // Compiling Logic
-        private void CompileGh3PakFile()
+        private void CompileFolderCheck()
         {
             if (compile_input.Text == "")
             {
                 compile_input.Text = Path.GetDirectoryName(midi_file_input_gh3.Text);
             }
-
+        }
+        private void CompileGh3PakFile()
+        {
             string pakFolder = PAK.CreateSongPackageGh3(midi_file_input_gh3.Text, compile_input.Text, song_checksum.Text, GetGame(), GetPlatform(), (int)HmxHopoVal.Value, ska_files_input_gh3.Text, perf_override_input_gh3.Text, song_script_input_gh3.Text, GetSkaSourceGh3());
 
             // Add code to delete the folder after processing eventually
         }
         private void compile_pak_button_Click(object sender, EventArgs e)
         {
-            
+            CompileFolderCheck();
             CompileGh3PakFile();
+        }
+        private async void compile_all_button_Click(object sender, EventArgs e)
+        {
+            CompileFolderCheck();
+            //CompileGh3PakFile();
+            string gtrPath = Path.Combine(compile_input.Text, "guitar.mp3");
+            string rhythmPath = Path.Combine(compile_input.Text, "rhythm.mp3");
+            string[] backingPaths = backing_input_gh3.Items.Cast<string>().ToArray();
+            string coopGtrPath = Path.Combine(compile_input.Text, "coop_guitar.mp3");
+            string coopRhythmPath = Path.Combine(compile_input.Text, "coop_rhythm.mp3");
+            string[] coopBackingPaths = coop_backing_input_gh3.Items.Cast<string>().ToArray();
+
+
+            FSB fsb = new FSB();
+            fsb.MixFiles(backingPaths, Path.Combine(compile_input.Text, "backing.mp3"));
+            Task gtrStem = fsb.ConvertToMp3(guitar_input_gh3.Text, gtrPath);
+            Task rhythmStem = fsb.ConvertToMp3(rhythm_input_gh3.Text, rhythmPath);
+
+            var tasksToAwait = new List<Task> { gtrStem, rhythmStem };
+
+
+
+            // Await all started tasks. This ensures all conversions are completed before moving on.
+            await Task.WhenAll(tasksToAwait.ToArray());
+
         }
 
         // Toolstrip Logic

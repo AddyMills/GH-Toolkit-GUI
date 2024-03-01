@@ -167,7 +167,7 @@
             platform_ps3 = new RadioButton();
             toolTip1 = new ToolTip(components);
             compile_pak_button = new Button();
-            button2 = new Button();
+            compile_all_button = new Button();
             toolStrip1 = new ToolStrip();
             toolStripButton1 = new ToolStripDropDownButton();
             newToolStripMenuItem = new ToolStripMenuItem();
@@ -1893,16 +1893,17 @@
             compile_pak_button.UseVisualStyleBackColor = false;
             compile_pak_button.Click += compile_pak_button_Click;
             // 
-            // button2
+            // compile_all_button
             // 
-            button2.BackColor = Color.IndianRed;
-            button2.Location = new Point(518, 32);
-            button2.Name = "button2";
-            button2.Size = new Size(114, 23);
-            button2.TabIndex = 7;
-            button2.Text = "Compile All";
-            toolTip1.SetToolTip(button2, "Compiles the song data as well as the audio.");
-            button2.UseVisualStyleBackColor = false;
+            compile_all_button.BackColor = Color.IndianRed;
+            compile_all_button.Location = new Point(518, 32);
+            compile_all_button.Name = "compile_all_button";
+            compile_all_button.Size = new Size(114, 23);
+            compile_all_button.TabIndex = 7;
+            compile_all_button.Text = "Compile All";
+            toolTip1.SetToolTip(compile_all_button, "Compiles the song data as well as the audio.");
+            compile_all_button.UseVisualStyleBackColor = false;
+            compile_all_button.Click += compile_all_button_Click;
             // 
             // toolStrip1
             // 
@@ -1989,7 +1990,7 @@
             tableLayoutPanel12.Controls.Add(project_select, 2, 1);
             tableLayoutPanel12.Controls.Add(compile_input, 1, 0);
             tableLayoutPanel12.Controls.Add(compile_pak_button, 3, 0);
-            tableLayoutPanel12.Controls.Add(button2, 3, 1);
+            tableLayoutPanel12.Controls.Add(compile_all_button, 3, 1);
             tableLayoutPanel12.Location = new Point(12, 600);
             tableLayoutPanel12.Name = "tableLayoutPanel12";
             tableLayoutPanel12.RowCount = 3;
@@ -2271,7 +2272,7 @@
         private Button compile_select;
         private Button project_select;
         private Button compile_pak_button;
-        private Button button2;
+        private Button compile_all_button;
         private ToolStripSeparator toolStripSeparator1;
         private ToolStripMenuItem saveTemplateToolStripMenuItem;
         private ToolStripMenuItem loadTemplateToolStripMenuItem;
