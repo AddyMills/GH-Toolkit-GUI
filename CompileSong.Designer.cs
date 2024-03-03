@@ -184,6 +184,8 @@
             compile_select = new Button();
             project_select = new Button();
             compile_input = new TextBox();
+            toolStripSplitButton1 = new ToolStripSplitButton();
+            preferencesToolStripMenuItem = new ToolStripMenuItem();
             compiler_tabs.SuspendLayout();
             metadata_tab.SuspendLayout();
             tableLayoutPanel2.SuspendLayout();
@@ -1907,7 +1909,7 @@
             // 
             // toolStrip1
             // 
-            toolStrip1.Items.AddRange(new ToolStripItem[] { toolStripButton1 });
+            toolStrip1.Items.AddRange(new ToolStripItem[] { toolStripButton1, toolStripSplitButton1 });
             toolStrip1.Location = new Point(0, 0);
             toolStrip1.Name = "toolStrip1";
             toolStrip1.Size = new Size(659, 25);
@@ -2055,6 +2057,22 @@
             compile_input.Name = "compile_input";
             compile_input.Size = new Size(382, 23);
             compile_input.TabIndex = 2;
+            // 
+            // toolStripSplitButton1
+            // 
+            toolStripSplitButton1.DisplayStyle = ToolStripItemDisplayStyle.Text;
+            toolStripSplitButton1.DropDownItems.AddRange(new ToolStripItem[] { preferencesToolStripMenuItem });
+            toolStripSplitButton1.ImageTransparentColor = Color.Magenta;
+            toolStripSplitButton1.Name = "toolStripSplitButton1";
+            toolStripSplitButton1.Size = new Size(65, 22);
+            toolStripSplitButton1.Text = "Settings";
+            // 
+            // preferencesToolStripMenuItem
+            // 
+            preferencesToolStripMenuItem.Name = "preferencesToolStripMenuItem";
+            preferencesToolStripMenuItem.Size = new Size(180, 22);
+            preferencesToolStripMenuItem.Text = "Preferences";
+            preferencesToolStripMenuItem.Click += preferencesToolStripMenuItem_Click;
             // 
             // CompileSong
             // 
@@ -2276,5 +2294,7 @@
         private ToolStripSeparator toolStripSeparator1;
         private ToolStripMenuItem saveTemplateToolStripMenuItem;
         private ToolStripMenuItem loadTemplateToolStripMenuItem;
+        private ToolStripSplitButton toolStripSplitButton1;
+        private ToolStripMenuItem preferencesToolStripMenuItem;
     }
 }

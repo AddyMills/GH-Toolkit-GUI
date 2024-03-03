@@ -19,6 +19,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Update="UserPreferences.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>UserPreferences.settings</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -30,6 +35,13 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\GH-Toolkit\GH-Toolkit-Core.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="UserPreferences.settings">
+	    <Generator>SettingsSingleFileGenerator</Generator>
+	    <LastGenOutput>UserPreferences.Designer.cs</LastGenOutput>
+	  </None>
 	</ItemGroup>
 
 </Project>

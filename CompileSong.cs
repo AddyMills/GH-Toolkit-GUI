@@ -14,6 +14,9 @@ using GH_Toolkit_Core.Audio;
 using Newtonsoft.Json;
 using System.Reflection;
 using System.Security.Policy;
+using static System.Net.Mime.MediaTypeNames;
+using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace GH_Toolkit_GUI
 {
@@ -25,6 +28,16 @@ namespace GH_Toolkit_GUI
         private string DefaultTemplateFolder;
         private string DefaultTemplatePath;
         private string StartupProject;
+
+        private static string DATAPath = "DATA";
+        private static string PAKPath = Path.Combine(DATAPath, "PAK");
+        private static string MUSICPath = Path.Combine(DATAPath, "MUSIC");
+        private static string SONGSPath = Path.Combine(DATAPath, "SONGS");
+        private string GH3Path;
+        private string GHAPath;
+
+        private string CurrentGame;
+        private string CurrentPlatform;
 
         // Dictionary to hold the selected genre for each game
         private Dictionary<string, string> gameSelectedGenres = new Dictionary<string, string>();
@@ -110,6 +123,8 @@ namespace GH_Toolkit_GUI
             ExeDirectory = Path.GetDirectoryName(ExeLocation);
             DefaultTemplateFolder = Path.Combine(ExeDirectory, "Templates");
             DefaultTemplatePath = Path.Combine(DefaultTemplateFolder, "default.ghproj");
+            CurrentGame = GetGame();
+            CurrentPlatform = GetPlatform();
         }
         private void DefaultTemplateCheck()
         {
@@ -408,12 +423,15 @@ namespace GH_Toolkit_GUI
 
                     // Remember this radio button as the last one checked
                     lastCheckedRadioButton = radioButton;
+
+                    // Update the Current Game field
+                    CurrentGame = radioButton.Text;
                 }
             }
         }
         private void PlatformSelect_CheckChanged(object sender, EventArgs e)
         {
-            string game = GetGame();
+            string game = CurrentGame;
             // Sender is the radio button that triggered the event
             RadioButton radioButton = sender as RadioButton;
             if (radioButton != null)
@@ -433,6 +451,8 @@ namespace GH_Toolkit_GUI
                             compile_input.Text = compileFolderPath;
                         }
                     }
+                    // Update the Current Platform field
+                    CurrentPlatform = radioButton.Text;
 
                 }
             }
@@ -640,13 +660,68 @@ namespace GH_Toolkit_GUI
             isProgrammaticChange = false;
         }
 
+        private void BackupQbFile()
+        {
+
+        }
+
         // Compiling Logic
-        private void CompileFolderCheck()
+        private void PreCompileCheck()
         {
             if (compile_input.Text == "")
             {
                 compile_input.Text = Path.GetDirectoryName(midi_file_input_gh3.Text);
             }
+            if (song_checksum.Text == "")
+            {
+                CreateChecksum();
+            }
+            string game = CurrentGame;
+            if (game == "GH3" || game == "GHA")
+            {
+                string platform = CurrentPlatform;
+                if (platform == "PC")
+                {
+                    string backupLocation = Path.Combine(ExeDirectory, "Backups", game);
+                    string qbPakLocation = Path.Combine(backupLocation, "qb");
+                    if (!File.Exists(qbPakLocation))
+                    {
+                        var regLookup = new RegistryLookup();
+                        string regFolder = game == "GH3" ? "Guitar Hero III" : "Guitar Hero Aerosmith";
+                        string regPath = $@"SOFTWARE\WOW6432Node\Aspyr\{regFolder}";
+                        string regValue = "Path";
+                        string ghPath = regLookup.GetRegistryValue(regPath, regValue);
+
+                        Directory.CreateDirectory(backupLocation);
+                        string ghQbPakPath = Path.Combine(ghPath, PAKPath, "qb.pak.xen");
+                        string ghQbPabPath = Path.Combine(ghPath, PAKPath, "qb.pab.xen");
+                        File.Copy(ghQbPakPath, qbPakLocation + DOT_PAK_XEN);
+                        File.Copy(ghQbPabPath, qbPakLocation + DOT_PAB_XEN);
+
+                        MessageBox.Show($"A backup of {regFolder}'s QB file has been created.\nIt can be copied back to your GH folder at any time in the settings menu.", "Backup Created", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+
+                }
+            }
+        }
+        private void CreateChecksum()
+        {
+            // Normalize the string to get the diacritics separated
+            string formD = title_input.Text.Normalize(NormalizationForm.FormD);
+            StringBuilder sb = new StringBuilder();
+            foreach (char ch in formD)
+            {
+                // Keep the char if it is a letter and not a diacritic
+                if (CharUnicodeInfo.GetUnicodeCategory(ch) != UnicodeCategory.NonSpacingMark)
+                {
+                    sb.Append(ch);
+                }
+            }
+            // Remove non-alphabetic characters
+            string alphanumericOnly = Regex.Replace(sb.ToString(), "[^A-Za-z]", "");
+
+            // Return the normalized string without diacritics and non-alphabetic characters
+            song_checksum.Text = alphanumericOnly;
         }
         private void CompileGh3PakFile()
         {
@@ -654,35 +729,102 @@ namespace GH_Toolkit_GUI
 
             // Add code to delete the folder after processing eventually
         }
+        private async Task CompileGh3All()
+        {
+            string gtrOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_guitar.mp3");
+            string rhythmOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_rhythm.mp3");
+            string backingOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_song.mp3");
+            string coopGtrOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_coop_guitar.mp3");
+            string coopRhythmOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_coop_rhythm.mp3");
+            string coopBackingOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_coop_song.mp3");
+            string crowdOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_crowd.mp3");
+            string previewOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_preview.mp3");
+            string[] spFiles = { gtrOutput, rhythmOutput, backingOutput};
+            string[] coopFiles = { coopGtrOutput, coopRhythmOutput, coopBackingOutput };
+            var filesToProcess = new List<string>();
+            filesToProcess.AddRange(spFiles);
+            filesToProcess.AddRange(coopFiles);
+            filesToProcess.Add(crowdOutput);
+            filesToProcess.Add(previewOutput);
+            string fsbOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}");
+            try
+            {
+                //CompileGh3PakFile();
+                // string gtrOutput = Path.Combine(compile_input.Text, "guitar.mp3");
+
+                string[] backingPaths = backing_input_gh3.Items.Cast<string>().ToArray();
+
+                string[] coopBackingPaths = coop_backing_input_gh3.Items.Cast<string>().ToArray();
+
+                FSB fsb = new FSB();
+
+                fsb.CombineFSB3File(filesToProcess, fsbOutput);
+
+                Task gtrStem = fsb.ConvertToMp3(guitar_input_gh3.Text, gtrOutput);
+                Task rhythmStem = fsb.ConvertToMp3(rhythm_input_gh3.Text, rhythmOutput);
+                Task backingStem = fsb.MixFiles(backingPaths, backingOutput);
+
+                var tasksToAwait = new List<Task> { gtrStem, rhythmStem, backingStem };
+                if (coop_audio_check.Checked)
+                {
+                    Task coopGtrStem = fsb.ConvertToMp3(coop_guitar_input_gh3.Text, coopGtrOutput);
+                    Task coopRhythmStem = fsb.ConvertToMp3(coop_rhythm_input_gh3.Text, coopRhythmOutput);
+                    Task coopBackingStem = fsb.MixFiles(coopBackingPaths, coopBackingOutput);
+                    tasksToAwait.AddRange(new List<Task> { coopGtrStem, coopRhythmStem, coopBackingStem });
+                }
+
+
+                // Await all started tasks. This ensures all conversions are completed before moving on.
+                await Task.WhenAll(tasksToAwait.ToArray());
+
+                // Create the preview audio
+                if (gh3_rendered_preview_check.Checked)
+                {
+                    Task previewStem = fsb.ConvertToMp3(gtrOutput, previewOutput);
+                    await previewStem;
+                }
+                else
+                {
+                    decimal previewStart = previewStartTime / 1000;
+                    decimal previewLength = previewEndTime / 1000;
+                    if (gh3_set_end.Checked)
+                    {
+                        previewLength = previewEndTime - previewStartTime;
+                    } 
+
+                    decimal fadeIn = UserPreferences.Default.PreviewFadeIn;
+                    decimal fadeOut = UserPreferences.Default.PreviewFadeOut;
+                    Task previewStem = fsb.MakePreview(spFiles, previewOutput, previewStart, previewLength, fadeIn, fadeOut);
+                    await previewStem;
+                }
+                //fsb.CombineFSB3File(filesToProcess, fsbOutput);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {              
+
+                foreach (string file in filesToProcess)
+                {
+                    if (File.Exists(file))
+                    {
+                        File.Delete(file);
+                    }
+                }
+            }
+        }
         private void compile_pak_button_Click(object sender, EventArgs e)
         {
-            CompileFolderCheck();
+            PreCompileCheck();
             CompileGh3PakFile();
         }
         private async void compile_all_button_Click(object sender, EventArgs e)
         {
-            CompileFolderCheck();
-            //CompileGh3PakFile();
-            string gtrPath = Path.Combine(compile_input.Text, "guitar.mp3");
-            string rhythmPath = Path.Combine(compile_input.Text, "rhythm.mp3");
-            string[] backingPaths = backing_input_gh3.Items.Cast<string>().ToArray();
-            string coopGtrPath = Path.Combine(compile_input.Text, "coop_guitar.mp3");
-            string coopRhythmPath = Path.Combine(compile_input.Text, "coop_rhythm.mp3");
-            string[] coopBackingPaths = coop_backing_input_gh3.Items.Cast<string>().ToArray();
-
-
-            FSB fsb = new FSB();
-            fsb.MixFiles(backingPaths, Path.Combine(compile_input.Text, "backing.mp3"));
-            Task gtrStem = fsb.ConvertToMp3(guitar_input_gh3.Text, gtrPath);
-            Task rhythmStem = fsb.ConvertToMp3(rhythm_input_gh3.Text, rhythmPath);
-
-            var tasksToAwait = new List<Task> { gtrStem, rhythmStem };
-
-
-
-            // Await all started tasks. This ensures all conversions are completed before moving on.
-            await Task.WhenAll(tasksToAwait.ToArray());
-
+            PreCompileCheck();
+            CompileGh3PakFile();
+            await CompileGh3All();
         }
 
         // Toolstrip Logic
@@ -911,6 +1053,11 @@ namespace GH_Toolkit_GUI
                     project_input.Text = "";
                 }
             }
+        }
+
+        private void preferencesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Create a modal window for the preferences panel
         }
     }
 }

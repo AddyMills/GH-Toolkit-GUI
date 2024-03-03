@@ -1,21 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
 
-
-namespace GH_Toolkit_Core.Registry
+namespace GH_Toolkit_GUI
 {
     internal class RegistryLookup
     {
-        public static string GetRegistryValue(string key, string value)
+        public string GetRegistryValue(string key, string value)
         {
             string result = string.Empty;
             try
             {
-                using (RegistryKey registryKey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(key))
+                using (RegistryKey registryKey = Registry.LocalMachine.OpenSubKey(key))
                 {
                     if (registryKey != null)
                     {
