@@ -1,22 +1,14 @@
-﻿using GH_Toolkit_Core.PAK;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using static GH_Toolkit_GUI.Ghproj;
-using static GH_Toolkit_Core.QB.QBConstants;
-using GH_Toolkit_Core.Audio;
+﻿using GH_Toolkit_Core.Audio;
+using GH_Toolkit_Core.PAK;
 using Newtonsoft.Json;
-using System.Reflection;
-using System.Security.Policy;
-using static System.Net.Mime.MediaTypeNames;
+using System.Data;
 using System.Globalization;
+using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
+using GH_Toolkit_Core.QB;
+using static GH_Toolkit_Core.QB.QBConstants;
+using static GH_Toolkit_GUI.Ghproj;
 
 namespace GH_Toolkit_GUI
 {
@@ -660,10 +652,19 @@ namespace GH_Toolkit_GUI
             isProgrammaticChange = false;
         }
 
-        private void BackupQbFile()
+        private void UpdateGh3FilePreference(string pakPath, string pabPath)
         {
-
+            UserPreferences.Default.Gh3QbPak = pakPath;
+            UserPreferences.Default.Gh3QbPab = pabPath;
+            UserPreferences.Default.Save();
         }
+        private void UpdateGhaFilePreference(string pakPath, string pabPath)
+        {
+            UserPreferences.Default.GhaQbPak = pakPath;
+            UserPreferences.Default.GhaQbPab = pabPath;
+            UserPreferences.Default.Save();
+        }
+
 
         // Compiling Logic
         private void PreCompileCheck()
@@ -684,7 +685,7 @@ namespace GH_Toolkit_GUI
                 {
                     string backupLocation = Path.Combine(ExeDirectory, "Backups", game);
                     string qbPakLocation = Path.Combine(backupLocation, "qb");
-                    if (!File.Exists(qbPakLocation))
+                    if (!File.Exists(qbPakLocation + DOT_PAK_XEN))
                     {
                         var regLookup = new RegistryLookup();
                         string regFolder = game == "GH3" ? "Guitar Hero III" : "Guitar Hero Aerosmith";
@@ -697,6 +698,15 @@ namespace GH_Toolkit_GUI
                         string ghQbPabPath = Path.Combine(ghPath, PAKPath, "qb.pab.xen");
                         File.Copy(ghQbPakPath, qbPakLocation + DOT_PAK_XEN);
                         File.Copy(ghQbPabPath, qbPakLocation + DOT_PAB_XEN);
+
+                        if (game == "GH3")
+                        {
+                            UpdateGh3FilePreference(ghQbPakPath, ghQbPabPath);
+                        }
+                        else
+                        {
+                            UpdateGhaFilePreference(ghQbPakPath, ghQbPabPath);
+                        }
 
                         MessageBox.Show($"A backup of {regFolder}'s QB file has been created.\nIt can be copied back to your GH folder at any time in the settings menu.", "Backup Created", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
@@ -718,7 +728,7 @@ namespace GH_Toolkit_GUI
                 }
             }
             // Remove non-alphabetic characters
-            string alphanumericOnly = Regex.Replace(sb.ToString(), "[^A-Za-z]", "");
+            string alphanumericOnly = Regex.Replace(sb.ToString(), "[^A-Za-z]", "").ToLower();
 
             // Return the normalized string without diacritics and non-alphabetic characters
             song_checksum.Text = alphanumericOnly;
@@ -728,6 +738,22 @@ namespace GH_Toolkit_GUI
             string pakFolder = PAK.CreateSongPackageGh3(midi_file_input_gh3.Text, compile_input.Text, song_checksum.Text, GetGame(), GetPlatform(), (int)HmxHopoVal.Value, ska_files_input_gh3.Text, perf_override_input_gh3.Text, song_script_input_gh3.Text, GetSkaSourceGh3());
 
             // Add code to delete the folder after processing eventually
+        }
+        private void AddToPCSetlist()
+        {
+            string qbPakLocation;
+            if (CurrentGame == "GH3")
+            {
+                qbPakLocation = UserPreferences.Default.Gh3QbPak;
+            }
+            else
+            {
+                qbPakLocation = UserPreferences.Default.GhaQbPak;
+            }
+
+            var qbPak = PAK.PakEntryDictFromFile(qbPakLocation);
+            var songList = qbPak["scripts\\guitar\\songlist.qb"];
+            var songListEntries = QB.QbEntryDictFromBytes(songList.EntryData, "big");
         }
         private async Task CompileGh3All()
         {
@@ -739,7 +765,7 @@ namespace GH_Toolkit_GUI
             string coopBackingOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_coop_song.mp3");
             string crowdOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_crowd.mp3");
             string previewOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_preview.mp3");
-            string[] spFiles = { gtrOutput, rhythmOutput, backingOutput};
+            string[] spFiles = { gtrOutput, rhythmOutput, backingOutput };
             string[] coopFiles = { coopGtrOutput, coopRhythmOutput, coopBackingOutput };
             var filesToProcess = new List<string>();
             filesToProcess.AddRange(spFiles);
@@ -749,16 +775,17 @@ namespace GH_Toolkit_GUI
             string fsbOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}");
             try
             {
-                //CompileGh3PakFile();
-                // string gtrOutput = Path.Combine(compile_input.Text, "guitar.mp3");
+                if (CurrentPlatform == "PC")
+                {
+                    AddToPCSetlist();
+                }
+                
 
                 string[] backingPaths = backing_input_gh3.Items.Cast<string>().ToArray();
 
                 string[] coopBackingPaths = coop_backing_input_gh3.Items.Cast<string>().ToArray();
 
                 FSB fsb = new FSB();
-
-                fsb.CombineFSB3File(filesToProcess, fsbOutput);
 
                 Task gtrStem = fsb.ConvertToMp3(guitar_input_gh3.Text, gtrOutput);
                 Task rhythmStem = fsb.ConvertToMp3(rhythm_input_gh3.Text, rhythmOutput);
@@ -790,21 +817,21 @@ namespace GH_Toolkit_GUI
                     if (gh3_set_end.Checked)
                     {
                         previewLength = previewEndTime - previewStartTime;
-                    } 
+                    }
 
                     decimal fadeIn = UserPreferences.Default.PreviewFadeIn;
                     decimal fadeOut = UserPreferences.Default.PreviewFadeOut;
                     Task previewStem = fsb.MakePreview(spFiles, previewOutput, previewStart, previewLength, fadeIn, fadeOut);
                     await previewStem;
                 }
-                //fsb.CombineFSB3File(filesToProcess, fsbOutput);
+                fsb.CombineFSB3File(filesToProcess, fsbOutput);
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
             finally
-            {              
+            {
 
                 foreach (string file in filesToProcess)
                 {

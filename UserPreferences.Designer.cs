@@ -49,25 +49,73 @@ namespace GH_Toolkit_GUI {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool Gh3BackupNag {
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string Gh3QbPak {
             get {
-                return ((bool)(this["Gh3BackupNag"]));
+                return ((string)(this["Gh3QbPak"]));
             }
             set {
-                this["Gh3BackupNag"] = value;
+                this["Gh3QbPak"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool GhaBackupNag {
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string Gh3QbPab {
             get {
-                return ((bool)(this["GhaBackupNag"]));
+                return ((string)(this["Gh3QbPab"]));
             }
             set {
-                this["GhaBackupNag"] = value;
+                this["Gh3QbPab"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string GhaQbPak {
+            get {
+                return ((string)(this["GhaQbPak"]));
+            }
+            set {
+                this["GhaQbPak"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string GhaQbPab {
+            get {
+                return ((string)(this["GhaQbPab"]));
+            }
+            set {
+                this["GhaQbPab"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string Gh3ExePath {
+            get {
+                return ((string)(this["Gh3ExePath"]));
+            }
+            set {
+                this["Gh3ExePath"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string GhaExePath {
+            get {
+                return ((string)(this["GhaExePath"]));
+            }
+            set {
+                this["GhaExePath"] = value;
             }
         }
     }
