@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using GH_Toolkit_Core.QB;
 using static GH_Toolkit_Core.QB.QBConstants;
 using static GH_Toolkit_GUI.Ghproj;
+using System.Drawing.Drawing2D;
 
 namespace GH_Toolkit_GUI
 {
@@ -27,6 +28,13 @@ namespace GH_Toolkit_GUI
         private static string SONGSPath = Path.Combine(DATAPath, "SONGS");
         private string GH3Path;
         private string GHAPath;
+        private static string downloadRef = "scripts\\guitar\\guitar_download.qb";
+        private static string gh3DownloadSongs = "gh3_download_songs";
+        private static string songlistRef = "scripts\\guitar\\songlist.qb";
+        private static string downloadSonglist = "download_songlist";
+        private static string gh3Songlist = "gh3_songlist";
+        private static string downloadProps = "download_songlist_props";
+        private static string permanentProps = "permanent_songlist_props";
 
         private string CurrentGame;
         private string CurrentPlatform;
@@ -45,6 +53,7 @@ namespace GH_Toolkit_GUI
         private Dictionary<string, TabPage> tabPageDict = new Dictionary<string, TabPage>();
         private int previewStartTime;
         private int previewEndTime;
+        private decimal nsHopoThreshold;
 
         private string compileFolderPath = "";
         private string GhwtModsFolderPath = "";
@@ -94,6 +103,7 @@ namespace GH_Toolkit_GUI
             SetAll();
             DefaultPaths();
             DefaultTemplateCheck();
+            UpdateNsValue();
         }
         private void Startup_Load(object sender, EventArgs e)
         {
@@ -242,7 +252,7 @@ namespace GH_Toolkit_GUI
             bool isOld = game == "GH3" || game == "GHA";
             SetTabs(isOld);
             SetGenres(game);
-            artist_text_select.SelectedIndex = 0;
+            // artist_text_select.SelectedIndex = 0;
             if (isOld)
             {
                 SetGh3Fields(game);
@@ -707,12 +717,36 @@ namespace GH_Toolkit_GUI
                         {
                             UpdateGhaFilePreference(ghQbPakPath, ghQbPabPath);
                         }
+                        // FirstTimeDownloadSonglist();
 
                         MessageBox.Show($"A backup of {regFolder}'s QB file has been created.\nIt can be copied back to your GH folder at any time in the settings menu.", "Backup Created", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
 
                 }
             }
+        }
+        private void OverwriteGh3Pak(byte[] pakData, byte[] pabData)
+        {
+            string qbPakLocation = GetGh3PakFile();
+            string qbPabLocation = qbPakLocation.Replace(DOT_PAK_XEN, DOT_PAB_XEN);
+            File.WriteAllBytes(qbPakLocation, pakData);
+            File.WriteAllBytes(qbPabLocation, pabData);
+        }
+        private void FirstTimeDownloadSonglist()
+        {
+            string qbPakLocation = GetGh3PakFile();
+            var pakCompiler = new PAK.PakCompiler(CurrentGame, CurrentPlatform, split: true);
+            var qbPak = PAK.PakEntryDictFromFile(qbPakLocation);
+            var downloadQb = qbPak[downloadRef];
+            var downloadQbEntries = QB.QbEntryDictFromBytes(downloadQb.EntryData, "big");
+            var downloadSonglist = downloadQbEntries[gh3DownloadSongs].Data as QBStruct.QBStructData;
+            var tier1 = downloadSonglist["tier1"] as QBStruct.QBStructData;
+            tier1.DeleteItem("defaultunlocked");
+            tier1.AddFlagToStruct("unlockall", QBKEY);
+            byte[] downloadQbBytes = QB.CompileQbFromDict(downloadQbEntries, downloadRef, CurrentGame, CurrentPlatform);
+            downloadQb.EntryData = downloadQbBytes;
+            var (pakData, pabData) = pakCompiler.CompilePakFromDictionary(qbPak);
+            OverwriteGh3Pak(pakData, pabData!);
         }
         private void CreateChecksum()
         {
@@ -733,27 +767,97 @@ namespace GH_Toolkit_GUI
             // Return the normalized string without diacritics and non-alphabetic characters
             song_checksum.Text = alphanumericOnly;
         }
+        private string GetGh3PakFile()
+        {
+            if (CurrentGame == "GH3")
+            {
+                return UserPreferences.Default.Gh3QbPak;
+            }
+            else
+            {
+                return UserPreferences.Default.GhaQbPak;
+            }
+        }
         private void CompileGh3PakFile()
         {
             string pakFolder = PAK.CreateSongPackageGh3(midi_file_input_gh3.Text, compile_input.Text, song_checksum.Text, GetGame(), GetPlatform(), (int)HmxHopoVal.Value, ska_files_input_gh3.Text, perf_override_input_gh3.Text, song_script_input_gh3.Text, GetSkaSourceGh3());
 
             // Add code to delete the folder after processing eventually
         }
+        private QBStruct.QBStructData GenerateGh3SongListEntry()
+        {
+            var entry = new QBStruct.QBStructData();
+            string pString = CurrentPlatform == CONSOLE_PS2 ? STRING : WIDESTRING; // Depends on the platform
+            bool artistIsOther = artist_text_select.Text == "Other";
+            bool artistIsFamousBy = artist_text_select.Text == "As Made Famous By";
+            string artistText = !artistIsOther ? $"artist_text_{artist_text_select.Text.ToLower().Replace(" ", "_")}" : artistTextCustom.Text;
+            string artistType = artistIsOther ? pString : POINTER;
+
+            entry.AddVarToStruct("checksum", song_checksum.Text, QBKEY);
+            entry.AddVarToStruct("name", song_checksum.Text, STRING);
+            entry.AddVarToStruct("title", title_input.Text, pString);
+            entry.AddVarToStruct("artist", artist_input.Text, pString);
+            entry.AddVarToStruct("year", $", {year_input.Value}", pString);
+            entry.AddVarToStruct("artist_text", artistText, artistType);
+            entry.AddIntToStruct("original_artist", artistIsFamousBy ? 0 : 1);
+            entry.AddVarToStruct("version", "gh3", QBKEY);
+            entry.AddIntToStruct("leaderboard", 1);
+            entry.AddIntToStruct("gem_offset", 0);
+            entry.AddIntToStruct("input_offset", 0);
+            entry.AddVarToStruct("singer", vocal_gender_select_gh3.Text, QBKEY);
+            entry.AddVarToStruct("keyboard", "false", QBKEY);
+            entry.AddFloatToStruct("band_playback_volume", (float)gh3_band_vol.Value);
+            entry.AddFloatToStruct("guitar_playback_volume", (float)gh3_gtr_vol.Value);
+            entry.AddVarToStruct("countoff", countoff_select_gh3.Text, STRING);
+            entry.AddIntToStruct("rhythm_track", p2_rhythm_check.Checked ? 1 : 0);
+            if (coop_audio_check.Checked)
+            {
+                entry.AddFlagToStruct("use_coop_notetracks", QBKEY);
+            }
+            entry.AddFloatToStruct("hammer_on_measure_scale", (float)nsHopoThreshold);
+            return entry;
+        }
         private void AddToPCSetlist()
         {
-            string qbPakLocation;
-            if (CurrentGame == "GH3")
+            string qbPakLocation = GetGh3PakFile();
+            var pakCompiler = new PAK.PakCompiler(CurrentGame, CurrentPlatform, split: true);
+            var qbPak = PAK.PakEntryDictFromFile(qbPakLocation);
+            var songList = qbPak[songlistRef];
+            var songListEntries = QB.QbEntryDictFromBytes(songList.EntryData, "big");
+            var dlSongList = songListEntries[gh3Songlist].Data as QBArray.QBArrayNode;
+            var dlSongListProps = songListEntries[permanentProps].Data as QBStruct.QBStructData;
+            var songPropsTest = songListEntries["permanent_songlist_props"].Data as QBStruct.QBStructData;
+            var songListEntry = GenerateGh3SongListEntry();
+            var songIndex = dlSongList.GetItemIndex(song_checksum.Text, QBKEY);
+            if (songIndex == -1)
             {
-                qbPakLocation = UserPreferences.Default.Gh3QbPak;
+                dlSongList.AddQbkeyToArray(song_checksum.Text);
+                dlSongListProps.AddStructToStruct(song_checksum.Text, songListEntry);
             }
             else
             {
-                qbPakLocation = UserPreferences.Default.GhaQbPak;
+                dlSongListProps[song_checksum.Text] = songListEntry;
             }
+            byte[] songlistBytes = QB.CompileQbFromDict(songListEntries, songlistRef, CurrentGame, CurrentPlatform);
+            songList.OverwriteData(songlistBytes);
 
-            var qbPak = PAK.PakEntryDictFromFile(qbPakLocation);
-            var songList = qbPak["scripts\\guitar\\songlist.qb"];
-            var songListEntries = QB.QbEntryDictFromBytes(songList.EntryData, "big");
+            var downloadQb = qbPak[downloadRef];
+            var downloadQbEntries = QB.QbEntryDictFromBytes(downloadQb.EntryData, "big");
+            var downloadlist = downloadQbEntries[gh3DownloadSongs].Data as QBStruct.QBStructData;
+            var tier1 = downloadlist["tier1"] as QBStruct.QBStructData;
+            var songArray = tier1["songs"] as QBArray.QBArrayNode;
+            
+
+            if (songArray.GetItemIndex(song_checksum.Text, QBKEY) == -1)
+            {
+                songArray.AddQbkeyToArray(song_checksum.Text);
+                tier1["defaultunlocked"] = songArray.Items.Count;
+            }
+            byte[] downloadQbBytes = QB.CompileQbFromDict(downloadQbEntries, downloadRef, CurrentGame, CurrentPlatform);
+            downloadQb.OverwriteData(downloadQbBytes);
+            
+            var (pakData, pabData) = pakCompiler.CompilePakFromDictionary(qbPak);
+            OverwriteGh3Pak(pakData, pabData!);
         }
         private async Task CompileGh3All()
         {
@@ -779,7 +883,7 @@ namespace GH_Toolkit_GUI
                 {
                     AddToPCSetlist();
                 }
-                
+
 
                 string[] backingPaths = backing_input_gh3.Items.Cast<string>().ToArray();
 
@@ -1085,6 +1189,28 @@ namespace GH_Toolkit_GUI
         private void preferencesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // Create a modal window for the preferences panel
+        }
+
+        private void artist_text_select_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (artist_text_select.Text == "Other")
+            {
+                artistTextCustom.Enabled = true;
+            }
+            else
+            {
+                artistTextCustom.Enabled = false;
+            }
+        }
+        private void UpdateNsValue()
+        {
+            nsHopoThreshold = 1920 / HmxHopoVal.Value / 4;
+            NsHopoVal.Text = Math.Round(nsHopoThreshold, 5).ToString();
+        }
+        private void HmxHopoVal_ValueChanged(object sender, EventArgs e)
+        {
+            
+            UpdateNsValue();
         }
     }
 }

@@ -177,6 +177,8 @@
             toolStripSeparator1 = new ToolStripSeparator();
             saveTemplateToolStripMenuItem = new ToolStripMenuItem();
             loadTemplateToolStripMenuItem = new ToolStripMenuItem();
+            toolStripSplitButton1 = new ToolStripSplitButton();
+            preferencesToolStripMenuItem = new ToolStripMenuItem();
             tableLayoutPanel12 = new TableLayoutPanel();
             compile_label = new Label();
             project_file_label = new Label();
@@ -184,8 +186,6 @@
             compile_select = new Button();
             project_select = new Button();
             compile_input = new TextBox();
-            toolStripSplitButton1 = new ToolStripSplitButton();
-            preferencesToolStripMenuItem = new ToolStripMenuItem();
             compiler_tabs.SuspendLayout();
             metadata_tab.SuspendLayout();
             tableLayoutPanel2.SuspendLayout();
@@ -454,6 +454,7 @@
             artist_text_select.Name = "artist_text_select";
             artist_text_select.Size = new Size(482, 23);
             artist_text_select.TabIndex = 14;
+            artist_text_select.SelectedIndexChanged += artist_text_select_SelectedIndexChanged;
             // 
             // genre_input
             // 
@@ -1388,7 +1389,7 @@
             countoff_select_gh3.Dock = DockStyle.Fill;
             countoff_select_gh3.DropDownStyle = ComboBoxStyle.DropDownList;
             countoff_select_gh3.FormattingEnabled = true;
-            countoff_select_gh3.Items.AddRange(new object[] { "Hihat01", "Hihat02", "Hihat03", "Sticks_Huge", "Sticks_Normal", "Sticks_Tiny" });
+            countoff_select_gh3.Items.AddRange(new object[] { "HiHat01", "HiHat02", "HiHat03", "Sticks_Huge", "Sticks_Normal", "Sticks_Tiny" });
             countoff_select_gh3.Location = new Point(88, 148);
             countoff_select_gh3.Name = "countoff_select_gh3";
             countoff_select_gh3.Size = new Size(464, 23);
@@ -1663,10 +1664,12 @@
             HmxHopoVal.Increment = new decimal(new int[] { 10, 0, 0, 0 });
             HmxHopoVal.Location = new Point(74, 5);
             HmxHopoVal.Maximum = new decimal(new int[] { 10000, 0, 0, 0 });
+            HmxHopoVal.Minimum = new decimal(new int[] { 10, 0, 0, 0 });
             HmxHopoVal.Name = "HmxHopoVal";
             HmxHopoVal.Size = new Size(67, 23);
             HmxHopoVal.TabIndex = 1;
             HmxHopoVal.Value = new decimal(new int[] { 170, 0, 0, 0 });
+            HmxHopoVal.ValueChanged += HmxHopoVal_ValueChanged;
             // 
             // label24
             // 
@@ -1681,9 +1684,10 @@
             // 
             // NsHopoVal
             // 
-            NsHopoVal.Dock = DockStyle.Bottom;
-            NsHopoVal.Location = new Point(206, 5);
+            NsHopoVal.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            NsHopoVal.Location = new Point(206, 3);
             NsHopoVal.Name = "NsHopoVal";
+            NsHopoVal.ReadOnly = true;
             NsHopoVal.Size = new Size(289, 23);
             NsHopoVal.TabIndex = 3;
             // 
@@ -1977,6 +1981,22 @@
             loadTemplateToolStripMenuItem.Text = "Load Template";
             loadTemplateToolStripMenuItem.Click += loadTemplateToolStripMenuItem_Click;
             // 
+            // toolStripSplitButton1
+            // 
+            toolStripSplitButton1.DisplayStyle = ToolStripItemDisplayStyle.Text;
+            toolStripSplitButton1.DropDownItems.AddRange(new ToolStripItem[] { preferencesToolStripMenuItem });
+            toolStripSplitButton1.ImageTransparentColor = Color.Magenta;
+            toolStripSplitButton1.Name = "toolStripSplitButton1";
+            toolStripSplitButton1.Size = new Size(65, 22);
+            toolStripSplitButton1.Text = "Settings";
+            // 
+            // preferencesToolStripMenuItem
+            // 
+            preferencesToolStripMenuItem.Name = "preferencesToolStripMenuItem";
+            preferencesToolStripMenuItem.Size = new Size(135, 22);
+            preferencesToolStripMenuItem.Text = "Preferences";
+            preferencesToolStripMenuItem.Click += preferencesToolStripMenuItem_Click;
+            // 
             // tableLayoutPanel12
             // 
             tableLayoutPanel12.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
@@ -2057,22 +2077,6 @@
             compile_input.Name = "compile_input";
             compile_input.Size = new Size(382, 23);
             compile_input.TabIndex = 2;
-            // 
-            // toolStripSplitButton1
-            // 
-            toolStripSplitButton1.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            toolStripSplitButton1.DropDownItems.AddRange(new ToolStripItem[] { preferencesToolStripMenuItem });
-            toolStripSplitButton1.ImageTransparentColor = Color.Magenta;
-            toolStripSplitButton1.Name = "toolStripSplitButton1";
-            toolStripSplitButton1.Size = new Size(65, 22);
-            toolStripSplitButton1.Text = "Settings";
-            // 
-            // preferencesToolStripMenuItem
-            // 
-            preferencesToolStripMenuItem.Name = "preferencesToolStripMenuItem";
-            preferencesToolStripMenuItem.Size = new Size(180, 22);
-            preferencesToolStripMenuItem.Text = "Preferences";
-            preferencesToolStripMenuItem.Click += preferencesToolStripMenuItem_Click;
             // 
             // CompileSong
             // 
