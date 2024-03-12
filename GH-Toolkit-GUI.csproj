@@ -38,6 +38,18 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Update="Replacements\PC\GH3\QB\scripts\guitar\guitar_memcard.qb">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Replacements\PC\GH3\QB\scripts\guitar\guitar_memcard.qb.xen">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Replacements\PC\GHA\QB\scripts\guitar\guitar_memcard.qb">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Replacements\PC\GHA\QB\scripts\guitar\menu\menu_setlist.qb">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	  <None Update="UserPreferences.settings">
 	    <Generator>SettingsSingleFileGenerator</Generator>
 	    <LastGenOutput>UserPreferences.Designer.cs</LastGenOutput>

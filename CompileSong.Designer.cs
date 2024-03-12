@@ -136,6 +136,8 @@
             perf_override_select_gh3 = new Button();
             ska_files_select_gh3 = new Button();
             song_script_select_gh3 = new Button();
+            label1 = new Label();
+            venue_source_gh3 = new ComboBox();
             compile_tab = new TabPage();
             compile_settings = new GroupBox();
             tableLayoutPanel9 = new TableLayoutPanel();
@@ -1219,29 +1221,33 @@
             tableLayoutPanel7.Controls.Add(label13, 0, 1);
             tableLayoutPanel7.Controls.Add(label14, 0, 2);
             tableLayoutPanel7.Controls.Add(label15, 0, 3);
-            tableLayoutPanel7.Controls.Add(label16, 0, 4);
-            tableLayoutPanel7.Controls.Add(label17, 0, 5);
-            tableLayoutPanel7.Controls.Add(label18, 0, 6);
-            tableLayoutPanel7.Controls.Add(label19, 0, 7);
+            tableLayoutPanel7.Controls.Add(label16, 0, 5);
+            tableLayoutPanel7.Controls.Add(label17, 0, 6);
+            tableLayoutPanel7.Controls.Add(label18, 0, 7);
+            tableLayoutPanel7.Controls.Add(label19, 0, 8);
             tableLayoutPanel7.Controls.Add(midi_file_input_gh3, 1, 0);
             tableLayoutPanel7.Controls.Add(perf_override_input_gh3, 1, 1);
             tableLayoutPanel7.Controls.Add(ska_files_input_gh3, 1, 2);
             tableLayoutPanel7.Controls.Add(ska_file_source_gh3, 1, 3);
-            tableLayoutPanel7.Controls.Add(song_script_input_gh3, 1, 4);
-            tableLayoutPanel7.Controls.Add(countoff_select_gh3, 1, 5);
-            tableLayoutPanel7.Controls.Add(vocal_gender_select_gh3, 1, 6);
-            tableLayoutPanel7.Controls.Add(bassist_select_gh3, 1, 7);
-            tableLayoutPanel7.Controls.Add(tableLayoutPanel8, 1, 9);
+            tableLayoutPanel7.Controls.Add(song_script_input_gh3, 1, 5);
+            tableLayoutPanel7.Controls.Add(countoff_select_gh3, 1, 6);
+            tableLayoutPanel7.Controls.Add(vocal_gender_select_gh3, 1, 7);
+            tableLayoutPanel7.Controls.Add(bassist_select_gh3, 1, 8);
+            tableLayoutPanel7.Controls.Add(tableLayoutPanel8, 1, 11);
             tableLayoutPanel7.Controls.Add(midi_file_select_gh3, 2, 0);
             tableLayoutPanel7.Controls.Add(perf_override_select_gh3, 2, 1);
             tableLayoutPanel7.Controls.Add(ska_files_select_gh3, 2, 2);
-            tableLayoutPanel7.Controls.Add(song_script_select_gh3, 2, 4);
+            tableLayoutPanel7.Controls.Add(song_script_select_gh3, 2, 5);
+            tableLayoutPanel7.Controls.Add(label1, 0, 4);
+            tableLayoutPanel7.Controls.Add(venue_source_gh3, 1, 4);
             tableLayoutPanel7.Location = new Point(6, 6);
             tableLayoutPanel7.Name = "tableLayoutPanel7";
-            tableLayoutPanel7.RowCount = 11;
+            tableLayoutPanel7.RowCount = 13;
             tableLayoutPanel7.RowStyles.Add(new RowStyle());
             tableLayoutPanel7.RowStyles.Add(new RowStyle());
             tableLayoutPanel7.RowStyles.Add(new RowStyle());
+            tableLayoutPanel7.RowStyles.Add(new RowStyle());
+            tableLayoutPanel7.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
             tableLayoutPanel7.RowStyles.Add(new RowStyle());
             tableLayoutPanel7.RowStyles.Add(new RowStyle());
             tableLayoutPanel7.RowStyles.Add(new RowStyle());
@@ -1301,7 +1307,7 @@
             // 
             label16.AutoSize = true;
             label16.Dock = DockStyle.Left;
-            label16.Location = new Point(3, 116);
+            label16.Location = new Point(3, 146);
             label16.Name = "label16";
             label16.Size = new Size(75, 29);
             label16.TabIndex = 4;
@@ -1312,7 +1318,7 @@
             // 
             label17.AutoSize = true;
             label17.Dock = DockStyle.Left;
-            label17.Location = new Point(3, 145);
+            label17.Location = new Point(3, 175);
             label17.Name = "label17";
             label17.Size = new Size(63, 29);
             label17.TabIndex = 5;
@@ -1323,7 +1329,7 @@
             // 
             label18.AutoSize = true;
             label18.Dock = DockStyle.Left;
-            label18.Location = new Point(3, 174);
+            label18.Location = new Point(3, 204);
             label18.Name = "label18";
             label18.Size = new Size(79, 29);
             label18.TabIndex = 6;
@@ -1334,7 +1340,7 @@
             // 
             label19.AutoSize = true;
             label19.Dock = DockStyle.Left;
-            label19.Location = new Point(3, 203);
+            label19.Location = new Point(3, 233);
             label19.Name = "label19";
             label19.Size = new Size(45, 29);
             label19.TabIndex = 7;
@@ -1344,44 +1350,44 @@
             // midi_file_input_gh3
             // 
             midi_file_input_gh3.Dock = DockStyle.Fill;
-            midi_file_input_gh3.Location = new Point(88, 3);
+            midi_file_input_gh3.Location = new Point(90, 3);
             midi_file_input_gh3.Name = "midi_file_input_gh3";
-            midi_file_input_gh3.Size = new Size(464, 23);
+            midi_file_input_gh3.Size = new Size(462, 23);
             midi_file_input_gh3.TabIndex = 9;
             // 
             // perf_override_input_gh3
             // 
             perf_override_input_gh3.Dock = DockStyle.Fill;
-            perf_override_input_gh3.Location = new Point(88, 32);
+            perf_override_input_gh3.Location = new Point(90, 32);
             perf_override_input_gh3.Name = "perf_override_input_gh3";
-            perf_override_input_gh3.Size = new Size(464, 23);
+            perf_override_input_gh3.Size = new Size(462, 23);
             perf_override_input_gh3.TabIndex = 10;
             // 
             // ska_files_input_gh3
             // 
             ska_files_input_gh3.Dock = DockStyle.Fill;
-            ska_files_input_gh3.Location = new Point(88, 61);
+            ska_files_input_gh3.Location = new Point(90, 61);
             ska_files_input_gh3.Name = "ska_files_input_gh3";
-            ska_files_input_gh3.Size = new Size(464, 23);
+            ska_files_input_gh3.Size = new Size(462, 23);
             ska_files_input_gh3.TabIndex = 11;
             // 
             // ska_file_source_gh3
             // 
-            ska_file_source_gh3.Dock = DockStyle.Fill;
+            ska_file_source_gh3.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             ska_file_source_gh3.DropDownStyle = ComboBoxStyle.DropDownList;
             ska_file_source_gh3.FormattingEnabled = true;
             ska_file_source_gh3.Items.AddRange(new object[] { "Guitar Hero World Tour+/Blender Export", "Guitar Hero: Aerosmith", "Guitar Hero 3" });
-            ska_file_source_gh3.Location = new Point(88, 90);
+            ska_file_source_gh3.Location = new Point(90, 90);
             ska_file_source_gh3.Name = "ska_file_source_gh3";
-            ska_file_source_gh3.Size = new Size(464, 23);
+            ska_file_source_gh3.Size = new Size(462, 23);
             ska_file_source_gh3.TabIndex = 12;
             // 
             // song_script_input_gh3
             // 
             song_script_input_gh3.Dock = DockStyle.Fill;
-            song_script_input_gh3.Location = new Point(88, 119);
+            song_script_input_gh3.Location = new Point(90, 149);
             song_script_input_gh3.Name = "song_script_input_gh3";
-            song_script_input_gh3.Size = new Size(464, 23);
+            song_script_input_gh3.Size = new Size(462, 23);
             song_script_input_gh3.TabIndex = 13;
             // 
             // countoff_select_gh3
@@ -1390,9 +1396,9 @@
             countoff_select_gh3.DropDownStyle = ComboBoxStyle.DropDownList;
             countoff_select_gh3.FormattingEnabled = true;
             countoff_select_gh3.Items.AddRange(new object[] { "HiHat01", "HiHat02", "HiHat03", "Sticks_Huge", "Sticks_Normal", "Sticks_Tiny" });
-            countoff_select_gh3.Location = new Point(88, 148);
+            countoff_select_gh3.Location = new Point(90, 178);
             countoff_select_gh3.Name = "countoff_select_gh3";
-            countoff_select_gh3.Size = new Size(464, 23);
+            countoff_select_gh3.Size = new Size(462, 23);
             countoff_select_gh3.TabIndex = 14;
             // 
             // vocal_gender_select_gh3
@@ -1401,9 +1407,9 @@
             vocal_gender_select_gh3.DropDownStyle = ComboBoxStyle.DropDownList;
             vocal_gender_select_gh3.FormattingEnabled = true;
             vocal_gender_select_gh3.Items.AddRange(new object[] { "Male", "Female", "None" });
-            vocal_gender_select_gh3.Location = new Point(88, 177);
+            vocal_gender_select_gh3.Location = new Point(90, 207);
             vocal_gender_select_gh3.Name = "vocal_gender_select_gh3";
-            vocal_gender_select_gh3.Size = new Size(464, 23);
+            vocal_gender_select_gh3.Size = new Size(462, 23);
             vocal_gender_select_gh3.TabIndex = 15;
             // 
             // bassist_select_gh3
@@ -1412,9 +1418,9 @@
             bassist_select_gh3.DropDownStyle = ComboBoxStyle.DropDownList;
             bassist_select_gh3.FormattingEnabled = true;
             bassist_select_gh3.Items.AddRange(new object[] { "Default", "Axel", "Casey", "Izzy", "Judy", "Johnny", "Lars", "Midori", "Xavier", "Slash", "Tom Morello", "Lou", "God of Rock/Metalhead", "Grim Ripper/Elroy" });
-            bassist_select_gh3.Location = new Point(88, 206);
+            bassist_select_gh3.Location = new Point(90, 236);
             bassist_select_gh3.Name = "bassist_select_gh3";
-            bassist_select_gh3.Size = new Size(464, 23);
+            bassist_select_gh3.Size = new Size(462, 23);
             bassist_select_gh3.TabIndex = 16;
             // 
             // tableLayoutPanel8
@@ -1429,12 +1435,12 @@
             tableLayoutPanel8.Controls.Add(gh3_band_vol_label, 2, 0);
             tableLayoutPanel8.Controls.Add(gh3_gtr_vol, 1, 0);
             tableLayoutPanel8.Controls.Add(gh3_band_vol, 3, 0);
-            tableLayoutPanel8.Location = new Point(85, 252);
+            tableLayoutPanel8.Location = new Point(87, 282);
             tableLayoutPanel8.Margin = new Padding(0);
             tableLayoutPanel8.Name = "tableLayoutPanel8";
             tableLayoutPanel8.RowCount = 1;
             tableLayoutPanel8.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tableLayoutPanel8.Size = new Size(470, 29);
+            tableLayoutPanel8.Size = new Size(468, 29);
             tableLayoutPanel8.TabIndex = 17;
             // 
             // gh3_gtr_vol_label
@@ -1512,12 +1518,34 @@
             // 
             // song_script_select_gh3
             // 
-            song_script_select_gh3.Location = new Point(558, 119);
+            song_script_select_gh3.Location = new Point(558, 149);
             song_script_select_gh3.Name = "song_script_select_gh3";
             song_script_select_gh3.Size = new Size(54, 23);
             song_script_select_gh3.TabIndex = 27;
             song_script_select_gh3.Text = "...";
             song_script_select_gh3.UseVisualStyleBackColor = true;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Dock = DockStyle.Fill;
+            label1.Location = new Point(3, 116);
+            label1.Name = "label1";
+            label1.Size = new Size(81, 30);
+            label1.TabIndex = 28;
+            label1.Text = "Venue Source:";
+            label1.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // venue_source_gh3
+            // 
+            venue_source_gh3.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            venue_source_gh3.DropDownStyle = ComboBoxStyle.DropDownList;
+            venue_source_gh3.FormattingEnabled = true;
+            venue_source_gh3.Items.AddRange(new object[] { "Guitar Hero 3", "Guitar Hero: Aerosmith", "Guitar Hero World Tour" });
+            venue_source_gh3.Location = new Point(90, 119);
+            venue_source_gh3.Name = "venue_source_gh3";
+            venue_source_gh3.Size = new Size(462, 23);
+            venue_source_gh3.TabIndex = 29;
             // 
             // compile_tab
             // 
@@ -2242,11 +2270,6 @@
         private ComboBox countoff_select_gh3;
         private ComboBox vocal_gender_select_gh3;
         private ComboBox bassist_select_gh3;
-        private TableLayoutPanel tableLayoutPanel8;
-        private Label gh3_gtr_vol_label;
-        private Label gh3_band_vol_label;
-        private NumericUpDown gh3_gtr_vol;
-        private NumericUpDown gh3_band_vol;
         private Button midi_file_select_gh3;
         private ToolTip toolTip1;
         private Button perf_override_select_gh3;
@@ -2300,5 +2323,12 @@
         private ToolStripMenuItem loadTemplateToolStripMenuItem;
         private ToolStripSplitButton toolStripSplitButton1;
         private ToolStripMenuItem preferencesToolStripMenuItem;
+        private Label label1;
+        private TableLayoutPanel tableLayoutPanel8;
+        private Label gh3_gtr_vol_label;
+        private Label gh3_band_vol_label;
+        private NumericUpDown gh3_gtr_vol;
+        private NumericUpDown gh3_band_vol;
+        private ComboBox venue_source_gh3;
     }
 }

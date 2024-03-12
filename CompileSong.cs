@@ -100,10 +100,20 @@ namespace GH_Toolkit_GUI
             }
             InitializeTabDict();
             SetButtons();
+            OneTimeSetup();
             SetAll();
             DefaultPaths();
             DefaultTemplateCheck();
             UpdateNsValue();
+        }
+        private void OneTimeSetup()
+        {
+            ska_file_source_gh3.SelectedIndex = 0;
+            venue_source_gh3.SelectedIndex = 0;
+            countoff_select_gh3.SelectedIndex = 0;
+            vocal_gender_select_gh3.SelectedIndex = 0;
+            bassist_select_gh3.SelectedIndex = 0;
+            hopo_mode_select.SelectedIndex = 0;
         }
         private void Startup_Load(object sender, EventArgs e)
         {
@@ -256,11 +266,7 @@ namespace GH_Toolkit_GUI
             if (isOld)
             {
                 SetGh3Fields(game);
-                ska_file_source_gh3.SelectedIndex = 0;
-                countoff_select_gh3.SelectedIndex = 0;
-                vocal_gender_select_gh3.SelectedIndex = 0;
-                bassist_select_gh3.SelectedIndex = 0;
-                hopo_mode_select.SelectedIndex = 0;
+                
             }
             else
             {
@@ -717,12 +723,37 @@ namespace GH_Toolkit_GUI
                         {
                             UpdateGhaFilePreference(ghQbPakPath, ghQbPabPath);
                         }
-                        // FirstTimeDownloadSonglist();
+                        ReplaceGh3PakFiles();
 
                         MessageBox.Show($"A backup of {regFolder}'s QB file has been created.\nIt can be copied back to your GH folder at any time in the settings menu.", "Backup Created", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
-
                 }
+
+            }
+        }
+        private void ReplaceGh3PakFiles()
+        {
+            string qbPakLocation = GetGh3PakFile();
+            // Might make this use the backup instead in the future...
+            string qbPabLocation = qbPakLocation.Replace(DOT_PAK_XEN, DOT_PAB_XEN);
+            string replaceLocation = Path.Combine(ExeDirectory, "Replacements", CurrentPlatform, CurrentGame, "QB");
+
+            if (Directory.Exists(replaceLocation))
+            {
+                var pakCompiler = new PAK.PakCompiler(CurrentGame, CurrentPlatform, split: true);
+                var replaceFiles = Directory.GetFiles(replaceLocation, "*.qb", SearchOption.AllDirectories);
+                var qbPak = PAK.PakEntryDictFromFile(qbPakLocation);
+                foreach(var file in replaceFiles)
+                {
+                    var relPath = Path.GetRelativePath(replaceLocation, file);
+                    if (qbPak.TryGetValue(relPath, out var entry))
+                    {
+                        var qbData = File.ReadAllBytes(file);
+                        entry.OverwriteData(qbData);
+                    }
+                }
+                var (pakData, pabData) = pakCompiler.CompilePakFromDictionary(qbPak);
+                OverwriteGh3Pak(pakData, pabData!);
             }
         }
         private void OverwriteGh3Pak(byte[] pakData, byte[] pabData)
@@ -780,7 +811,31 @@ namespace GH_Toolkit_GUI
         }
         private void CompileGh3PakFile()
         {
-            string pakFolder = PAK.CreateSongPackageGh3(midi_file_input_gh3.Text, compile_input.Text, song_checksum.Text, GetGame(), GetPlatform(), (int)HmxHopoVal.Value, ska_files_input_gh3.Text, perf_override_input_gh3.Text, song_script_input_gh3.Text, GetSkaSourceGh3());
+            string venue;
+            switch (venue_source_gh3.SelectedIndex)
+            {
+                case 0:
+                    venue = "GH3";
+                    break;
+                case 1:
+                    venue = "GHA";
+                    break;
+                default:
+                    venue = "GHWT";
+                    break;
+            }
+            string pakFolder = PAK.CreateSongPackageGh3(
+                midiPath:midi_file_input_gh3.Text,
+                savePath:compile_input.Text, 
+                songName:song_checksum.Text, 
+                game:GetGame(), 
+                gameConsole:GetPlatform(), 
+                hopoThreshold:(int)HmxHopoVal.Value, 
+                skaPath:ska_files_input_gh3.Text, 
+                perfOverride:perf_override_input_gh3.Text, 
+                songScripts:song_script_input_gh3.Text, 
+                skaSource:GetSkaSourceGh3(),
+                venueSource:venue);
 
             // Add code to delete the folder after processing eventually
         }
@@ -819,6 +874,7 @@ namespace GH_Toolkit_GUI
         }
         private void AddToPCSetlist()
         {
+            ReplaceGh3PakFiles();
             string qbPakLocation = GetGh3PakFile();
             var pakCompiler = new PAK.PakCompiler(CurrentGame, CurrentPlatform, split: true);
             var qbPak = PAK.PakEntryDictFromFile(qbPakLocation);
@@ -993,6 +1049,7 @@ namespace GH_Toolkit_GUI
                 previewEnd = previewEndTime,
                 hmxHopoVal = (int)HmxHopoVal.Value,
                 skaSource = ska_file_source_gh3.SelectedIndex,
+                venueSource = venue_source_gh3.SelectedIndex,
                 countoff = countoff_select_gh3.SelectedIndex,
                 vocalGender = vocal_gender_select_gh3.SelectedIndex,
                 bassistSelect = bassist_select_gh3.SelectedIndex,
@@ -1055,6 +1112,7 @@ namespace GH_Toolkit_GUI
             genre_input.SelectedIndex = data.genre;
             HmxHopoVal.Value = data.hmxHopoVal;
             ska_file_source_gh3.SelectedIndex = data.skaSource;
+            venue_source_gh3.SelectedIndex = data.venueSource;
             countoff_select_gh3.SelectedIndex = data.countoff;
             vocal_gender_select_gh3.SelectedIndex = data.vocalGender;
             bassist_select_gh3.SelectedIndex = data.bassistSelect;
