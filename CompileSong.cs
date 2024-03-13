@@ -847,7 +847,8 @@ namespace GH_Toolkit_GUI
                 perfOverride:perf_override_input_gh3.Text, 
                 songScripts:song_script_input_gh3.Text, 
                 skaSource:GetSkaSourceGh3(),
-                venueSource:venue);
+                venueSource:venue,
+                rhythmTrack:p2_rhythm_check.Checked);
 
             MoveToGh3SongsFolder(pakFile);
 
