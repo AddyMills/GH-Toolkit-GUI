@@ -98,24 +98,24 @@ namespace GH_Toolkit_GUI {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string Gh3ExePath {
+        public string Gh3FolderPath {
             get {
-                return ((string)(this["Gh3ExePath"]));
+                return ((string)(this["Gh3FolderPath"]));
             }
             set {
-                this["Gh3ExePath"] = value;
+                this["Gh3FolderPath"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string GhaExePath {
+        public string GhaFolderPath {
             get {
-                return ((string)(this["GhaExePath"]));
+                return ((string)(this["GhaFolderPath"]));
             }
             set {
-                this["GhaExePath"] = value;
+                this["GhaFolderPath"] = value;
             }
         }
     }

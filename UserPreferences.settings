@@ -20,10 +20,10 @@
     <Setting Name="GhaQbPab" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="Gh3ExePath" Type="System.String" Scope="User">
+    <Setting Name="Gh3FolderPath" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="GhaExePath" Type="System.String" Scope="User">
+    <Setting Name="GhaFolderPath" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>

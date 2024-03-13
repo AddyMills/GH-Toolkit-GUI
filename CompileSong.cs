@@ -668,16 +668,18 @@ namespace GH_Toolkit_GUI
             isProgrammaticChange = false;
         }
 
-        private void UpdateGh3FilePreference(string pakPath, string pabPath)
+        private void UpdateGh3FilePreference(string pakPath, string pabPath, string folderPath)
         {
             UserPreferences.Default.Gh3QbPak = pakPath;
             UserPreferences.Default.Gh3QbPab = pabPath;
+            UserPreferences.Default.Gh3FolderPath = folderPath;
             UserPreferences.Default.Save();
         }
-        private void UpdateGhaFilePreference(string pakPath, string pabPath)
+        private void UpdateGhaFilePreference(string pakPath, string pabPath, string folderPath)
         {
             UserPreferences.Default.GhaQbPak = pakPath;
             UserPreferences.Default.GhaQbPab = pabPath;
+            UserPreferences.Default.GhaFolderPath = folderPath;
             UserPreferences.Default.Save();
         }
 
@@ -717,11 +719,11 @@ namespace GH_Toolkit_GUI
 
                         if (game == "GH3")
                         {
-                            UpdateGh3FilePreference(ghQbPakPath, ghQbPabPath);
+                            UpdateGh3FilePreference(ghQbPakPath, ghQbPabPath, ghPath);
                         }
                         else
                         {
-                            UpdateGhaFilePreference(ghQbPakPath, ghQbPabPath);
+                            UpdateGhaFilePreference(ghQbPakPath, ghQbPabPath, ghPath);
                         }
                         ReplaceGh3PakFiles();
 
@@ -735,7 +737,6 @@ namespace GH_Toolkit_GUI
         {
             string qbPakLocation = GetGh3PakFile();
             // Might make this use the backup instead in the future...
-            string qbPabLocation = qbPakLocation.Replace(DOT_PAK_XEN, DOT_PAB_XEN);
             string replaceLocation = Path.Combine(ExeDirectory, "Replacements", CurrentPlatform, CurrentGame, "QB");
 
             if (Directory.Exists(replaceLocation))
@@ -809,6 +810,17 @@ namespace GH_Toolkit_GUI
                 return UserPreferences.Default.GhaQbPak;
             }
         }
+        private string GetGh3Folder()
+        {
+            if (CurrentGame == "GH3")
+            {
+                return UserPreferences.Default.Gh3FolderPath;
+            }
+            else
+            {
+                return UserPreferences.Default.GhaFolderPath;
+            }
+        }
         private void CompileGh3PakFile()
         {
             string venue;
@@ -824,12 +836,12 @@ namespace GH_Toolkit_GUI
                     venue = "GHWT";
                     break;
             }
-            string pakFolder = PAK.CreateSongPackageGh3(
+            string pakFile = PAK.CreateSongPackageGh3(
                 midiPath:midi_file_input_gh3.Text,
                 savePath:compile_input.Text, 
                 songName:song_checksum.Text, 
-                game:GetGame(), 
-                gameConsole:GetPlatform(), 
+                game:CurrentGame, 
+                gameConsole:CurrentPlatform, 
                 hopoThreshold:(int)HmxHopoVal.Value, 
                 skaPath:ska_files_input_gh3.Text, 
                 perfOverride:perf_override_input_gh3.Text, 
@@ -837,7 +849,35 @@ namespace GH_Toolkit_GUI
                 skaSource:GetSkaSourceGh3(),
                 venueSource:venue);
 
+            MoveToGh3SongsFolder(pakFile);
+
             // Add code to delete the folder after processing eventually
+        }
+        private void MoveToGh3SongsFolder(string pakPath)
+        {
+            string gameFolder = GetGh3Folder();
+            string saveFolder = Path.Combine(gameFolder, SONGSPath);
+            string savePath = Path.Combine(saveFolder, Path.GetFileName(pakPath));
+            if (!Directory.Exists(saveFolder))
+            {
+                Directory.CreateDirectory(saveFolder);
+            }
+            File.Move(pakPath, savePath, true);
+        }
+        private void MoveToGh3MusicFolder(string audioPath)
+        {
+            string gameFolder = GetGh3Folder();
+            string saveFolder = Path.Combine(gameFolder, MUSICPath);
+            string savePath = Path.Combine(saveFolder, Path.GetFileName(audioPath));
+            if (!savePath.EndsWith(".xen"))
+            {
+                savePath += ".xen";
+            }
+            if (!Directory.Exists(saveFolder))
+            {
+                Directory.CreateDirectory(saveFolder);
+            }
+            File.Move(audioPath, savePath, true);
         }
         private QBStruct.QBStructData GenerateGh3SongListEntry()
         {
@@ -860,6 +900,10 @@ namespace GH_Toolkit_GUI
             entry.AddIntToStruct("gem_offset", 0);
             entry.AddIntToStruct("input_offset", 0);
             entry.AddVarToStruct("singer", vocal_gender_select_gh3.Text, QBKEY);
+            if (CurrentGame == "GHA")
+            {
+                entry.AddVarToStruct("band", "default_band", QBKEY);
+            }
             entry.AddVarToStruct("keyboard", "false", QBKEY);
             entry.AddFloatToStruct("band_playback_volume", (float)gh3_band_vol.Value);
             entry.AddFloatToStruct("guitar_playback_volume", (float)gh3_gtr_vol.Value);
@@ -874,7 +918,7 @@ namespace GH_Toolkit_GUI
         }
         private void AddToPCSetlist()
         {
-            ReplaceGh3PakFiles();
+            //ReplaceGh3PakFiles();
             string qbPakLocation = GetGh3PakFile();
             var pakCompiler = new PAK.PakCompiler(CurrentGame, CurrentPlatform, split: true);
             var qbPak = PAK.PakEntryDictFromFile(qbPakLocation);
@@ -937,7 +981,7 @@ namespace GH_Toolkit_GUI
             {
                 if (CurrentPlatform == "PC")
                 {
-                    AddToPCSetlist();
+                    //AddToPCSetlist();
                 }
 
 
@@ -984,7 +1028,9 @@ namespace GH_Toolkit_GUI
                     Task previewStem = fsb.MakePreview(spFiles, previewOutput, previewStart, previewLength, fadeIn, fadeOut);
                     await previewStem;
                 }
-                fsb.CombineFSB3File(filesToProcess, fsbOutput);
+                var (fsbOut, datOut) = fsb.CombineFSB3File(filesToProcess, fsbOutput);
+                MoveToGh3MusicFolder(fsbOut);
+                MoveToGh3MusicFolder(datOut);
             }
             catch (Exception ex)
             {
