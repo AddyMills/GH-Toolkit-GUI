@@ -981,7 +981,7 @@ namespace GH_Toolkit_GUI
             {
                 if (CurrentPlatform == "PC")
                 {
-                    //AddToPCSetlist();
+                    AddToPCSetlist();
                 }
 
 
