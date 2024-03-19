@@ -8,7 +8,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using GH_Toolkit_Core.QB;
 using static GH_Toolkit_Core.QB.QBConstants;
-using static GH_Toolkit_GUI.Ghproj;
 using System.Drawing.Drawing2D;
 
 namespace GH_Toolkit_GUI
@@ -43,6 +42,7 @@ namespace GH_Toolkit_GUI
         private Dictionary<string, string> gameSelectedGenres = new Dictionary<string, string>();
         // Dictionary to hold the compile folder path for each platform and each game
         private Dictionary<string, Dictionary<string, string>> gamePlatformCompilePaths = new Dictionary<string, Dictionary<string, string>>();
+
 
         private RadioButton lastCheckedRadioButton = null;
         private string audioFileFilter = "Audio files (*.mp3, *.ogg, *.flac, *.wav)|*.mp3;*.ogg;*.flac;*.wav|All files (*.*)|*.*";
@@ -119,7 +119,7 @@ namespace GH_Toolkit_GUI
         {
             if (File.Exists(StartupProject))
             {
-                LoadGhproj(StartupProject);
+                LoadProject(StartupProject);
             }
 
         }
@@ -142,7 +142,7 @@ namespace GH_Toolkit_GUI
         {
             if (File.Exists(DefaultTemplatePath))
             {
-                LoadGhproj(DefaultTemplatePath);
+                LoadProject(DefaultTemplatePath);
             }
             else
             {
@@ -265,8 +265,8 @@ namespace GH_Toolkit_GUI
             // artist_text_select.SelectedIndex = 0;
             if (isOld)
             {
-                SetGh3Fields(game);
-                
+                //
+                //SetGh3Fields(game);
             }
             else
             {
@@ -711,11 +711,44 @@ namespace GH_Toolkit_GUI
                         string regValue = "Path";
                         string ghPath = regLookup.GetRegistryValue(regPath, regValue);
 
+                        try
+                        {
+                            // Check if ghPath is null or an empty string
+                            if (string.IsNullOrEmpty(ghPath))
+                            {
+                                // Call the method that pops up a window asking for the game path
+                                ghPath = AskForGamePath();
+                                string ghExePath = Path.Combine(ghPath, $"{CurrentGame}.exe");
+                                if (!File.Exists(ghExePath))
+                                {
+                                    throw new Exception($"The game executable was not found at the specified path: {ghExePath}");
+                                }
+                            }
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            MessageBox.Show($"{regFolder}'s game path is required to proceed.\n\nCancelling compilation.", "Path Required", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            throw;
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show($"An error occurred while trying to get the game path.\n\n{ex.Message}\n\nCancelling compilation.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            throw;
+                        }
+
                         Directory.CreateDirectory(backupLocation);
                         string ghQbPakPath = Path.Combine(ghPath, PAKPath, "qb.pak.xen");
                         string ghQbPabPath = Path.Combine(ghPath, PAKPath, "qb.pab.xen");
-                        File.Copy(ghQbPakPath, qbPakLocation + DOT_PAK_XEN);
-                        File.Copy(ghQbPabPath, qbPakLocation + DOT_PAB_XEN);
+                        try
+                        {
+                            File.Copy(ghQbPakPath, qbPakLocation + DOT_PAK_XEN);
+                            File.Copy(ghQbPabPath, qbPakLocation + DOT_PAB_XEN);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show($"An error occurred while trying to backup {regFolder}'s QB.PAK file.\n\n{ex.Message}\n\nCancelling compilation.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            throw;
+                        }
 
                         if (game == "GH3")
                         {
@@ -731,6 +764,39 @@ namespace GH_Toolkit_GUI
                     }
                 }
 
+            }
+        }
+        public static string AskForGamePath()
+        {
+
+            string folderPath = "";
+            while (true) // Keep showing the dialog until a valid path is selected or the user cancels
+            {
+                using (var dialog = new FolderBrowserDialog())
+                {
+                    dialog.ShowNewFolderButton = false;
+                    DialogResult result = dialog.ShowDialog();
+
+                    if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(dialog.SelectedPath))
+                    {
+                        if (Directory.Exists(dialog.SelectedPath))
+                        {
+                            return dialog.SelectedPath; // Return the selected path if it's valid
+                        }
+                        else
+                        {
+                            MessageBox.Show("The selected path does not exist. Please select a valid path.", "Invalid Path", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                    else if (result == DialogResult.Cancel)
+                    {
+                        throw new OperationCanceledException("User cancelled the path selection."); // Throw an exception if the user cancels
+                    }
+                    else
+                    {
+                        MessageBox.Show("Please select a valid path.", "Path Required", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
             }
         }
         private void ReplaceGh3PakFiles()
@@ -850,7 +916,14 @@ namespace GH_Toolkit_GUI
                 venueSource:venue,
                 rhythmTrack:p2_rhythm_check.Checked);
 
-            MoveToGh3SongsFolder(pakFile);
+            if (CurrentPlatform == "PC")
+            {
+                AddToPCSetlist();
+                MoveToGh3SongsFolder(pakFile);
+            }
+            
+
+
 
             // Add code to delete the folder after processing eventually
         }
@@ -888,6 +961,7 @@ namespace GH_Toolkit_GUI
             bool artistIsFamousBy = artist_text_select.Text == "As Made Famous By";
             string artistText = !artistIsOther ? $"artist_text_{artist_text_select.Text.ToLower().Replace(" ", "_")}" : artistTextCustom.Text;
             string artistType = artistIsOther ? pString : POINTER;
+            string bassist = BassistName();
 
             entry.AddVarToStruct("checksum", song_checksum.Text, QBKEY);
             entry.AddVarToStruct("name", song_checksum.Text, STRING);
@@ -915,7 +989,32 @@ namespace GH_Toolkit_GUI
                 entry.AddFlagToStruct("use_coop_notetracks", QBKEY);
             }
             entry.AddFloatToStruct("hammer_on_measure_scale", (float)nsHopoThreshold);
+            if (bassist != "Default")
+            {
+                entry.AddVarToStruct("bassist", bassist, QBKEY);
+            }
             return entry;
+        }
+        private string BassistName()
+        {
+            string bassist = bassist_select_gh3.Text;
+            if (bassist == "Tom Morello")
+            {
+                return CurrentGame == GAME_GH3 ? "Morello": "Default";
+            }
+            else if (bassist == "Lou")
+            {
+                return CurrentGame == GAME_GH3 ? "Satan" : "Default";
+            }
+            else if (bassist == "God of Rock/Metalhead")
+            {
+                return CurrentPlatform == CONSOLE_PS2 ? "Metalhead" : (CurrentGame == GAME_GH3 ? "RockGod" : "Default");
+            }
+            else if (bassist == "Grim Ripper/Elroy")
+            {
+                return CurrentPlatform == CONSOLE_PS2 ? "Elroy" : (CurrentGame == GAME_GH3 ? "Ripper" : "Default");
+            }
+            return bassist;
         }
         private void AddToPCSetlist()
         {
@@ -980,12 +1079,6 @@ namespace GH_Toolkit_GUI
             string fsbOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}");
             try
             {
-                if (CurrentPlatform == "PC")
-                {
-                    AddToPCSetlist();
-                }
-
-
                 string[] backingPaths = backing_input_gh3.Items.Cast<string>().ToArray();
 
                 string[] coopBackingPaths = coop_backing_input_gh3.Items.Cast<string>().ToArray();
@@ -997,6 +1090,11 @@ namespace GH_Toolkit_GUI
                 Task backingStem = fsb.MixFiles(backingPaths, backingOutput);
 
                 var tasksToAwait = new List<Task> { gtrStem, rhythmStem, backingStem };
+                if (CurrentGame == GAME_GHA && File.Exists(crowd_input_gh3.Text))
+                {
+                    Task crowdStem = fsb.ConvertToMp3(crowd_input_gh3.Text, crowdOutput);
+                    tasksToAwait.Add(crowdStem);
+                }
                 if (coop_audio_check.Checked)
                 {
                     Task coopGtrStem = fsb.ConvertToMp3(coop_guitar_input_gh3.Text, coopGtrOutput);
@@ -1030,8 +1128,11 @@ namespace GH_Toolkit_GUI
                     await previewStem;
                 }
                 var (fsbOut, datOut) = fsb.CombineFSB3File(filesToProcess, fsbOutput);
-                MoveToGh3MusicFolder(fsbOut);
-                MoveToGh3MusicFolder(datOut);
+                if (CurrentPlatform == "PC")
+                {
+                    MoveToGh3MusicFolder(fsbOut);
+                    MoveToGh3MusicFolder(datOut);
+                }
             }
             catch (Exception ex)
             {
@@ -1049,185 +1150,52 @@ namespace GH_Toolkit_GUI
                 }
             }
         }
+        private int CompilePak()
+        {
+            int success = 0;
+            try
+            {
+                SaveProject();
+                PreCompileCheck();
+                CompileGh3PakFile();
+            }
+            catch
+            {
+                success = -1;
+            }
+            return success;
+        }
         private void compile_pak_button_Click(object sender, EventArgs e)
         {
-            PreCompileCheck();
-            CompileGh3PakFile();
+            CompilePak();
         }
         private async void compile_all_button_Click(object sender, EventArgs e)
         {
-            PreCompileCheck();
-            CompileGh3PakFile();
-            await CompileGh3All();
+            string compileText = compile_all_button.Text;
+            compile_all_button.Text = "Compiling...";
+            int success = CompilePak();
+            if (success == 0)
+            {
+                await CompileGh3All();
+            }
+            compile_all_button.Text = compileText;
         }
 
         // Toolstrip Logic
-        private SaveData makeSaveClass()
-        {
-            var data = new SaveData
-            {
-                gameSelect = GetGame(),
-                platformSelect = GetPlatform(),
-                songName = song_checksum.Text,
-                chartAuthor = chart_author_input.Text,
-                title = title_input.Text,
-                artist = artist_input.Text,
-                artistTextCustom = artistTextCustom.Text,
-                coverArtist = cover_artist_input.Text,
-                guitarPath = guitar_input_gh3.Text,
-                rhythmPath = rhythm_input_gh3.Text,
-                backingPaths = string.Join(";", backing_input_gh3.Items.Cast<string>().ToArray()),
-                coopGuitarPath = coop_guitar_input_gh3.Text,
-                coopRhythmPath = coop_rhythm_input_gh3.Text,
-                coopBackingPaths = string.Join(";", coop_backing_input_gh3.Items.Cast<string>().ToArray()),
-                crowdPath = crowd_input_gh3.Text,
-                previewAudioPath = preview_audio_input_gh3.Text,
-                midiPath = midi_file_input_gh3.Text,
-                perfPath = perf_override_input_gh3.Text,
-                skaPath = ska_files_input_gh3.Text,
-                songScriptPath = song_script_input_gh3.Text,
-                compilePath = compile_input.Text,
-                projectPath = project_input.Text,
-                artistText = artist_text_select.SelectedIndex,
-                songYear = (int)year_input.Value,
-                coverYear = (int)cover_year_input.Value,
-                genre = genre_input.SelectedIndex,
-                previewStart = previewStartTime,
-                previewEnd = previewEndTime,
-                hmxHopoVal = (int)HmxHopoVal.Value,
-                skaSource = ska_file_source_gh3.SelectedIndex,
-                venueSource = venue_source_gh3.SelectedIndex,
-                countoff = countoff_select_gh3.SelectedIndex,
-                vocalGender = vocal_gender_select_gh3.SelectedIndex,
-                bassistSelect = bassist_select_gh3.SelectedIndex,
-                hopoMode = hopo_mode_select.SelectedIndex,
-                beat8thLow = (int)beat8thLow.Value,
-                beat8thHigh = (int)beat8thHigh.Value,
-                beat16thLow = (int)beat16thLow.Value,
-                beat16thHigh = (int)beat16thHigh.Value,
-                gtrVolume = gh3_gtr_vol.Value,
-                bandVolume = gh3_band_vol.Value,
-                isCover = isCover.Checked,
-                isP2Rhythm = p2_rhythm_check.Checked,
-                isCoopAudio = coop_audio_check.Checked,
-                useGh3RenderedPreview = gh3_rendered_preview_check.Checked,
-                setEnd = gh3_set_end.Checked,
-                useBeatTrack = use_beat_check.Checked
-            };
-            return data;
-        }
+        
         private void ClearListBoxes()
         {
             backing_input_gh3.Items.Clear();
             coop_backing_input_gh3.Items.Clear();
         }
-        private void LoadSaveData(SaveData data)
-        {
-            isProgrammaticChange = true;
-            ClearListBoxes();
-            game_layout.Controls.OfType<RadioButton>().FirstOrDefault(r => r.Text == data.gameSelect).Checked = true;
-            platform_layout.Controls.OfType<RadioButton>().FirstOrDefault(r => r.Text == data.platformSelect).Checked = true;
-            song_checksum.Text = data.songName;
-            chart_author_input.Text = data.chartAuthor;
-            title_input.Text = data.title;
-            artist_input.Text = data.artist;
-            artistTextCustom.Text = data.artistTextCustom;
-            cover_artist_input.Text = data.coverArtist;
-            guitar_input_gh3.Text = data.guitarPath;
-            rhythm_input_gh3.Text = data.rhythmPath;
-            if (data.backingPaths != "")
-            {
-                backing_input_gh3.Items.AddRange(data.backingPaths.Split(';'));
-            }
-            coop_guitar_input_gh3.Text = data.coopGuitarPath;
-            coop_rhythm_input_gh3.Text = data.coopRhythmPath;
-            if (data.coopBackingPaths != "")
-            {
-                coop_backing_input_gh3.Items.AddRange(data.coopBackingPaths.Split(';'));
-            }
-            crowd_input_gh3.Text = data.crowdPath;
-            preview_audio_input_gh3.Text = data.previewAudioPath;
-            midi_file_input_gh3.Text = data.midiPath;
-            perf_override_input_gh3.Text = data.perfPath;
-            ska_files_input_gh3.Text = data.skaPath;
-            song_script_input_gh3.Text = data.songScriptPath;
-            compile_input.Text = data.compilePath;
-            project_input.Text = data.projectPath;
-            artist_text_select.SelectedIndex = data.artistText;
-            year_input.Value = data.songYear;
-            cover_year_input.Value = data.coverYear;
-            genre_input.SelectedIndex = data.genre;
-            HmxHopoVal.Value = data.hmxHopoVal;
-            ska_file_source_gh3.SelectedIndex = data.skaSource;
-            venue_source_gh3.SelectedIndex = data.venueSource;
-            countoff_select_gh3.SelectedIndex = data.countoff;
-            vocal_gender_select_gh3.SelectedIndex = data.vocalGender;
-            bassist_select_gh3.SelectedIndex = data.bassistSelect;
-            hopo_mode_select.SelectedIndex = data.hopoMode;
-            beat8thLow.Value = data.beat8thLow;
-            beat8thHigh.Value = data.beat8thHigh;
-            beat16thLow.Value = data.beat16thLow;
-            beat16thHigh.Value = data.beat16thHigh;
-            gh3_gtr_vol.Value = data.gtrVolume;
-            gh3_band_vol.Value = data.bandVolume;
-            isCover.Checked = data.isCover;
-            p2_rhythm_check.Checked = data.isP2Rhythm;
-            coop_audio_check.Checked = data.isCoopAudio;
-            gh3_rendered_preview_check.Checked = data.useGh3RenderedPreview;
-            gh3_set_end.Checked = data.setEnd;
-            use_beat_check.Checked = data.useBeatTrack;
-            isProgrammaticChange = false;
-            SetAll();
-        }
-        private void SaveProject(SaveData data)
-        {
-            if (File.Exists(projectFilePath))
-            {
-                string json = JsonConvert.SerializeObject(data, Formatting.Indented);
-                File.WriteAllText(projectFilePath, json);
-            }
-            else
-            {
-                SaveProjectAs(data);
-            }
-        }
-        private void SaveProjectAs(SaveData data)
-        {
-            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
-            {
-                saveFileDialog.Filter = ghprojFileFilter;
-                saveFileDialog.FilterIndex = 1;
-                saveFileDialog.RestoreDirectory = true;
-
-                if (saveFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    // Get the path of specified file
-                    project_input.Text = saveFileDialog.FileName;
-                    string json = JsonConvert.SerializeObject(data, Formatting.Indented);
-                    File.WriteAllText(projectFilePath, json);
-                }
-            }
-        }
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var data = makeSaveClass();
-            SaveProject(data);
+            SaveProject();
         }
 
         private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var data = makeSaveClass();
-            SaveProjectAs(data);
-        }
-        private void LoadGhproj(string filePath)
-        {
-
-            if (File.Exists(filePath))
-            {
-                string json = File.ReadAllText(filePath);
-                SaveData data = JsonConvert.DeserializeObject<SaveData>(json);
-                LoadSaveData(data);
-            }
+            SaveProjectAs();
         }
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -1241,16 +1209,15 @@ namespace GH_Toolkit_GUI
                 {
                     // Get the path of specified file
                     project_input.Text = openFileDialog.FileName;
-                    LoadGhproj(project_input.Text);
+                    LoadProject(project_input.Text);
                 }
             }
         }
 
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            LoadGhproj(DefaultTemplatePath);
+            LoadProject(DefaultTemplatePath);
         }
-
         private void saveTemplateToolStripMenuItem_Click(object sender, EventArgs e)
         {
             using (SaveFileDialog saveFileDialog = new SaveFileDialog())
@@ -1271,7 +1238,6 @@ namespace GH_Toolkit_GUI
                 }
             }
         }
-
         private void loadTemplateToolStripMenuItem_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
@@ -1285,7 +1251,7 @@ namespace GH_Toolkit_GUI
                 {
                     // Get the path of specified file
                     string filePath = openFileDialog.FileName;
-                    LoadGhproj(filePath);
+                    LoadProject(filePath);
                     project_input.Text = "";
                 }
             }
