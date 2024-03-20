@@ -1137,7 +1137,7 @@ namespace GH_Toolkit_GUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                HandleException(ex, "Audio Compilation Failed!");
             }
             finally
             {
@@ -1194,13 +1194,13 @@ namespace GH_Toolkit_GUI
                 }
                 else 
                 {
-                    MessageBox.Show(ex.Message, "Compile Failed!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    HandleException(ex, "Compile Failed!");
                 }
                 success = -1;
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Compile Failed!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                HandleException(ex, "Compile Failed!");
                 success = -1;
             }
             return success;
