@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Diagnostics;
 using GH_Toolkit_Core.QB;
 using static GH_Toolkit_Core.QB.QBConstants;
 using System.Drawing.Drawing2D;
@@ -683,7 +684,6 @@ namespace GH_Toolkit_GUI
             UserPreferences.Default.Save();
         }
 
-
         // Compiling Logic
         private void PreCompileCheck()
         {
@@ -718,7 +718,8 @@ namespace GH_Toolkit_GUI
                             {
                                 // Call the method that pops up a window asking for the game path
                                 ghPath = AskForGamePath();
-                                string ghExePath = Path.Combine(ghPath, $"{CurrentGame}.exe");
+                                string exeName = CurrentGame == GAME_GH3 ? "GH3" : "Guitar Hero Aerosmith";
+                                string ghExePath = Path.Combine(ghPath, $"{exeName}.exe");
                                 if (!File.Exists(ghExePath))
                                 {
                                     throw new Exception($"The game executable was not found at the specified path: {ghExePath}");
@@ -1159,8 +1160,47 @@ namespace GH_Toolkit_GUI
                 PreCompileCheck();
                 CompileGh3PakFile();
             }
-            catch
+            catch (UnauthorizedAccessException ex)
             {
+                string errorMessage = "Compilation has failed due to one or more files having \"Read-Only\" permission. " +
+                    "To be able to compile, the Toolkit needs to run a separate tool which requires Administrator permissions.\n\n" +
+                    "Pressing OK will launch this tool, and will ask for your permission to run it in Administrator mode.\n\n" +
+                    "Otherwise, click Cancel, go to the file path the next Error Box mentions and remove Read-Only mode from it.\n\n" +
+                    "You will need to re-compile afterwards for either method used.";
+                var nextSteps = MessageBox.Show(errorMessage, "Could not access file", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+                if (nextSteps == DialogResult.OK)
+                {
+                    string removePath = Path.Combine(ExeDirectory, "Tools", "RemoveReadOnly", "RemoveReadOnly.exe");
+                    string gamePath = GetGh3Folder();
+                    ProcessStartInfo startInfo = new ProcessStartInfo(removePath);
+                    startInfo.CreateNoWindow = false;
+                    startInfo.UseShellExecute = true;
+                    startInfo.WindowStyle = ProcessWindowStyle.Normal;
+                    startInfo.ArgumentList.Add(gamePath);
+                    try
+                    {
+                        // Start the process with the info we specified.
+                        // Call WaitForExit and then the using statement will close.
+                        using (Process exeProcess = Process.Start(startInfo))
+                        {
+                            exeProcess.WaitForExit();
+                        }
+                        MessageBox.Show("Read-Only permissions have been removed from the game folder. Please re-compile the song.", "RemoveReadOnly Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex2)
+                    {
+                        MessageBox.Show(ex2.Message, "RemoveReadOnly Failed!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+                else 
+                {
+                    MessageBox.Show(ex.Message, "Compile Failed!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                success = -1;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Compile Failed!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 success = -1;
             }
             return success;
