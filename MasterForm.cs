@@ -15,16 +15,15 @@ namespace GH_Toolkit_GUI
         {
             if (Path.GetExtension(inputFile.ToLower()) == ".ghproj")
             {
-                CompileSong compileSongForm = new CompileSong(inputFile);
-                compileSongForm.ShowDialog(); // Use Show() if you don't want it to be modal
+                OpenCompileSongForm(inputFile);
             }
 
         }
 
-        private void OpenCompileSongForm()
+        private void OpenCompileSongForm(string inputFile = "")
         {
-            CompileSong compileSongForm = new CompileSong();
-            compileSongForm.ShowDialog(); // Use Show() if you don't want it to be modal
+            CompileSong compileSongForm = new CompileSong(inputFile);
+            compileSongForm.Show(); // Use Show() if you don't want it to be modal
         }
 
         private void button1_Click(object sender, EventArgs e)
