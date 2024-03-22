@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Diagnostics;
 using GH_Toolkit_Core.QB;
 using static GH_Toolkit_Core.QB.QBConstants;
+using static GH_Toolkit_Exceptions.Exceptions;
 using System.Drawing.Drawing2D;
 
 namespace GH_Toolkit_GUI

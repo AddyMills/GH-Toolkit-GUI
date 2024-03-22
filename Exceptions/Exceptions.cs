@@ -1,11 +1,8 @@
-﻿
+﻿using System.Diagnostics;
 
-
-using System.Diagnostics;
-
-namespace GH_Toolkit_GUI
+namespace GH_Toolkit_Exceptions
 {
-    public partial class CompileSong
+    public static class Exceptions
     {
         public static void HandleException(Exception ex, string errorInfo = "Error")
         {
