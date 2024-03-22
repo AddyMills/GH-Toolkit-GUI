@@ -23,12 +23,17 @@ namespace GH_Toolkit_GUI
         private void OpenCompileSongForm(string inputFile = "")
         {
             CompileSong compileSongForm = new CompileSong(inputFile);
-            compileSongForm.Show(); // Use Show() if you don't want it to be modal
+            compileSongForm.Show();
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
             OpenCompileSongForm();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
