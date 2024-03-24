@@ -1214,11 +1214,14 @@ namespace GH_Toolkit_GUI
         {
             string compileText = compile_all_button.Text;
             compile_all_button.Text = "Compiling...";
+            DisableCloseButton();
             int success = CompilePak();
             if (success == 0)
             {
                 await CompileGh3All();
+                MessageBox.Show("Compilation has completed successfully!\n\nYour song has been added to the game and can be played immediately.", "Compilation Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
+            EnableCloseButton();
             compile_all_button.Text = compileText;
         }
 
