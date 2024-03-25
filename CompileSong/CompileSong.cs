@@ -63,6 +63,7 @@ namespace GH_Toolkit_GUI
         private string projectFilePath = "";
 
         private bool isProgrammaticChange = false;
+        private UserPreferences Pref = UserPreferences.Default;
 
 
         public CompileSong(string ghproj = "")
@@ -672,17 +673,17 @@ namespace GH_Toolkit_GUI
 
         private void UpdateGh3FilePreference(string pakPath, string pabPath, string folderPath)
         {
-            UserPreferences.Default.Gh3QbPak = pakPath;
-            UserPreferences.Default.Gh3QbPab = pabPath;
-            UserPreferences.Default.Gh3FolderPath = folderPath;
-            UserPreferences.Default.Save();
+            Pref.Gh3QbPak = pakPath;
+            Pref.Gh3QbPab = pabPath;
+            Pref.Gh3FolderPath = folderPath;
+            Pref.Save();
         }
         private void UpdateGhaFilePreference(string pakPath, string pabPath, string folderPath)
         {
-            UserPreferences.Default.GhaQbPak = pakPath;
-            UserPreferences.Default.GhaQbPab = pabPath;
-            UserPreferences.Default.GhaFolderPath = folderPath;
-            UserPreferences.Default.Save();
+            Pref.GhaQbPak = pakPath;
+            Pref.GhaQbPab = pabPath;
+            Pref.GhaFolderPath = folderPath;
+            Pref.Save();
         }
 
         // Compiling Logic
@@ -1219,12 +1220,22 @@ namespace GH_Toolkit_GUI
             if (success == 0)
             {
                 await CompileGh3All();
-                MessageBox.Show("Compilation has completed successfully!\n\nYour song has been added to the game and can be played immediately.", "Compilation Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if (Pref.ShowPostCompile)
+                {
+                    ShowPostCompile();
+                }
             }
             EnableCloseButton();
             compile_all_button.Text = compileText;
         }
 
+        private void ShowPostCompile()
+        {
+            if (CurrentPlatform == platform_pc.Text)
+            {
+                MessageBox.Show("Compilation has completed successfully!\n\nYour song has been added to the game and can be played immediately.", "Compilation Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
         // Toolstrip Logic
         
         private void ClearListBoxes()
