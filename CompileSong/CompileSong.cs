@@ -254,6 +254,40 @@ namespace GH_Toolkit_GUI
             perf_override_select_gh3.Click += SelectFileFolder;
             ska_files_select_gh3.Click += SelectFileFolder;
             song_script_select_gh3.Click += SelectFileFolder;
+
+            // GHWT+
+
+            // Audio
+            kickSelect.Tag = new Tuple<TextBox, string, string>(kickInput, "file", audioFileFilter);
+            snareSelect.Tag = new Tuple<TextBox, string, string>(snareInput, "file", audioFileFilter);
+            cymbalsSelect.Tag = new Tuple<TextBox, string, string>(cymbalsInput, "file", audioFileFilter);
+            tomsSelect.Tag = new Tuple<TextBox, string, string>(tomsInput, "file", audioFileFilter);
+
+            guitarSelect.Tag = new Tuple<TextBox, string, string>(guitarInput, "file", audioFileFilter);
+            bassSelect.Tag = new Tuple<TextBox, string, string>(bassInput, "file", audioFileFilter);
+            vocalsSelect.Tag = new Tuple<TextBox, string, string>(vocalsInput, "file", audioFileFilter);
+
+            backingAdd.Tag = backingInput;
+            backingDelete.Tag = backingInput;
+
+            crowdSelect.Tag = new Tuple<TextBox, string, string>(crowdInput, "file", audioFileFilter);
+            previewSelect.Tag = new Tuple<TextBox, string, string>(previewInput, "file", audioFileFilter);
+
+            // Attach the event handlers to all GHWT+ Audio tab buttons
+            kickSelect.Click += SelectFileFolder;
+            snareSelect.Click += SelectFileFolder;
+            cymbalsSelect.Click += SelectFileFolder;
+            tomsSelect.Click += SelectFileFolder;
+
+            guitarSelect.Click += SelectFileFolder;
+            bassSelect.Click += SelectFileFolder;
+            vocalsSelect.Click += SelectFileFolder;
+
+            backingAdd.Click += AddToListBox;
+            backingDelete.Click += DeleteFromListBox;
+
+            crowdSelect.Click += SelectFileFolder;
+            previewSelect.Click += SelectFileFolder;
         }
         public void SetGameFields()
         {
@@ -265,6 +299,7 @@ namespace GH_Toolkit_GUI
             bool isOld = game == "GH3" || game == "GHA";
             SetTabs(isOld);
             SetGenres(game);
+            SetBeatLines();
             // artist_text_select.SelectedIndex = 0;
             if (isOld)
             {
@@ -275,6 +310,13 @@ namespace GH_Toolkit_GUI
             {
 
             }
+        }
+        private void SetBeatLines()
+        {
+            beat8thLow.Enabled = Pref.OverrideBeatLines;
+            beat8thHigh.Enabled = Pref.OverrideBeatLines;
+            beat16thLow.Enabled = Pref.OverrideBeatLines;
+            beat16thHigh.Enabled = Pref.OverrideBeatLines;
         }
         private void SetGenres(string game)
         {
@@ -1317,6 +1359,7 @@ namespace GH_Toolkit_GUI
             // Create a modal window for the preferences panel
             var prefWindow = new ProgramSettings(TabType.CompileSong);
             prefWindow.ShowDialog();
+            SetBeatLines();
         }
 
         private void artist_text_select_SelectedIndexChanged(object sender, EventArgs e)

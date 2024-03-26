@@ -28,8 +28,10 @@ namespace GH_Toolkit_GUI
         private void PopulateData()
         {
             CompilePopup.Checked = Pref.ShowPostCompile;
+            OverrideBeatLines.Checked = Pref.OverrideBeatLines;
             PreviewFadeIn.Value = Pref.PreviewFadeIn;
             PreviewFadeOut.Value = Pref.PreviewFadeOut;
+            EncryptAudio.Checked = Pref.EncryptAudio;
             WtModsFolder.Text = Pref.WtModsFolder;
             Gh3FolderPath.Text = Pref.Gh3FolderPath;
             GhaFolderPath.Text = Pref.GhaFolderPath;
@@ -37,11 +39,12 @@ namespace GH_Toolkit_GUI
         private void SaveData()
         {
             Pref.ShowPostCompile = CompilePopup.Checked;
+            Pref.OverrideBeatLines = OverrideBeatLines.Checked;
             Pref.PreviewFadeIn = PreviewFadeIn.Value;
             Pref.PreviewFadeOut = PreviewFadeOut.Value;
+            Pref.EncryptAudio = EncryptAudio.Checked;
             Pref.WtModsFolder = WtModsFolder.Text;
-            Pref.Gh3FolderPath = Gh3FolderPath.Text;
-            Pref.GhaFolderPath = GhaFolderPath.Text;
+            // Do not save Gh3/Gha folder paths as they are read-only fields
             Pref.Save();
         }
 

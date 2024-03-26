@@ -142,5 +142,29 @@ namespace GH_Toolkit_GUI {
                 this["WtModsFolder"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool EncryptAudio {
+            get {
+                return ((bool)(this["EncryptAudio"]));
+            }
+            set {
+                this["EncryptAudio"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool OverrideBeatLines {
+            get {
+                return ((bool)(this["OverrideBeatLines"]));
+            }
+            set {
+                this["OverrideBeatLines"] = value;
+            }
+        }
     }
 }
