@@ -130,5 +130,17 @@ namespace GH_Toolkit_GUI {
                 this["ShowPostCompile"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string WtModsFolder {
+            get {
+                return ((string)(this["WtModsFolder"]));
+            }
+            set {
+                this["WtModsFolder"] = value;
+            }
+        }
     }
 }

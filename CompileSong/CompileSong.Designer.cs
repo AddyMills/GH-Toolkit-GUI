@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CompileSong));
             compiler_tabs = new TabControl();
             metadata_tab = new TabPage();
             import_from_other = new Button();
@@ -179,8 +178,8 @@
             toolStripSeparator1 = new ToolStripSeparator();
             saveTemplateToolStripMenuItem = new ToolStripMenuItem();
             loadTemplateToolStripMenuItem = new ToolStripMenuItem();
-            toolStripSplitButton1 = new ToolStripSplitButton();
-            preferencesToolStripMenuItem = new ToolStripMenuItem();
+            toolStripSplitButton1 = new ToolStripDropDownButton();
+            settingsToolStripMenuItem = new ToolStripMenuItem();
             tableLayoutPanel12 = new TableLayoutPanel();
             compile_label = new Label();
             project_file_label = new Label();
@@ -2103,18 +2102,18 @@
             // toolStripSplitButton1
             // 
             toolStripSplitButton1.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            toolStripSplitButton1.DropDownItems.AddRange(new ToolStripItem[] { preferencesToolStripMenuItem });
+            toolStripSplitButton1.DropDownItems.AddRange(new ToolStripItem[] { settingsToolStripMenuItem });
             toolStripSplitButton1.ImageTransparentColor = Color.Magenta;
             toolStripSplitButton1.Name = "toolStripSplitButton1";
-            toolStripSplitButton1.Size = new Size(81, 24);
-            toolStripSplitButton1.Text = "Settings";
+            toolStripSplitButton1.Size = new Size(58, 24);
+            toolStripSplitButton1.Text = "Tools";
             // 
-            // preferencesToolStripMenuItem
+            // settingsToolStripMenuItem
             // 
-            preferencesToolStripMenuItem.Name = "preferencesToolStripMenuItem";
-            preferencesToolStripMenuItem.Size = new Size(168, 26);
-            preferencesToolStripMenuItem.Text = "Preferences";
-            preferencesToolStripMenuItem.Click += preferencesToolStripMenuItem_Click;
+            settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
+            settingsToolStripMenuItem.Size = new Size(145, 26);
+            settingsToolStripMenuItem.Text = "Settings";
+            settingsToolStripMenuItem.Click += settingsToolStripMenuItem_Click;
             // 
             // tableLayoutPanel12
             // 
@@ -2418,8 +2417,6 @@
         private ToolStripSeparator toolStripSeparator1;
         private ToolStripMenuItem saveTemplateToolStripMenuItem;
         private ToolStripMenuItem loadTemplateToolStripMenuItem;
-        private ToolStripSplitButton toolStripSplitButton1;
-        private ToolStripMenuItem preferencesToolStripMenuItem;
         private Label label1;
         private TableLayoutPanel tableLayoutPanel8;
         private Label gh3_gtr_vol_label;
@@ -2427,5 +2424,7 @@
         private NumericUpDown gh3_gtr_vol;
         private NumericUpDown gh3_band_vol;
         private ComboBox venue_source_gh3;
+        private ToolStripDropDownButton toolStripSplitButton1;
+        private ToolStripMenuItem settingsToolStripMenuItem;
     }
 }

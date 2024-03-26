@@ -1312,9 +1312,11 @@ namespace GH_Toolkit_GUI
             }
         }
 
-        private void preferencesToolStripMenuItem_Click(object sender, EventArgs e)
+        private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // Create a modal window for the preferences panel
+            var prefWindow = new ProgramSettings(TabType.CompileSong);
+            prefWindow.ShowDialog();
         }
 
         private void artist_text_select_SelectedIndexChanged(object sender, EventArgs e)
