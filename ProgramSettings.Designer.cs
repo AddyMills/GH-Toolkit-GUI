@@ -179,8 +179,8 @@
             tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
             tableLayoutPanel2.Controls.Add(label6, 0, 0);
             tableLayoutPanel2.Controls.Add(label7, 2, 0);
-            tableLayoutPanel2.Controls.Add(PreviewFadeIn, 1, 0);
             tableLayoutPanel2.Controls.Add(PreviewFadeOut, 3, 0);
+            tableLayoutPanel2.Controls.Add(PreviewFadeIn, 1, 0);
             tableLayoutPanel2.Dock = DockStyle.Fill;
             tableLayoutPanel2.Location = new Point(275, 77);
             tableLayoutPanel2.Margin = new Padding(0);
@@ -214,11 +214,10 @@
             // 
             // PreviewFadeIn
             // 
+            PreviewFadeIn.Anchor = AnchorStyles.Left;
             PreviewFadeIn.DecimalPlaces = 2;
-            PreviewFadeIn.Dock = DockStyle.Fill;
             PreviewFadeIn.Increment = new decimal(new int[] { 5, 0, 0, 65536 });
-            PreviewFadeIn.Location = new Point(130, 23);
-            PreviewFadeIn.Margin = new Padding(3, 23, 3, 3);
+            PreviewFadeIn.Location = new Point(130, 25);
             PreviewFadeIn.Maximum = new decimal(new int[] { 10, 0, 0, 0 });
             PreviewFadeIn.Name = "PreviewFadeIn";
             PreviewFadeIn.Size = new Size(121, 27);
@@ -227,11 +226,10 @@
             // 
             // PreviewFadeOut
             // 
+            PreviewFadeOut.Anchor = AnchorStyles.Left;
             PreviewFadeOut.DecimalPlaces = 2;
-            PreviewFadeOut.Dock = DockStyle.Fill;
             PreviewFadeOut.Increment = new decimal(new int[] { 5, 0, 0, 65536 });
-            PreviewFadeOut.Location = new Point(384, 23);
-            PreviewFadeOut.Margin = new Padding(3, 23, 3, 3);
+            PreviewFadeOut.Location = new Point(384, 25);
             PreviewFadeOut.Maximum = new decimal(new int[] { 10, 0, 0, 0 });
             PreviewFadeOut.Name = "PreviewFadeOut";
             PreviewFadeOut.Size = new Size(124, 27);
