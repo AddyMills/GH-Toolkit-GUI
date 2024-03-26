@@ -40,8 +40,8 @@
             tableLayoutPanel2 = new TableLayoutPanel();
             label6 = new Label();
             label7 = new Label();
-            PreviewFadeIn = new NumericUpDown();
             PreviewFadeOut = new NumericUpDown();
+            PreviewFadeIn = new NumericUpDown();
             WtModsFolder = new TextBox();
             Gh3FolderPath = new TextBox();
             GhaFolderPath = new TextBox();
@@ -51,8 +51,8 @@
             tabPage1.SuspendLayout();
             tableLayoutPanel1.SuspendLayout();
             tableLayoutPanel2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)PreviewFadeIn).BeginInit();
             ((System.ComponentModel.ISupportInitialize)PreviewFadeOut).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)PreviewFadeIn).BeginInit();
             SuspendLayout();
             // 
             // tabControl1
@@ -79,6 +79,7 @@
             // 
             // tableLayoutPanel1
             // 
+            tableLayoutPanel1.Anchor = AnchorStyles.Left;
             tableLayoutPanel1.ColumnCount = 2;
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 35F));
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 65F));
@@ -92,7 +93,6 @@
             tableLayoutPanel1.Controls.Add(WtModsFolder, 1, 2);
             tableLayoutPanel1.Controls.Add(Gh3FolderPath, 1, 3);
             tableLayoutPanel1.Controls.Add(GhaFolderPath, 1, 4);
-            tableLayoutPanel1.Dock = DockStyle.Fill;
             tableLayoutPanel1.Location = new Point(3, 3);
             tableLayoutPanel1.Name = "tableLayoutPanel1";
             tableLayoutPanel1.RowCount = 6;
@@ -146,7 +146,7 @@
             label4.Name = "label4";
             label4.Size = new Size(269, 77);
             label4.TabIndex = 2;
-            label4.Text = "Preview Fade Values";
+            label4.Text = "Preview Fade Values (Seconds)";
             label4.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // label5
@@ -212,18 +212,6 @@
             label7.Text = "Fade Out:";
             label7.TextAlign = ContentAlignment.MiddleLeft;
             // 
-            // PreviewFadeIn
-            // 
-            PreviewFadeIn.Anchor = AnchorStyles.Left;
-            PreviewFadeIn.DecimalPlaces = 2;
-            PreviewFadeIn.Increment = new decimal(new int[] { 5, 0, 0, 65536 });
-            PreviewFadeIn.Location = new Point(130, 25);
-            PreviewFadeIn.Maximum = new decimal(new int[] { 10, 0, 0, 0 });
-            PreviewFadeIn.Name = "PreviewFadeIn";
-            PreviewFadeIn.Size = new Size(121, 27);
-            PreviewFadeIn.TabIndex = 2;
-            PreviewFadeIn.Value = new decimal(new int[] { 1, 0, 0, 0 });
-            // 
             // PreviewFadeOut
             // 
             PreviewFadeOut.Anchor = AnchorStyles.Left;
@@ -236,20 +224,30 @@
             PreviewFadeOut.TabIndex = 3;
             PreviewFadeOut.Value = new decimal(new int[] { 1, 0, 0, 0 });
             // 
+            // PreviewFadeIn
+            // 
+            PreviewFadeIn.Anchor = AnchorStyles.Left;
+            PreviewFadeIn.DecimalPlaces = 2;
+            PreviewFadeIn.Increment = new decimal(new int[] { 5, 0, 0, 65536 });
+            PreviewFadeIn.Location = new Point(130, 25);
+            PreviewFadeIn.Maximum = new decimal(new int[] { 10, 0, 0, 0 });
+            PreviewFadeIn.Name = "PreviewFadeIn";
+            PreviewFadeIn.Size = new Size(121, 27);
+            PreviewFadeIn.TabIndex = 2;
+            PreviewFadeIn.Value = new decimal(new int[] { 1, 0, 0, 0 });
+            // 
             // WtModsFolder
             // 
-            WtModsFolder.Dock = DockStyle.Fill;
-            WtModsFolder.Location = new Point(278, 177);
-            WtModsFolder.Margin = new Padding(3, 23, 3, 3);
+            WtModsFolder.Anchor = AnchorStyles.Left;
+            WtModsFolder.Location = new Point(278, 179);
             WtModsFolder.Name = "WtModsFolder";
             WtModsFolder.Size = new Size(505, 27);
             WtModsFolder.TabIndex = 8;
             // 
             // Gh3FolderPath
             // 
-            Gh3FolderPath.Dock = DockStyle.Fill;
-            Gh3FolderPath.Location = new Point(278, 254);
-            Gh3FolderPath.Margin = new Padding(3, 23, 3, 3);
+            Gh3FolderPath.Anchor = AnchorStyles.Left;
+            Gh3FolderPath.Location = new Point(278, 256);
             Gh3FolderPath.Name = "Gh3FolderPath";
             Gh3FolderPath.ReadOnly = true;
             Gh3FolderPath.Size = new Size(505, 27);
@@ -257,9 +255,8 @@
             // 
             // GhaFolderPath
             // 
-            GhaFolderPath.Dock = DockStyle.Fill;
-            GhaFolderPath.Location = new Point(278, 331);
-            GhaFolderPath.Margin = new Padding(3, 23, 3, 3);
+            GhaFolderPath.Anchor = AnchorStyles.Left;
+            GhaFolderPath.Location = new Point(278, 333);
             GhaFolderPath.Name = "GhaFolderPath";
             GhaFolderPath.ReadOnly = true;
             GhaFolderPath.Size = new Size(505, 27);
@@ -304,8 +301,8 @@
             tableLayoutPanel1.PerformLayout();
             tableLayoutPanel2.ResumeLayout(false);
             tableLayoutPanel2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)PreviewFadeIn).EndInit();
             ((System.ComponentModel.ISupportInitialize)PreviewFadeOut).EndInit();
+            ((System.ComponentModel.ISupportInitialize)PreviewFadeIn).EndInit();
             ResumeLayout(false);
         }
 

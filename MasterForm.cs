@@ -23,7 +23,7 @@ namespace GH_Toolkit_GUI
         private void OpenCompileSongForm(string inputFile = "")
         {
             CompileSong compileSongForm = new CompileSong(inputFile);
-            compileSongForm.Show();
+            compileSongForm.ShowDialog();
         }
 
         private void button1_Click(object sender, EventArgs e)
