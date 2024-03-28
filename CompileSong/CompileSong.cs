@@ -195,7 +195,8 @@ namespace GH_Toolkit_GUI
                 { "song_data_wt", song_data_tab_wt },
                 { "audio_tab_gh3", audio_tab_gh3 },
                 { "song_data_gh3", song_data_tab_gh3 },
-                { "compile_tab", compile_tab }
+                { "compile_tab", compile_tab },
+                { "wtde_settings", wtde_settings }
             };
         }
         private void SetButtons()
@@ -406,6 +407,10 @@ namespace GH_Toolkit_GUI
                 newTab.Text = tabName;
                 compiler_tabs.TabPages.Add(newTab);
             }
+            if (CurrentGame == GAME_GHWT && CurrentPlatform == "PC")
+            {
+                compiler_tabs.TabPages.Add(wtde_settings);
+            }
         }
         public string GetGame()
         {
@@ -471,14 +476,16 @@ namespace GH_Toolkit_GUI
                 }
                 else if (radioButton.Checked)
                 {
+                    // Update the Current Game field
+                    CurrentGame = radioButton.Text;
+
                     // Radio button is checked, update fields based on the selected game
                     SetGameFields();
 
                     // Remember this radio button as the last one checked
                     lastCheckedRadioButton = radioButton;
 
-                    // Update the Current Game field
-                    CurrentGame = radioButton.Text;
+                    
                 }
             }
         }
@@ -855,7 +862,7 @@ namespace GH_Toolkit_GUI
                 var pakCompiler = new PAK.PakCompiler(CurrentGame, CurrentPlatform, split: true);
                 var replaceFiles = Directory.GetFiles(replaceLocation, "*.qb", SearchOption.AllDirectories);
                 var qbPak = PAK.PakEntryDictFromFile(qbPakLocation);
-                foreach(var file in replaceFiles)
+                foreach (var file in replaceFiles)
                 {
                     var relPath = Path.GetRelativePath(replaceLocation, file);
                     if (qbPak.TryGetValue(relPath, out var entry))
@@ -948,25 +955,25 @@ namespace GH_Toolkit_GUI
                     break;
             }
             string pakFile = PAK.CreateSongPackageGh3(
-                midiPath:midi_file_input_gh3.Text,
-                savePath:compile_input.Text, 
-                songName:song_checksum.Text, 
-                game:CurrentGame, 
-                gameConsole:CurrentPlatform, 
-                hopoThreshold:(int)HmxHopoVal.Value, 
-                skaPath:ska_files_input_gh3.Text, 
-                perfOverride:perf_override_input_gh3.Text, 
-                songScripts:song_script_input_gh3.Text, 
-                skaSource:GetSkaSourceGh3(),
-                venueSource:venue,
-                rhythmTrack:p2_rhythm_check.Checked);
+                midiPath: midi_file_input_gh3.Text,
+                savePath: compile_input.Text,
+                songName: song_checksum.Text,
+                game: CurrentGame,
+                gameConsole: CurrentPlatform,
+                hopoThreshold: (int)HmxHopoVal.Value,
+                skaPath: ska_files_input_gh3.Text,
+                perfOverride: perf_override_input_gh3.Text,
+                songScripts: song_script_input_gh3.Text,
+                skaSource: GetSkaSourceGh3(),
+                venueSource: venue,
+                rhythmTrack: p2_rhythm_check.Checked);
 
             if (CurrentPlatform == "PC")
             {
                 AddToPCSetlist();
                 MoveToGh3SongsFolder(pakFile);
             }
-            
+
 
 
 
@@ -1045,7 +1052,7 @@ namespace GH_Toolkit_GUI
             string bassist = bassist_select_gh3.Text;
             if (bassist == "Tom Morello")
             {
-                return CurrentGame == GAME_GH3 ? "Morello": "Default";
+                return CurrentGame == GAME_GH3 ? "Morello" : "Default";
             }
             else if (bassist == "Lou")
             {
@@ -1091,7 +1098,7 @@ namespace GH_Toolkit_GUI
             var downloadlist = downloadQbEntries[gh3DownloadSongs].Data as QBStruct.QBStructData;
             var tier1 = downloadlist["tier1"] as QBStruct.QBStructData;
             var songArray = tier1["songs"] as QBArray.QBArrayNode;
-            
+
 
             if (songArray.GetItemIndex(song_checksum.Text, QBKEY) == -1)
             {
@@ -1100,7 +1107,7 @@ namespace GH_Toolkit_GUI
             }
             byte[] downloadQbBytes = QB.CompileQbFromDict(downloadQbEntries, downloadRef, CurrentGame, CurrentPlatform);
             downloadQb.OverwriteData(downloadQbBytes);
-            
+
             var (pakData, pabData) = pakCompiler.CompilePakFromDictionary(qbPak);
             OverwriteGh3Pak(pakData, pabData!);
         }
@@ -1236,7 +1243,7 @@ namespace GH_Toolkit_GUI
                         MessageBox.Show(ex2.Message, "RemoveReadOnly Failed!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
-                else 
+                else
                 {
                     HandleException(ex, "Compile Failed!");
                 }
@@ -1279,7 +1286,7 @@ namespace GH_Toolkit_GUI
             }
         }
         // Toolstrip Logic
-        
+
         private void ClearListBoxes()
         {
             backing_input_gh3.Items.Clear();
@@ -1380,7 +1387,7 @@ namespace GH_Toolkit_GUI
         }
         private void HmxHopoVal_ValueChanged(object sender, EventArgs e)
         {
-            
+
             UpdateNsValue();
         }
     }
