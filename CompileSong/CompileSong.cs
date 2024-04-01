@@ -11,6 +11,8 @@ using GH_Toolkit_Core.QB;
 using static GH_Toolkit_Core.QB.QBConstants;
 using static GH_Toolkit_Exceptions.Exceptions;
 using System.Drawing.Drawing2D;
+using System.Configuration;
+using System;
 
 namespace GH_Toolkit_GUI
 {
@@ -117,6 +119,22 @@ namespace GH_Toolkit_GUI
             vocal_gender_select_gh3.SelectedIndex = 0;
             bassist_select_gh3.SelectedIndex = 0;
             hopo_mode_select.SelectedIndex = 0;
+
+            
+            previewMinutes.ValueChanged += allPreviewTimeChange;
+            previewSeconds.ValueChanged += allPreviewTimeChange;
+            previewMills.ValueChanged += allPreviewTimeChange;
+            lengthMinutes.ValueChanged += allPreviewTimeChange;
+            lengthSeconds.ValueChanged += allPreviewTimeChange;
+            lengthMills.ValueChanged += allPreviewTimeChange;
+            preview_minutes_gh3.ValueChanged += allPreviewTimeChange;
+            preview_seconds_gh3.ValueChanged += allPreviewTimeChange;
+            preview_mills_gh3.ValueChanged += allPreviewTimeChange;
+            length_minutes_gh3.ValueChanged += allPreviewTimeChange;
+            length_seconds_gh3.ValueChanged += allPreviewTimeChange;
+            length_mills_gh3.ValueChanged += allPreviewTimeChange;
+            
+
         }
         private void Startup_Load(object sender, EventArgs e)
         {
@@ -289,6 +307,18 @@ namespace GH_Toolkit_GUI
 
             crowdSelect.Click += SelectFileFolder;
             previewSelect.Click += SelectFileFolder;
+
+            // Song Data
+            midiFileSelect.Tag = new Tuple<TextBox, string, string>(midiFileInput, "file", midiFileFilter);
+            perfOverrideSelect.Tag = new Tuple<TextBox, string, string>(perfOverrideInput, "file", qFileFilter);
+            skaFilesSelect.Tag = new Tuple<TextBox, string, string>(skaFilesInput, "folder", "");
+            songScriptSelect.Tag = new Tuple<TextBox, string, string>(songScriptInput, "file", qFileFilter);
+
+            // Attach the event handlers to all GHWT+ Song Data tab buttons
+            midiFileSelect.Click += SelectFileFolder;
+            perfOverrideSelect.Click += SelectFileFolder;
+            skaFilesSelect.Click += SelectFileFolder;
+            songScriptSelect.Click += SelectFileFolder;
         }
         public void SetGameFields()
         {
@@ -422,7 +452,15 @@ namespace GH_Toolkit_GUI
         }
         public string GetSkaSourceGh3()
         {
-            int skaSource = ska_file_source_gh3.SelectedIndex;
+            return GetSkaSource(ska_file_source_gh3.SelectedIndex);
+
+        }
+        public string GetSkaSourceGhwt()
+        {
+            return GetSkaSource(skaFileSource.SelectedIndex);
+        }
+        private string GetSkaSource(int skaSource)
+        {
             if (skaSource == 2)
             {
                 return "GH3";
@@ -485,7 +523,7 @@ namespace GH_Toolkit_GUI
                     // Remember this radio button as the last one checked
                     lastCheckedRadioButton = radioButton;
 
-                    
+
                 }
             }
         }
@@ -651,6 +689,10 @@ namespace GH_Toolkit_GUI
 
         private void gh3_rendered_preview_check_CheckedChanged(object sender, EventArgs e)
         {
+            if (isProgrammaticChange)
+            {
+                return;
+            }
             gh3_preview_audio_label.Enabled = gh3_rendered_preview_check.Checked;
             preview_audio_input_gh3.Enabled = gh3_rendered_preview_check.Checked;
             preview_audio_select_gh3.Enabled = gh3_rendered_preview_check.Checked;
@@ -664,6 +706,10 @@ namespace GH_Toolkit_GUI
             length_seconds_gh3.Enabled = !gh3_rendered_preview_check.Checked;
             length_mills_gh3.Enabled = !gh3_rendered_preview_check.Checked;
             gh3_set_end.Enabled = !gh3_rendered_preview_check.Checked;
+
+            isProgrammaticChange = true;
+            renderedPreviewCheck.Checked = gh3_rendered_preview_check.Checked;
+            isProgrammaticChange = false;
         }
         private void updatePreviewStartTime()
         {
@@ -696,6 +742,45 @@ namespace GH_Toolkit_GUI
             length_minutes_gh3.Value = previewEndTime / 60000;
             length_seconds_gh3.Value = (previewEndTime % 60000) / 1000;
             length_mills_gh3.Value = (previewEndTime % 60000) % 1000;
+            lengthMinutes.Value = length_minutes_gh3.Value;
+            lengthSeconds.Value = length_seconds_gh3.Value;
+            lengthMills.Value = length_mills_gh3.Value;
+        }
+        private void allPreviewTimeChange(object sender, EventArgs e)
+        {
+            
+            // Sender is the NumericUpDown that triggered the event
+            NumericUpDown changed = sender as NumericUpDown;
+            if (changed != null)
+            {
+                var actionMap = new Dictionary<NumericUpDown, Action<NumericUpDown>>()
+                {
+                    { preview_minutes_gh3, (c) => { previewMinutes.Value = c.Value; updatePreviewStartTime(); } },
+                    { preview_seconds_gh3, (c) => { previewSeconds.Value = c.Value; updatePreviewStartTime(); } },
+                    { preview_mills_gh3, (c) => { previewMills.Value = c.Value; updatePreviewStartTime(); } },
+                    { length_minutes_gh3, (c) => { lengthMinutes.Value = c.Value; updatePreviewEndTime(); } },
+                    { length_seconds_gh3, (c) => { lengthSeconds.Value = c.Value; updatePreviewEndTime(); } },
+                    { length_mills_gh3, (c) => { lengthMills.Value = c.Value; updatePreviewEndTime(); } },
+                    { previewMinutes, (c) => { preview_minutes_gh3.Value = c.Value; updatePreviewStartTime(); } },
+                    { previewSeconds, (c) => { preview_seconds_gh3.Value = c.Value; updatePreviewStartTime(); } },
+                    { previewMills, (c) => { preview_mills_gh3.Value = c.Value; updatePreviewStartTime(); } },
+                    { lengthMinutes, (c) => { length_minutes_gh3.Value = c.Value; updatePreviewEndTime(); } },
+                    { lengthSeconds, (c) => { length_seconds_gh3.Value = c.Value; updatePreviewEndTime(); } },
+                    { lengthMills, (c) => { length_mills_gh3.Value = c.Value; updatePreviewEndTime(); } },
+                };
+
+                if (actionMap.TryGetValue(changed, out var action))
+                {
+                    if (isProgrammaticChange)
+                    {
+                        return;
+                    }
+                    isProgrammaticChange = true;
+                    action(changed);
+                    isProgrammaticChange = false;
+                }
+            }
+            
         }
         private void gh3_preview_ValueChanged(object sender, EventArgs e)
         {
@@ -717,6 +802,7 @@ namespace GH_Toolkit_GUI
         {
             isProgrammaticChange = true;
             previewLengthEndSwap();
+            setEndTime.Checked = gh3_set_end.Checked;
             isProgrammaticChange = false;
         }
 
@@ -939,10 +1025,10 @@ namespace GH_Toolkit_GUI
                 return UserPreferences.Default.GhaFolderPath;
             }
         }
-        private void CompileGh3PakFile()
+        private string GetVenue(int venueType)
         {
             string venue;
-            switch (venue_source_gh3.SelectedIndex)
+            switch (venueType)
             {
                 case 0:
                     venue = "GH3";
@@ -954,7 +1040,14 @@ namespace GH_Toolkit_GUI
                     venue = "GHWT";
                     break;
             }
-            string pakFile = PAK.CreateSongPackageGh3(
+            return venue;
+        }
+        private void CompileGh3PakFile()
+        {
+
+            string venue = GetVenue(venue_source_gh3.SelectedIndex);
+
+            string pakFile = PAK.CreateSongPackage(
                 midiPath: midi_file_input_gh3.Text,
                 savePath: compile_input.Text,
                 songName: song_checksum.Text,
@@ -973,10 +1066,30 @@ namespace GH_Toolkit_GUI
                 AddToPCSetlist();
                 MoveToGh3SongsFolder(pakFile);
             }
+            // Add code to delete the folder after processing eventually
+        }
+        private void CompileGhwtPakFile()
+        {
 
+            string venue = GetVenue(venueSource.SelectedIndex);
 
+            string pakFile = PAK.CreateSongPackage(
+                midiPath: midiFileInput.Text,
+                savePath: compile_input.Text,
+                songName: song_checksum.Text,
+                game: CurrentGame,
+                gameConsole: CurrentPlatform,
+                hopoThreshold: (int)HmxHopoVal.Value,
+                skaPath: skaFilesInput.Text,
+                perfOverride: perfOverrideInput.Text,
+                songScripts: songScriptInput.Text,
+                skaSource: GetSkaSourceGhwt(),
+                venueSource: venue);
 
+            if (CurrentPlatform == "PC")
+            {
 
+            }
             // Add code to delete the folder after processing eventually
         }
         private void MoveToGh3SongsFolder(string pakPath)
@@ -1202,7 +1315,7 @@ namespace GH_Toolkit_GUI
                 }
             }
         }
-        private int CompilePak()
+        private int CompilePakGh3()
         {
             int success = 0;
             try
@@ -1256,22 +1369,45 @@ namespace GH_Toolkit_GUI
             }
             return success;
         }
+        private void CompilePakGhwt()
+        {
+            try
+            {
+                SaveProject();
+                PreCompileCheck();
+                CompileGhwtPakFile();
+            }
+            catch
+            {
+
+            }
+        }
         private void compile_pak_button_Click(object sender, EventArgs e)
         {
-            CompilePak();
+            if (CurrentGame == GAME_GH3 || CurrentGame == GAME_GHA)
+            {
+                CompilePakGh3();
+            }
+            else
+            {
+                CompilePakGhwt();
+            }
         }
         private async void compile_all_button_Click(object sender, EventArgs e)
         {
             string compileText = compile_all_button.Text;
             compile_all_button.Text = "Compiling...";
             DisableCloseButton();
-            int success = CompilePak();
-            if (success == 0)
+            if (CurrentGame == GAME_GH3 || CurrentGame == GAME_GHA)
             {
-                await CompileGh3All();
-                if (Pref.ShowPostCompile)
+                int success = CompilePakGh3();
+                if (success == 0)
                 {
-                    ShowPostCompile();
+                    await CompileGh3All();
+                    if (Pref.ShowPostCompile)
+                    {
+                        ShowPostCompile();
+                    }
                 }
             }
             EnableCloseButton();
@@ -1291,6 +1427,7 @@ namespace GH_Toolkit_GUI
         {
             backing_input_gh3.Items.Clear();
             coop_backing_input_gh3.Items.Clear();
+            backingInput.Items.Clear();
         }
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -1389,6 +1526,26 @@ namespace GH_Toolkit_GUI
         {
 
             UpdateNsValue();
+        }
+
+        private void renderedPreviewCheck_CheckedChanged(object sender, EventArgs e)
+        {
+            if (isProgrammaticChange)
+            {
+                return;
+            }
+            isProgrammaticChange = true;
+            gh3_rendered_preview_check.Checked = renderedPreviewCheck.Checked;
+            isProgrammaticChange = false;
+        }
+
+        private void setEndTime_CheckedChanged(object sender, EventArgs e)
+        {
+            if (isProgrammaticChange)
+            {
+                return;
+            }
+            gh3_set_end.Checked = setEndTime.Checked;
         }
     }
 }

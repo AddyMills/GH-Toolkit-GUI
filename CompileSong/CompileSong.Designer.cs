@@ -89,7 +89,7 @@
             previewMills = new NumericUpDown();
             label43 = new Label();
             lengthMinutes = new NumericUpDown();
-            checkBox1 = new CheckBox();
+            setEndTime = new CheckBox();
             previewMinutes = new NumericUpDown();
             label41 = new Label();
             renderedPreviewCheck = new CheckBox();
@@ -1037,7 +1037,7 @@
             tableLayoutPanel13.Controls.Add(previewMills, 3, 0);
             tableLayoutPanel13.Controls.Add(label43, 4, 0);
             tableLayoutPanel13.Controls.Add(lengthMinutes, 5, 0);
-            tableLayoutPanel13.Controls.Add(checkBox1, 8, 0);
+            tableLayoutPanel13.Controls.Add(setEndTime, 8, 0);
             tableLayoutPanel13.Controls.Add(previewMinutes, 1, 0);
             tableLayoutPanel13.Dock = DockStyle.Fill;
             tableLayoutPanel13.Location = new Point(74, 457);
@@ -1122,17 +1122,18 @@
             lengthMinutes.Size = new Size(42, 27);
             lengthMinutes.TabIndex = 5;
             // 
-            // checkBox1
+            // setEndTime
             // 
-            checkBox1.Anchor = AnchorStyles.Left;
-            checkBox1.AutoSize = true;
-            checkBox1.Location = new Point(501, 10);
-            checkBox1.Margin = new Padding(3, 5, 3, 4);
-            checkBox1.Name = "checkBox1";
-            checkBox1.Size = new Size(118, 24);
-            checkBox1.TabIndex = 6;
-            checkBox1.Text = "Set End Time";
-            checkBox1.UseVisualStyleBackColor = true;
+            setEndTime.Anchor = AnchorStyles.Left;
+            setEndTime.AutoSize = true;
+            setEndTime.Location = new Point(501, 10);
+            setEndTime.Margin = new Padding(3, 5, 3, 4);
+            setEndTime.Name = "setEndTime";
+            setEndTime.Size = new Size(118, 24);
+            setEndTime.TabIndex = 6;
+            setEndTime.Text = "Set End Time";
+            setEndTime.UseVisualStyleBackColor = true;
+            setEndTime.CheckedChanged += setEndTime_CheckedChanged;
             // 
             // previewMinutes
             // 
@@ -1166,6 +1167,7 @@
             renderedPreviewCheck.TabIndex = 31;
             renderedPreviewCheck.Text = "Use Rendered Preview";
             renderedPreviewCheck.UseVisualStyleBackColor = true;
+            renderedPreviewCheck.CheckedChanged += renderedPreviewCheck_CheckedChanged;
             // 
             // previewInput
             // 
@@ -3810,7 +3812,7 @@
         private NumericUpDown previewMills;
         private Label label43;
         private NumericUpDown lengthMinutes;
-        private CheckBox checkBox1;
+        private CheckBox setEndTime;
         private NumericUpDown previewMinutes;
         private CheckBox renderedPreviewCheck;
         private TextBox previewInput;
