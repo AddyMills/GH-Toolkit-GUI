@@ -600,6 +600,7 @@
             genre_input.Name = "genre_input";
             genre_input.Size = new Size(551, 28);
             genre_input.TabIndex = 15;
+            genre_input.SelectedIndexChanged += genre_input_SelectedIndexChanged;
             // 
             // label8
             // 

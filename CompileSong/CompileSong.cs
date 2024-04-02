@@ -43,7 +43,7 @@ namespace GH_Toolkit_GUI
         private string CurrentPlatform;
 
         // Dictionary to hold the selected genre for each game
-        private Dictionary<string, string> gameSelectedGenres = new Dictionary<string, string>();
+        private Dictionary<string, int> gameSelectedGenres = new Dictionary<string, int>();
         // Dictionary to hold the compile folder path for each platform and each game
         private Dictionary<string, Dictionary<string, string>> gamePlatformCompilePaths = new Dictionary<string, Dictionary<string, string>>();
 
@@ -65,6 +65,7 @@ namespace GH_Toolkit_GUI
         private string projectFilePath = "";
 
         private bool isProgrammaticChange = false;
+        private bool isLoading = false;
         private UserPreferences Pref = UserPreferences.Default;
 
 
@@ -120,7 +121,7 @@ namespace GH_Toolkit_GUI
             bassist_select_gh3.SelectedIndex = 0;
             hopo_mode_select.SelectedIndex = 0;
 
-            
+
             previewMinutes.ValueChanged += allPreviewTimeChange;
             previewSeconds.ValueChanged += allPreviewTimeChange;
             previewMills.ValueChanged += allPreviewTimeChange;
@@ -133,7 +134,7 @@ namespace GH_Toolkit_GUI
             length_minutes_gh3.ValueChanged += allPreviewTimeChange;
             length_seconds_gh3.ValueChanged += allPreviewTimeChange;
             length_mills_gh3.ValueChanged += allPreviewTimeChange;
-            
+
 
         }
         private void Startup_Load(object sender, EventArgs e)
@@ -387,9 +388,9 @@ namespace GH_Toolkit_GUI
                 genre_input.Items.AddRange(mergedGenres.ToArray());
                 if (gameSelectedGenres.ContainsKey(game))
                 {
-                    genre_input.Text = gameSelectedGenres[game];
+                    genre_input.SelectedIndex = gameSelectedGenres[game];
                 }
-                else
+                else if (!isLoading)
                 {
                     genre_input.SelectedIndex = 0;
                 }
@@ -501,9 +502,9 @@ namespace GH_Toolkit_GUI
                 {
                     // Radio button is unchecked, add or update the entry in the gameSelectedGenres dictionary
                     string gameName = lastCheckedRadioButton.Text;
-                    string selectedGenre = genre_input.Text; // Get the currently selected genre
+                    var selectedGenre = genre_input.SelectedIndex; // Get the currently selected genre
 
-                    if (!string.IsNullOrEmpty(gameName) && !string.IsNullOrEmpty(selectedGenre))
+                    if (!string.IsNullOrEmpty(gameName))
                     {
                         // Add or update the dictionary entry for the game
                         gameSelectedGenres[gameName] = selectedGenre;
@@ -737,6 +738,21 @@ namespace GH_Toolkit_GUI
             }
             UpdatePreviewLengthFields();
         }
+        private void UpdatePreviewFields()
+        {             
+            preview_minutes_gh3.Value = previewStartTime / 60000;
+            preview_seconds_gh3.Value = (previewStartTime % 60000) / 1000;
+            preview_mills_gh3.Value = (previewStartTime % 60000) % 1000;
+            length_minutes_gh3.Value = previewEndTime / 60000;
+            length_seconds_gh3.Value = (previewEndTime % 60000) / 1000;
+            length_mills_gh3.Value = (previewEndTime % 60000) % 1000;
+            previewMinutes.Value = preview_minutes_gh3.Value;
+            previewSeconds.Value = preview_seconds_gh3.Value;
+            previewMills.Value = preview_mills_gh3.Value;
+            lengthMinutes.Value = length_minutes_gh3.Value;
+            lengthSeconds.Value = length_seconds_gh3.Value;
+            lengthMills.Value = length_mills_gh3.Value;
+        }
         private void UpdatePreviewLengthFields()
         {
             length_minutes_gh3.Value = previewEndTime / 60000;
@@ -748,7 +764,7 @@ namespace GH_Toolkit_GUI
         }
         private void allPreviewTimeChange(object sender, EventArgs e)
         {
-            
+
             // Sender is the NumericUpDown that triggered the event
             NumericUpDown changed = sender as NumericUpDown;
             if (changed != null)
@@ -780,7 +796,7 @@ namespace GH_Toolkit_GUI
                     isProgrammaticChange = false;
                 }
             }
-            
+
         }
         private void gh3_preview_ValueChanged(object sender, EventArgs e)
         {
@@ -1377,9 +1393,9 @@ namespace GH_Toolkit_GUI
                 PreCompileCheck();
                 CompileGhwtPakFile();
             }
-            catch
+            catch (Exception ex)
             {
-
+                HandleException(ex, "Compile Failed!");
             }
         }
         private void compile_pak_button_Click(object sender, EventArgs e)
@@ -1546,6 +1562,15 @@ namespace GH_Toolkit_GUI
                 return;
             }
             gh3_set_end.Checked = setEndTime.Checked;
+        }
+
+        private void genre_input_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (isProgrammaticChange || isLoading)
+            {
+                return;
+            }
+            gameSelectedGenres[CurrentGame] = genre_input.SelectedIndex;
         }
     }
 }

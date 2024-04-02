@@ -104,7 +104,11 @@ namespace GH_Toolkit_GUI
             public int songYear { get; set; } = 2024;
             public int coverYear { get; set; } = 2024;
             [DefaultValue(-1)]
-            public int genre { get; set; } = 0;
+            public int wtGenre { get; set; } = 0;
+            [DefaultValue(-1)]
+            public int gh5Genre { get; set; } = 0;
+            [DefaultValue(-1)]
+            public int worGenre { get; set; } = 0;
             [DefaultValue(45000)]
             public int previewStart { get; set; } = 30000;
             [DefaultValue(30000)]
@@ -161,6 +165,7 @@ namespace GH_Toolkit_GUI
                 artist = artist_input.Text,
                 artistTextCustom = artistTextCustom.Text,
                 coverArtist = cover_artist_input.Text,
+
                 // GHWT
                 // Audio
                 kickPath = kickInput.Text,
@@ -232,7 +237,9 @@ namespace GH_Toolkit_GUI
                 artistText = artist_text_select.SelectedIndex,
                 songYear = (int)year_input.Value,
                 coverYear = (int)cover_year_input.Value,
-                genre = genre_input.SelectedIndex,
+                wtGenre = gameSelectedGenres["GHWT"],
+                gh5Genre = gameSelectedGenres["GH5"],
+                worGenre = gameSelectedGenres["WOR"],
                 previewStart = previewStartTime,
                 previewEnd = previewEndTime,
                 hmxHopoVal = (int)HmxHopoVal.Value,
@@ -259,6 +266,7 @@ namespace GH_Toolkit_GUI
             artist_input.Text = data.artist;
             artistTextCustom.Text = data.artistTextCustom;
             cover_artist_input.Text = data.coverArtist;
+
 
             // GH3 Audio
             guitar_input_gh3.Text = data.guitarPathGh3;
@@ -290,11 +298,10 @@ namespace GH_Toolkit_GUI
             artist_text_select.SelectedIndex = data.artistText;
             year_input.Value = data.songYear;
             cover_year_input.Value = data.coverYear;
-            if (CurrentGame != "GH3" && CurrentGame != "GHA")
-            {
-                genre_input.SelectedIndex = data.genre;
-            }
-            
+            gameSelectedGenres["GHWT"] = data.wtGenre;
+            gameSelectedGenres["GH5"] = data.gh5Genre;
+            gameSelectedGenres["WOR"] = data.worGenre;
+           
             HmxHopoVal.Value = data.hmxHopoVal;
             hopo_mode_select.SelectedIndex = data.hopoMode;
             beat8thLow.Value = data.beat8thLow;
@@ -358,12 +365,12 @@ namespace GH_Toolkit_GUI
             vSkeletonSelect.Text = data.vSkeleton;
             useNewClipsCheck.Checked = data.useNewClips;
             modernStrobesCheck.Checked = data.modernStrobes;
-
             previewStartTime = data.previewStart;
             previewEndTime = data.previewEnd;
+            UpdatePreviewFields(); // This needs to be changed. Currently broken
+            isProgrammaticChange = false;
             
 
-            isProgrammaticChange = false;
             SetAll();
         }
         private void SaveProject()
@@ -390,7 +397,7 @@ namespace GH_Toolkit_GUI
 
         private void SaveProjectAs()
         {
-            var data = makeSaveClass();
+            
             using (SaveFileDialog saveFileDialog = new SaveFileDialog())
             {
                 saveFileDialog.Filter = ghprojFileFilter; // Ensure this is defined somewhere in your code
@@ -401,7 +408,7 @@ namespace GH_Toolkit_GUI
                 {
                     // Get the path of specified file
                     project_input.Text = saveFileDialog.FileName;
-
+                    var data = makeSaveClass();
                     // Custom serializer settings to ignore default values
                     var settings = new JsonSerializerSettings
                     {
@@ -419,9 +426,11 @@ namespace GH_Toolkit_GUI
 
             if (File.Exists(filePath))
             {
+                isLoading = true;
                 string json = File.ReadAllText(filePath);
                 SaveData data = JsonConvert.DeserializeObject<SaveData>(json);
                 LoadSaveData(data);
+                isLoading = false;
             }
         }
     }
