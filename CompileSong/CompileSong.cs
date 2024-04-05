@@ -842,7 +842,7 @@ namespace GH_Toolkit_GUI
         {
             if (compile_input.Text == "")
             {
-                compile_input.Text = Path.GetDirectoryName(midi_file_input_gh3.Text);
+                compile_input.Text = Path.GetDirectoryName(project_input.Text);
             }
             if (song_checksum.Text == "")
             {
