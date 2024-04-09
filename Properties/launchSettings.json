@@ -2,7 +2,7 @@
   "profiles": {
     "GH-Toolkit-GUI": {
       "commandName": "Project",
-      "commandLineArgs": "\"C:\\Charting\\Outlaws\\Compile\\GHWT\\greengrassreal_new.ghproj\""
+      "commandLineArgs": "\"D:\\RB\\Songs\\Billy Talent\\Fallen Leaves\\Compile\\GHWT\\fallenleaves-new.ghproj\""
     }
   }
 }

@@ -43,7 +43,12 @@ namespace GH_Toolkit_GUI
         private string CurrentPlatform;
 
         // Dictionary to hold the selected genre for each game
-        private Dictionary<string, int> gameSelectedGenres = new Dictionary<string, int>();
+        private Dictionary<string, int> gameSelectedGenres = new Dictionary<string, int>()
+        {
+            { "GHWT", 0 },
+            { "GH5", 0 },
+            { "GHWoR", 0 }
+        };
         // Dictionary to hold the compile folder path for each platform and each game
         private Dictionary<string, Dictionary<string, string>> gamePlatformCompilePaths = new Dictionary<string, Dictionary<string, string>>();
 
@@ -120,6 +125,8 @@ namespace GH_Toolkit_GUI
             vocal_gender_select_gh3.SelectedIndex = 0;
             bassist_select_gh3.SelectedIndex = 0;
             hopo_mode_select.SelectedIndex = 0;
+
+            venueSource.SelectedIndex = 2;
 
 
             previewMinutes.ValueChanged += allPreviewTimeChange;

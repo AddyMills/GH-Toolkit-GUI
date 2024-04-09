@@ -109,10 +109,10 @@ namespace GH_Toolkit_GUI
             public int gh5Genre { get; set; } = 0;
             [DefaultValue(-1)]
             public int worGenre { get; set; } = 0;
-            [DefaultValue(45000)]
+            [DefaultValue(30000)]
             public int previewStart { get; set; } = 30000;
             [DefaultValue(30000)]
-            public int previewEnd { get; set; } = 60000;
+            public int previewEnd { get; set; } = 30000;
             [DefaultValue(170)]
             public int hmxHopoVal { get; set; } = 170;
             public int skaSourceGh3 { get; set; } = 0;
@@ -151,6 +151,40 @@ namespace GH_Toolkit_GUI
             public bool bassMic { get; set; } = false;
             public bool useNewClips { get; set; } = false;
             public bool modernStrobes { get; set; } = false;
+        }
+        private class SaveDataOld {             
+            public string game { get; set; }
+            public string title_input { get; set; }
+            public string artist_text_select { get; set; }
+            public string artist_text_other { get; set; }
+            public string artist_input { get; set; }
+            public int year_input { get; set; }
+            public string cover_checkbox { get; set; }
+            public int cover_year_input { get; set; }
+            public string cover_artist_input { get; set; }
+            public string genre_select { get; set; }
+            public string checksum_input { get; set; }
+            public string author_input { get; set; }
+            public string ghwt_genre { get; set; }
+            public string ghwor_genre { get; set; }
+            public string kick_input { get; set; }
+            public string snare_input { get; set; }
+            public string cymbals_input { get; set; }
+            public string toms_input { get; set; }
+            public string guitar_input { get; set; }
+            public string bass_input { get; set; }
+            public string vocals_input { get; set; }
+            public string backing_input { get; set; }
+            public string crowd_input { get; set; }
+            public int preview_minutes { get; set; }
+            public int preview_seconds { get; set; }
+            public int preview_mills { get; set; }
+            public bool ghwt_set_end { get; set; }
+            public int length_minutes { get; set; }
+            public int length_seconds { get; set; }
+            public int length_mills { get; set; }
+            // Continue later
+
         }
         private SaveData makeSaveClass()
         {
@@ -239,7 +273,7 @@ namespace GH_Toolkit_GUI
                 coverYear = (int)cover_year_input.Value,
                 wtGenre = gameSelectedGenres["GHWT"],
                 gh5Genre = gameSelectedGenres["GH5"],
-                worGenre = gameSelectedGenres["WOR"],
+                worGenre = gameSelectedGenres["GHWoR"],
                 previewStart = previewStartTime,
                 previewEnd = previewEndTime,
                 hmxHopoVal = (int)HmxHopoVal.Value,
@@ -429,6 +463,7 @@ namespace GH_Toolkit_GUI
                 isLoading = true;
                 string json = File.ReadAllText(filePath);
                 SaveData data = JsonConvert.DeserializeObject<SaveData>(json);
+
                 LoadSaveData(data);
                 isLoading = false;
             }
