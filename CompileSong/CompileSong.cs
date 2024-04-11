@@ -14,6 +14,7 @@ using static GH_Toolkit_Exceptions.Exceptions;
 using System.Drawing.Drawing2D;
 using System.Configuration;
 using System;
+using static GH_Toolkit_Core.Methods.Exceptions;
 
 namespace GH_Toolkit_GUI
 {
@@ -1157,7 +1158,8 @@ namespace GH_Toolkit_GUI
                 songScripts: song_script_input_gh3.Text,
                 skaSource: GetSkaSourceGh3(),
                 venueSource: venue,
-                rhythmTrack: p2_rhythm_check.Checked);
+                rhythmTrack: p2_rhythm_check.Checked,
+                overrideBeat: use_beat_check.Checked);
 
             if (CurrentPlatform == "PC")
             {
@@ -1182,7 +1184,8 @@ namespace GH_Toolkit_GUI
                 perfOverride: perfOverrideInput.Text,
                 songScripts: songScriptInput.Text,
                 skaSource: GetSkaSourceGhwt(),
-                venueSource: venue);
+                venueSource: venue,
+                overrideBeat: use_beat_check.Checked);
 
             if (CurrentPlatform == "PC")
             {
@@ -1460,6 +1463,11 @@ namespace GH_Toolkit_GUI
                 }
                 success = -1;
             }
+            catch (MidiCompileException ex)
+            {
+                MidiFailException(ex);
+                success = -1;
+            }
             catch (Exception ex)
             {
                 HandleException(ex, "Compile Failed!");
@@ -1474,6 +1482,10 @@ namespace GH_Toolkit_GUI
                 SaveProject();
                 PreCompileCheck();
                 CompileGhwtPakFile();
+            }
+            catch (MidiCompileException ex)
+            {
+                MidiFailException(ex);
             }
             catch (Exception ex)
             {

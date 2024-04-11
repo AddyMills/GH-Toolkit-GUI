@@ -37,5 +37,11 @@ namespace GH_Toolkit_Exceptions
                 MessageBox.Show($"Exception: {ex.Message}", "errorMessage", MessageBoxButtons.OK, MessageBoxIcon.Error);
             } 
         }
+
+        public static void MidiFailException(Exception ex)
+        {
+            MessageBox.Show($"Errors were found while compiling the MIDI:\n\n{ex.Message}\n\nCompilation has been cancelled.", "Compile Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            // Make a custom error handler in the near future
+        }
     }
 }
