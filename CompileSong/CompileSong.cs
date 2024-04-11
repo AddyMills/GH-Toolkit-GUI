@@ -1159,7 +1159,8 @@ namespace GH_Toolkit_GUI
                 skaSource: GetSkaSourceGh3(),
                 venueSource: venue,
                 rhythmTrack: p2_rhythm_check.Checked,
-                overrideBeat: use_beat_check.Checked);
+                overrideBeat: use_beat_check.Checked,
+                hopoType: hopo_mode_select.SelectedIndex);
 
             if (CurrentPlatform == "PC")
             {
@@ -1185,7 +1186,8 @@ namespace GH_Toolkit_GUI
                 songScripts: songScriptInput.Text,
                 skaSource: GetSkaSourceGhwt(),
                 venueSource: venue,
-                overrideBeat: use_beat_check.Checked);
+                overrideBeat: use_beat_check.Checked,
+                hopoType: hopo_mode_select.SelectedIndex);
 
             if (CurrentPlatform == "PC")
             {
