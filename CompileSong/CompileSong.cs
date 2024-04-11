@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
 using GH_Toolkit_Core.QB;
+using GH_Toolkit_Core.INI;
 using static GH_Toolkit_Core.QB.QBConstants;
 using static GH_Toolkit_Exceptions.Exceptions;
 using System.Drawing.Drawing2D;
@@ -19,8 +20,8 @@ namespace GH_Toolkit_GUI
     public partial class CompileSong : Form
     {
         private int ghprojVersion = 1;
-        private string ExeLocation;
-        private string ExeDirectory;
+        private static string ExeLocation = Assembly.GetExecutingAssembly().Location;
+        private static string ExeDirectory = Path.GetDirectoryName(ExeLocation);
         private string DefaultTemplateFolder;
         private string DefaultTemplatePath;
         private string StartupProject;
@@ -49,13 +50,22 @@ namespace GH_Toolkit_GUI
             { "GH5", 0 },
             { "GHWoR", 0 }
         };
+        // Dictionary to hold the selected drum kit for each game
+        private Dictionary<string, int> gameDrumKits = new Dictionary<string, int>()
+        {
+            { "GHWT", 0 },
+            { "GH5", 0 },
+            { "GHWoR", 0 }
+        };
         // Dictionary to hold the compile folder path for each platform and each game
         private Dictionary<string, Dictionary<string, string>> gamePlatformCompilePaths = new Dictionary<string, Dictionary<string, string>>();
 
 
         private RadioButton lastCheckedRadioButton = null;
         private string audioFileFilter = "Audio files (*.mp3, *.ogg, *.flac, *.wav)|*.mp3;*.ogg;*.flac;*.wav|All files (*.*)|*.*";
+        private string audioRegex = ".*\\.(mp3|ogg|flac|wav)$";
         private string midiFileFilter = "MIDI files (*.mid)|*.mid|All files (*.*)|*.*";
+        private string midiRegexCh = ".*\\.mid$";
         private string qFileFilter = "Q files (*.q)|*.q|All files (*.*)|*.*";
         private string ghprojFileFilter = "GHProj files (*.ghproj)|*.ghproj|All files (*.*)|*.*";
 
@@ -128,6 +138,31 @@ namespace GH_Toolkit_GUI
 
             venueSource.SelectedIndex = 2;
 
+            string[] skeletons = LoadTextFile(Path.Combine(ExeDirectory, "List Files", "skeletons.txt"));
+            if (skeletons.Length == 0)
+            {
+                skeletons = ["Default"];
+            }
+
+            gSkeletonSelect.Items.AddRange(skeletons);
+            bSkeletonSelect.Items.AddRange(skeletons);
+            dSkeletonSelect.Items.AddRange(skeletons);
+            vSkeletonSelect.Items.AddRange(skeletons);
+
+            gSkeletonSelect.SelectedIndex = 0;
+            bSkeletonSelect.SelectedIndex = 0;
+            dSkeletonSelect.SelectedIndex = 0;
+            vSkeletonSelect.SelectedIndex = 0;
+
+            string[] songCategories = LoadTextFile(Path.Combine(ExeDirectory, "List Files", "songcategories.txt"));
+            if (songCategories.Length != 0)
+            {
+                gameCategoryInput.Items.AddRange(songCategories);
+                foreach (string category in songCategories)
+                {
+                    gameIconInput.Items.Add($"gamelogo_{category}");
+                }
+            }
 
             previewMinutes.ValueChanged += allPreviewTimeChange;
             previewSeconds.ValueChanged += allPreviewTimeChange;
@@ -143,6 +178,22 @@ namespace GH_Toolkit_GUI
             length_mills_gh3.ValueChanged += allPreviewTimeChange;
 
 
+        }
+        // Method to load a text file and return a list of string for each line in the file
+        private string[] LoadTextFile(string filePath)
+        {
+            // Create a new list to hold the lines of the text file
+            List<string> lines = new List<string>();
+
+            // Check if the file exists
+            if (File.Exists(filePath))
+            {
+                // Read all lines from the text file and add them to the list
+                lines = File.ReadAllLines(filePath).ToList();
+            }
+
+            // Return the list of lines
+            return lines.ToArray();
         }
         private void Startup_Load(object sender, EventArgs e)
         {
@@ -160,8 +211,7 @@ namespace GH_Toolkit_GUI
         }
         private void DefaultPaths()
         {
-            ExeLocation = Assembly.GetExecutingAssembly().Location;
-            ExeDirectory = Path.GetDirectoryName(ExeLocation);
+
             DefaultTemplateFolder = Path.Combine(ExeDirectory, "Templates");
             DefaultTemplatePath = Path.Combine(DefaultTemplateFolder, "default.ghproj");
             CurrentGame = GetGame();
@@ -338,12 +388,12 @@ namespace GH_Toolkit_GUI
             bool isOld = game == "GH3" || game == "GHA";
             SetTabs(isOld);
             SetGenres(game);
+            SetDrumkit();
             SetBeatLines();
             // artist_text_select.SelectedIndex = 0;
             if (isOld)
             {
-                //
-                //SetGh3Fields(game);
+
             }
             else
             {
@@ -407,6 +457,35 @@ namespace GH_Toolkit_GUI
                 genre_input.Enabled = false;
                 genre_input.Text = "";
             }
+        }
+        private void SetDrumkit()
+        {
+            string game = CurrentGame;
+            if (game == GAME_GH3 || game == GAME_GHA)
+            {
+                return;
+            }
+            List<string> drumKitBase = new List<string> { "Classic Rock", "Electro", "Fusion", "Heavy Rock", "Hip Hop", "Modern Rock" };
+            List<string> drumKitWt = new List<string> { "Blip Hop", "Cheesy", "Computight", "Conga", "Dub", "Eightys", "Gunshot",
+                                       "House", "India", "Jazzy", "Old School", "Orchestral", "Scratch", "Scratch_Electro" };
+            List<string> drumKitGh5 = new List<string> { "Bigroom Rock", "Dance", "Metal", "Noise", "Standard Rock" };
+
+            if (CurrentGame == "GHWT")
+            {
+                drumKitBase.AddRange(drumKitWt);
+            }
+            else
+            {
+                drumKitBase.AddRange(drumKitGh5);
+            }
+
+            drumKitBase.Sort();
+
+            // Clear drumKitSelect ComboBox entries
+            drumKitSelect.Items.Clear();
+
+            // Add the drum kits to the drumKitSelect ComboBox
+            drumKitSelect.Items.AddRange(drumKitBase.ToArray());
         }
         private void SetGh3Fields(string game)
         {
@@ -714,10 +793,6 @@ namespace GH_Toolkit_GUI
             length_seconds_gh3.Enabled = !gh3_rendered_preview_check.Checked;
             length_mills_gh3.Enabled = !gh3_rendered_preview_check.Checked;
             gh3_set_end.Enabled = !gh3_rendered_preview_check.Checked;
-
-            isProgrammaticChange = true;
-            renderedPreviewCheck.Checked = gh3_rendered_preview_check.Checked;
-            isProgrammaticChange = false;
         }
         private void updatePreviewStartTime()
         {
@@ -746,7 +821,7 @@ namespace GH_Toolkit_GUI
             UpdatePreviewLengthFields();
         }
         private void UpdatePreviewFields()
-        {             
+        {
             preview_minutes_gh3.Value = previewStartTime / 60000;
             preview_seconds_gh3.Value = (previewStartTime % 60000) / 1000;
             preview_mills_gh3.Value = (previewStartTime % 60000) % 1000;
@@ -1557,9 +1632,20 @@ namespace GH_Toolkit_GUI
             {
                 return;
             }
-            isProgrammaticChange = true;
-            gh3_rendered_preview_check.Checked = renderedPreviewCheck.Checked;
-            isProgrammaticChange = false;
+
+            previewAudioLabel.Enabled = renderedPreviewCheck.Checked;
+            previewInput.Enabled = renderedPreviewCheck.Checked;
+            previewSelect.Enabled = renderedPreviewCheck.Checked;
+
+            previewLabel.Enabled = !renderedPreviewCheck.Checked;
+            previewMinutes.Enabled = !renderedPreviewCheck.Checked;
+            previewSeconds.Enabled = !renderedPreviewCheck.Checked;
+            previewMills.Enabled = !renderedPreviewCheck.Checked;
+            lengthLabel.Enabled = !renderedPreviewCheck.Checked;
+            lengthMinutes.Enabled = !renderedPreviewCheck.Checked;
+            lengthSeconds.Enabled = !renderedPreviewCheck.Checked;
+            lengthMills.Enabled = !renderedPreviewCheck.Checked;
+            setEndTime.Enabled = !renderedPreviewCheck.Checked;
         }
 
         private void setEndTime_CheckedChanged(object sender, EventArgs e)
@@ -1578,6 +1664,30 @@ namespace GH_Toolkit_GUI
                 return;
             }
             gameSelectedGenres[CurrentGame] = genre_input.SelectedIndex;
+        }
+
+        private void drumKitSelect_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (isProgrammaticChange || isLoading)
+            {
+                return;
+            }
+            gameDrumKits[CurrentGame] = drumKitSelect.SelectedIndex;
+        }
+
+        private void import_from_other_Click(object sender, EventArgs e)
+        {
+            // Open a folder choosing dialog to select a folder
+            using (FolderBrowserDialog folderDialog = new FolderBrowserDialog())
+            {
+                folderDialog.Description = "Select the Clone Hero song folder you want to import.";
+                DialogResult result = folderDialog.ShowDialog();
+                if (result == DialogResult.OK)
+                {
+                    string folderPath = folderDialog.SelectedPath;
+                    LoadFromChFolder(folderPath);
+                }
+            }
         }
     }
 }

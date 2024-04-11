@@ -39,6 +39,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Update="List Files\skeletons.txt">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="List Files\songcategories.txt">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	  <None Update="Replacements\PC\GH3\QB\scripts\guitar\guitar_memcard.qb">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>

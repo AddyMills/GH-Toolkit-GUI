@@ -84,14 +84,14 @@
             tableLayoutPanel13 = new TableLayoutPanel();
             lengthMills = new NumericUpDown();
             lengthSeconds = new NumericUpDown();
-            label42 = new Label();
+            previewLabel = new Label();
             previewSeconds = new NumericUpDown();
             previewMills = new NumericUpDown();
-            label43 = new Label();
+            lengthLabel = new Label();
             lengthMinutes = new NumericUpDown();
             setEndTime = new CheckBox();
             previewMinutes = new NumericUpDown();
-            label41 = new Label();
+            previewAudioLabel = new Label();
             renderedPreviewCheck = new CheckBox();
             previewInput = new TextBox();
             kickSelect = new Button();
@@ -186,6 +186,8 @@
             tableLayoutPanel16 = new TableLayoutPanel();
             guitarMicCheck = new CheckBox();
             bassMicCheck = new CheckBox();
+            label65 = new Label();
+            drumKitSelect = new ComboBox();
             song_data_tab_gh3 = new TabPage();
             tableLayoutPanel7 = new TableLayoutPanel();
             label11 = new Label();
@@ -369,7 +371,7 @@
             metadata_tab.Controls.Add(game_select);
             metadata_tab.Location = new Point(4, 24);
             metadata_tab.Name = "metadata_tab";
-            metadata_tab.Padding = new Padding(3, 3, 3, 3);
+            metadata_tab.Padding = new Padding(3);
             metadata_tab.Size = new Size(627, 538);
             metadata_tab.TabIndex = 0;
             metadata_tab.Text = "Metadata";
@@ -383,6 +385,7 @@
             import_from_other.TabIndex = 2;
             import_from_other.Text = "Import Data from Clone Hero folder";
             import_from_other.UseVisualStyleBackColor = true;
+            import_from_other.Click += import_from_other_Click;
             // 
             // tableLayoutPanel2
             // 
@@ -755,7 +758,7 @@
             audio_tab_wt.Controls.Add(tableLayoutPanel11);
             audio_tab_wt.Location = new Point(4, 24);
             audio_tab_wt.Name = "audio_tab_wt";
-            audio_tab_wt.Padding = new Padding(3, 3, 3, 3);
+            audio_tab_wt.Padding = new Padding(3);
             audio_tab_wt.Size = new Size(627, 538);
             audio_tab_wt.TabIndex = 1;
             audio_tab_wt.Text = "Audio (WT)";
@@ -786,7 +789,7 @@
             tableLayoutPanel11.Controls.Add(vocalsInput, 1, 7);
             tableLayoutPanel11.Controls.Add(crowdInput, 1, 9);
             tableLayoutPanel11.Controls.Add(tableLayoutPanel13, 1, 10);
-            tableLayoutPanel11.Controls.Add(label41, 0, 12);
+            tableLayoutPanel11.Controls.Add(previewAudioLabel, 0, 12);
             tableLayoutPanel11.Controls.Add(renderedPreviewCheck, 1, 11);
             tableLayoutPanel11.Controls.Add(previewInput, 1, 12);
             tableLayoutPanel11.Controls.Add(kickSelect, 2, 1);
@@ -1018,10 +1021,10 @@
             tableLayoutPanel13.ColumnStyles.Add(new ColumnStyle());
             tableLayoutPanel13.Controls.Add(lengthMills, 7, 0);
             tableLayoutPanel13.Controls.Add(lengthSeconds, 6, 0);
-            tableLayoutPanel13.Controls.Add(label42, 0, 0);
+            tableLayoutPanel13.Controls.Add(previewLabel, 0, 0);
             tableLayoutPanel13.Controls.Add(previewSeconds, 2, 0);
             tableLayoutPanel13.Controls.Add(previewMills, 3, 0);
-            tableLayoutPanel13.Controls.Add(label43, 4, 0);
+            tableLayoutPanel13.Controls.Add(lengthLabel, 4, 0);
             tableLayoutPanel13.Controls.Add(lengthMinutes, 5, 0);
             tableLayoutPanel13.Controls.Add(setEndTime, 8, 0);
             tableLayoutPanel13.Controls.Add(previewMinutes, 1, 0);
@@ -1052,16 +1055,16 @@
             lengthSeconds.TabIndex = 3;
             lengthSeconds.Value = new decimal(new int[] { 30, 0, 0, 0 });
             // 
-            // label42
+            // previewLabel
             // 
-            label42.Anchor = AnchorStyles.Left;
-            label42.AutoSize = true;
-            label42.Location = new Point(3, 9);
-            label42.Margin = new Padding(3, 4, 3, 3);
-            label42.Name = "label42";
-            label42.Size = new Size(78, 15);
-            label42.TabIndex = 0;
-            label42.Text = "Preview Start:";
+            previewLabel.Anchor = AnchorStyles.Left;
+            previewLabel.AutoSize = true;
+            previewLabel.Location = new Point(3, 9);
+            previewLabel.Margin = new Padding(3, 4, 3, 3);
+            previewLabel.Name = "previewLabel";
+            previewLabel.Size = new Size(78, 15);
+            previewLabel.TabIndex = 0;
+            previewLabel.Text = "Preview Start:";
             // 
             // previewSeconds
             // 
@@ -1082,16 +1085,16 @@
             previewMills.Size = new Size(47, 23);
             previewMills.TabIndex = 3;
             // 
-            // label43
+            // lengthLabel
             // 
-            label43.Anchor = AnchorStyles.Left;
-            label43.AutoSize = true;
-            label43.Location = new Point(233, 9);
-            label43.Margin = new Padding(3, 4, 3, 3);
-            label43.Name = "label43";
-            label43.Size = new Size(47, 15);
-            label43.TabIndex = 4;
-            label43.Text = "Length:";
+            lengthLabel.Anchor = AnchorStyles.Left;
+            lengthLabel.AutoSize = true;
+            lengthLabel.Location = new Point(233, 9);
+            lengthLabel.Margin = new Padding(3, 4, 3, 3);
+            lengthLabel.Name = "lengthLabel";
+            lengthLabel.Size = new Size(47, 15);
+            lengthLabel.TabIndex = 4;
+            lengthLabel.Text = "Length:";
             // 
             // lengthMinutes
             // 
@@ -1125,16 +1128,16 @@
             previewMinutes.Size = new Size(41, 23);
             previewMinutes.TabIndex = 1;
             // 
-            // label41
+            // previewAudioLabel
             // 
-            label41.Anchor = AnchorStyles.Right;
-            label41.AutoSize = true;
-            label41.Location = new Point(8, 415);
-            label41.Name = "label41";
-            label41.Size = new Size(48, 15);
-            label41.TabIndex = 10;
-            label41.Text = "Preview";
-            label41.TextAlign = ContentAlignment.MiddleRight;
+            previewAudioLabel.Anchor = AnchorStyles.Right;
+            previewAudioLabel.AutoSize = true;
+            previewAudioLabel.Location = new Point(8, 415);
+            previewAudioLabel.Name = "previewAudioLabel";
+            previewAudioLabel.Size = new Size(48, 15);
+            previewAudioLabel.TabIndex = 10;
+            previewAudioLabel.Text = "Preview";
+            previewAudioLabel.TextAlign = ContentAlignment.MiddleRight;
             // 
             // renderedPreviewCheck
             // 
@@ -1152,6 +1155,7 @@
             // previewInput
             // 
             previewInput.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            previewInput.Enabled = false;
             previewInput.Location = new Point(62, 411);
             previewInput.Margin = new Padding(3, 2, 3, 2);
             previewInput.Name = "previewInput";
@@ -1191,6 +1195,7 @@
             // previewSelect
             // 
             previewSelect.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            previewSelect.Enabled = false;
             previewSelect.Location = new Point(561, 411);
             previewSelect.Name = "previewSelect";
             previewSelect.Size = new Size(54, 23);
@@ -1302,7 +1307,7 @@
             audio_tab_gh3.Controls.Add(tableLayoutPanel1);
             audio_tab_gh3.Location = new Point(4, 24);
             audio_tab_gh3.Name = "audio_tab_gh3";
-            audio_tab_gh3.Padding = new Padding(3, 3, 3, 3);
+            audio_tab_gh3.Padding = new Padding(3);
             audio_tab_gh3.Size = new Size(627, 538);
             audio_tab_gh3.TabIndex = 2;
             audio_tab_gh3.Text = "Audio (GH3)";
@@ -1851,7 +1856,7 @@
             song_data_tab_wt.Controls.Add(tableLayoutPanel15);
             song_data_tab_wt.Location = new Point(4, 24);
             song_data_tab_wt.Name = "song_data_tab_wt";
-            song_data_tab_wt.Padding = new Padding(3, 3, 3, 3);
+            song_data_tab_wt.Padding = new Padding(3);
             song_data_tab_wt.Size = new Size(627, 538);
             song_data_tab_wt.TabIndex = 3;
             song_data_tab_wt.Text = "Song Data (WT)";
@@ -1864,39 +1869,42 @@
             tableLayoutPanel15.ColumnStyles.Add(new ColumnStyle());
             tableLayoutPanel15.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tableLayoutPanel15.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 60F));
-            tableLayoutPanel15.Controls.Add(label53, 0, 11);
+            tableLayoutPanel15.Controls.Add(label53, 0, 12);
             tableLayoutPanel15.Controls.Add(label44, 0, 0);
             tableLayoutPanel15.Controls.Add(label45, 0, 1);
             tableLayoutPanel15.Controls.Add(label46, 0, 2);
             tableLayoutPanel15.Controls.Add(label47, 0, 3);
             tableLayoutPanel15.Controls.Add(label48, 0, 5);
             tableLayoutPanel15.Controls.Add(label49, 0, 6);
-            tableLayoutPanel15.Controls.Add(label50, 0, 7);
+            tableLayoutPanel15.Controls.Add(label50, 0, 8);
             tableLayoutPanel15.Controls.Add(midiFileInput, 1, 0);
             tableLayoutPanel15.Controls.Add(perfOverrideInput, 1, 1);
             tableLayoutPanel15.Controls.Add(skaFilesInput, 1, 2);
             tableLayoutPanel15.Controls.Add(skaFileSource, 1, 3);
             tableLayoutPanel15.Controls.Add(songScriptInput, 1, 5);
             tableLayoutPanel15.Controls.Add(countoffSelect, 1, 6);
-            tableLayoutPanel15.Controls.Add(vocalGenderSelect, 1, 7);
+            tableLayoutPanel15.Controls.Add(vocalGenderSelect, 1, 8);
             tableLayoutPanel15.Controls.Add(midiFileSelect, 2, 0);
             tableLayoutPanel15.Controls.Add(perfOverrideSelect, 2, 1);
             tableLayoutPanel15.Controls.Add(skaFilesSelect, 2, 2);
             tableLayoutPanel15.Controls.Add(songScriptSelect, 2, 5);
             tableLayoutPanel15.Controls.Add(label54, 0, 4);
             tableLayoutPanel15.Controls.Add(venueSource, 1, 4);
-            tableLayoutPanel15.Controls.Add(label51, 0, 8);
-            tableLayoutPanel15.Controls.Add(overallVolume, 1, 11);
-            tableLayoutPanel15.Controls.Add(vocalScrollSpeed, 1, 8);
-            tableLayoutPanel15.Controls.Add(label52, 0, 9);
-            tableLayoutPanel15.Controls.Add(vocalTuningCents, 1, 9);
-            tableLayoutPanel15.Controls.Add(label55, 0, 10);
-            tableLayoutPanel15.Controls.Add(sustainThreshold, 1, 10);
-            tableLayoutPanel15.Controls.Add(label56, 0, 12);
-            tableLayoutPanel15.Controls.Add(tableLayoutPanel16, 1, 12);
+            tableLayoutPanel15.Controls.Add(label51, 0, 9);
+            tableLayoutPanel15.Controls.Add(overallVolume, 1, 12);
+            tableLayoutPanel15.Controls.Add(vocalScrollSpeed, 1, 9);
+            tableLayoutPanel15.Controls.Add(label52, 0, 10);
+            tableLayoutPanel15.Controls.Add(vocalTuningCents, 1, 10);
+            tableLayoutPanel15.Controls.Add(label55, 0, 11);
+            tableLayoutPanel15.Controls.Add(sustainThreshold, 1, 11);
+            tableLayoutPanel15.Controls.Add(label56, 0, 13);
+            tableLayoutPanel15.Controls.Add(tableLayoutPanel16, 1, 13);
+            tableLayoutPanel15.Controls.Add(label65, 0, 7);
+            tableLayoutPanel15.Controls.Add(drumKitSelect, 1, 7);
             tableLayoutPanel15.Location = new Point(7, 5);
             tableLayoutPanel15.Name = "tableLayoutPanel15";
-            tableLayoutPanel15.RowCount = 15;
+            tableLayoutPanel15.RowCount = 16;
+            tableLayoutPanel15.RowStyles.Add(new RowStyle());
             tableLayoutPanel15.RowStyles.Add(new RowStyle());
             tableLayoutPanel15.RowStyles.Add(new RowStyle());
             tableLayoutPanel15.RowStyles.Add(new RowStyle());
@@ -1919,7 +1927,7 @@
             // 
             label53.Anchor = AnchorStyles.Left;
             label53.AutoSize = true;
-            label53.Location = new Point(3, 326);
+            label53.Location = new Point(3, 355);
             label53.Margin = new Padding(3, 2, 3, 2);
             label53.Name = "label53";
             label53.Size = new Size(90, 15);
@@ -1997,7 +2005,7 @@
             // 
             label50.Anchor = AnchorStyles.Left;
             label50.AutoSize = true;
-            label50.Location = new Point(3, 210);
+            label50.Location = new Point(3, 239);
             label50.Name = "label50";
             label50.Size = new Size(79, 15);
             label50.TabIndex = 6;
@@ -2064,7 +2072,7 @@
             vocalGenderSelect.DropDownStyle = ComboBoxStyle.DropDownList;
             vocalGenderSelect.FormattingEnabled = true;
             vocalGenderSelect.Items.AddRange(new object[] { "Male", "Female", "None" });
-            vocalGenderSelect.Location = new Point(120, 206);
+            vocalGenderSelect.Location = new Point(120, 235);
             vocalGenderSelect.Name = "vocalGenderSelect";
             vocalGenderSelect.Size = new Size(432, 23);
             vocalGenderSelect.TabIndex = 15;
@@ -2131,7 +2139,7 @@
             // 
             label51.Anchor = AnchorStyles.Left;
             label51.AutoSize = true;
-            label51.Location = new Point(3, 238);
+            label51.Location = new Point(3, 267);
             label51.Name = "label51";
             label51.Size = new Size(105, 15);
             label51.TabIndex = 7;
@@ -2143,7 +2151,7 @@
             overallVolume.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             overallVolume.DecimalPlaces = 2;
             overallVolume.Increment = new decimal(new int[] { 5, 0, 0, 131072 });
-            overallVolume.Location = new Point(120, 322);
+            overallVolume.Location = new Point(120, 351);
             overallVolume.Maximum = new decimal(new int[] { 10, 0, 0, 0 });
             overallVolume.Minimum = new decimal(new int[] { 999, 0, 0, int.MinValue });
             overallVolume.Name = "overallVolume";
@@ -2155,7 +2163,7 @@
             vocalScrollSpeed.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             vocalScrollSpeed.DecimalPlaces = 2;
             vocalScrollSpeed.Increment = new decimal(new int[] { 1, 0, 0, 131072 });
-            vocalScrollSpeed.Location = new Point(120, 234);
+            vocalScrollSpeed.Location = new Point(120, 263);
             vocalScrollSpeed.Margin = new Padding(3, 2, 3, 2);
             vocalScrollSpeed.Maximum = new decimal(new int[] { 10, 0, 0, 0 });
             vocalScrollSpeed.Name = "vocalScrollSpeed";
@@ -2167,7 +2175,7 @@
             // 
             label52.Anchor = AnchorStyles.Left;
             label52.AutoSize = true;
-            label52.Location = new Point(3, 266);
+            label52.Location = new Point(3, 295);
             label52.Name = "label52";
             label52.Size = new Size(111, 15);
             label52.TabIndex = 31;
@@ -2177,7 +2185,7 @@
             // vocalTuningCents
             // 
             vocalTuningCents.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            vocalTuningCents.Location = new Point(120, 262);
+            vocalTuningCents.Location = new Point(120, 291);
             vocalTuningCents.Margin = new Padding(3, 2, 3, 2);
             vocalTuningCents.Maximum = new decimal(new int[] { 50, 0, 0, 0 });
             vocalTuningCents.Minimum = new decimal(new int[] { 50, 0, 0, int.MinValue });
@@ -2189,7 +2197,7 @@
             // 
             label55.Anchor = AnchorStyles.Left;
             label55.AutoSize = true;
-            label55.Location = new Point(3, 296);
+            label55.Location = new Point(3, 325);
             label55.Name = "label55";
             label55.Size = new Size(103, 15);
             label55.TabIndex = 33;
@@ -2201,7 +2209,7 @@
             sustainThreshold.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             sustainThreshold.DecimalPlaces = 2;
             sustainThreshold.Increment = new decimal(new int[] { 5, 0, 0, 131072 });
-            sustainThreshold.Location = new Point(120, 292);
+            sustainThreshold.Location = new Point(120, 321);
             sustainThreshold.Margin = new Padding(3, 2, 3, 2);
             sustainThreshold.Maximum = new decimal(new int[] { 3, 0, 0, 0 });
             sustainThreshold.Name = "sustainThreshold";
@@ -2213,7 +2221,7 @@
             // 
             label56.Anchor = AnchorStyles.Left;
             label56.AutoSize = true;
-            label56.Location = new Point(3, 355);
+            label56.Location = new Point(3, 384);
             label56.Name = "label56";
             label56.Size = new Size(80, 15);
             label56.TabIndex = 35;
@@ -2228,7 +2236,7 @@
             tableLayoutPanel16.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tableLayoutPanel16.Controls.Add(guitarMicCheck, 0, 0);
             tableLayoutPanel16.Controls.Add(bassMicCheck, 1, 0);
-            tableLayoutPanel16.Location = new Point(117, 348);
+            tableLayoutPanel16.Location = new Point(117, 377);
             tableLayoutPanel16.Margin = new Padding(0);
             tableLayoutPanel16.Name = "tableLayoutPanel16";
             tableLayoutPanel16.RowCount = 1;
@@ -2260,12 +2268,34 @@
             bassMicCheck.Text = "Bass";
             bassMicCheck.UseVisualStyleBackColor = true;
             // 
+            // label65
+            // 
+            label65.Anchor = AnchorStyles.Left;
+            label65.AutoSize = true;
+            label65.Location = new Point(3, 210);
+            label65.Name = "label65";
+            label65.Size = new Size(57, 15);
+            label65.TabIndex = 37;
+            label65.Text = "Drum Kit:";
+            label65.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // drumKitSelect
+            // 
+            drumKitSelect.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            drumKitSelect.DropDownStyle = ComboBoxStyle.DropDownList;
+            drumKitSelect.FormattingEnabled = true;
+            drumKitSelect.Location = new Point(120, 206);
+            drumKitSelect.Name = "drumKitSelect";
+            drumKitSelect.Size = new Size(432, 23);
+            drumKitSelect.TabIndex = 38;
+            drumKitSelect.SelectedIndexChanged += drumKitSelect_SelectedIndexChanged;
+            // 
             // song_data_tab_gh3
             // 
             song_data_tab_gh3.Controls.Add(tableLayoutPanel7);
             song_data_tab_gh3.Location = new Point(4, 24);
             song_data_tab_gh3.Name = "song_data_tab_gh3";
-            song_data_tab_gh3.Padding = new Padding(3, 3, 3, 3);
+            song_data_tab_gh3.Padding = new Padding(3);
             song_data_tab_gh3.Size = new Size(627, 538);
             song_data_tab_gh3.TabIndex = 4;
             song_data_tab_gh3.Text = "Song Data (GH3)";
@@ -2614,7 +2644,7 @@
             compile_tab.Controls.Add(platform_groupbox);
             compile_tab.Location = new Point(4, 24);
             compile_tab.Name = "compile_tab";
-            compile_tab.Padding = new Padding(3, 3, 3, 3);
+            compile_tab.Padding = new Padding(3);
             compile_tab.Size = new Size(627, 538);
             compile_tab.TabIndex = 5;
             compile_tab.Text = "Compile";
@@ -3055,7 +3085,6 @@
             // 
             gameIconInput.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             gameIconInput.FormattingEnabled = true;
-            gameIconInput.Items.AddRange(new object[] { "Guitar Hero World Tour+/Blender Export", "Guitar Hero: Aerosmith", "Guitar Hero 3" });
             gameIconInput.Location = new Point(101, 3);
             gameIconInput.Name = "gameIconInput";
             gameIconInput.Size = new Size(451, 23);
@@ -3065,7 +3094,6 @@
             // 
             gameCategoryInput.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             gameCategoryInput.FormattingEnabled = true;
-            gameCategoryInput.Items.AddRange(new object[] { "Guitar Hero 3", "Guitar Hero: Aerosmith", "Guitar Hero World Tour" });
             gameCategoryInput.Location = new Point(101, 32);
             gameCategoryInput.Name = "gameCategoryInput";
             gameCategoryInput.Size = new Size(451, 23);
@@ -3690,7 +3718,7 @@
         private Label label38;
         private Label label39;
         private Label label40;
-        private Label label41;
+        private Label previewAudioLabel;
         private TextBox kickInput;
         private TextBox snareInput;
         private TextBox cymbalsInput;
@@ -3703,10 +3731,10 @@
         private TableLayoutPanel tableLayoutPanel13;
         private NumericUpDown lengthMills;
         private NumericUpDown lengthSeconds;
-        private Label label42;
+        private Label previewLabel;
         private NumericUpDown previewSeconds;
         private NumericUpDown previewMills;
-        private Label label43;
+        private Label lengthLabel;
         private NumericUpDown lengthMinutes;
         private CheckBox setEndTime;
         private NumericUpDown previewMinutes;
@@ -3778,5 +3806,7 @@
         private TableLayoutPanel tableLayoutPanel19;
         private CheckBox useNewClipsCheck;
         private CheckBox modernStrobesCheck;
+        private Label label65;
+        private ComboBox drumKitSelect;
     }
 }

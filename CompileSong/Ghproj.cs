@@ -1,10 +1,9 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
+﻿using GH_Toolkit_Core.INI;
+using Newtonsoft.Json;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.RegularExpressions;
+using static GH_Toolkit_Core.QB.QBConstants;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace GH_Toolkit_GUI
 {
@@ -51,7 +50,7 @@ namespace GH_Toolkit_GUI
             public string previewAudioPath { get; set; } = "";
             [DefaultValue("")]
             public string guitarPathGh3 { get; set; } = "";
-            [DefaultValue("")] 
+            [DefaultValue("")]
             public string rhythmPathGh3 { get; set; } = "";
             [DefaultValue("")]
             public string backingPathsGh3 { get; set; } = "";
@@ -133,6 +132,12 @@ namespace GH_Toolkit_GUI
             public int beat16thLow { get; set; } = 1;
             [DefaultValue(120)]
             public int beat16thHigh { get; set; } = 120;
+            [DefaultValue(-1)]
+            public int ghwtDrumkit { get; set; } = 0;
+            [DefaultValue(-1)]
+            public int gh5Drumkit { get; set; } = 0;
+            [DefaultValue(-1)]
+            public int ghworDrumkit { get; set; } = 0;
             public decimal gtrVolumeGh3 { get; set; } = 0;
             public decimal bandVolumeGh3 { get; set; } = 0;
             [DefaultValue(1)]
@@ -152,7 +157,8 @@ namespace GH_Toolkit_GUI
             public bool useNewClips { get; set; } = false;
             public bool modernStrobes { get; set; } = false;
         }
-        private class SaveDataOld {             
+        private class SaveDataOld
+        {
             public string game { get; set; }
             public string title_input { get; set; }
             public string artist_text_select { get; set; }
@@ -220,6 +226,9 @@ namespace GH_Toolkit_GUI
                 skaSource = skaFileSource.SelectedIndex,
                 venueSource = venueSource.SelectedIndex,
                 countoff = countoffSelect.SelectedIndex,
+                ghwtDrumkit = gameDrumKits["GHWT"],
+                gh5Drumkit = gameDrumKits["GH5"],
+                ghworDrumkit = gameDrumKits["GHWoR"],
                 vocalGender = vocalGenderSelect.SelectedIndex,
                 vocalScrollSpeed = vocalScrollSpeed.Value,
                 vocalTuningCents = vocalTuningCents.Value,
@@ -335,7 +344,7 @@ namespace GH_Toolkit_GUI
             gameSelectedGenres["GHWT"] = data.wtGenre;
             gameSelectedGenres["GH5"] = data.gh5Genre;
             gameSelectedGenres["WOR"] = data.worGenre;
-           
+
             HmxHopoVal.Value = data.hmxHopoVal;
             hopo_mode_select.SelectedIndex = data.hopoMode;
             beat8thLow.Value = data.beat8thLow;
@@ -381,6 +390,9 @@ namespace GH_Toolkit_GUI
             skaFileSource.SelectedIndex = data.skaSource;
             venueSource.SelectedIndex = data.venueSource;
             countoffSelect.SelectedIndex = data.countoff;
+            gameDrumKits["GHWT"] = data.ghwtDrumkit;
+            gameDrumKits["GH5"] = data.gh5Drumkit;
+            gameDrumKits["GHWoR"] = data.ghworDrumkit;
             vocalGenderSelect.SelectedIndex = data.vocalGender;
             vocalScrollSpeed.Value = data.vocalScrollSpeed;
             vocalTuningCents.Value = data.vocalTuningCents;
@@ -403,7 +415,7 @@ namespace GH_Toolkit_GUI
             previewEndTime = data.previewEnd;
             UpdatePreviewFields(); // This needs to be changed. Currently broken
             isProgrammaticChange = false;
-            
+
 
             SetAll();
         }
@@ -431,7 +443,7 @@ namespace GH_Toolkit_GUI
 
         private void SaveProjectAs()
         {
-            
+
             using (SaveFileDialog saveFileDialog = new SaveFileDialog())
             {
                 saveFileDialog.Filter = ghprojFileFilter; // Ensure this is defined somewhere in your code
@@ -457,7 +469,6 @@ namespace GH_Toolkit_GUI
         }
         private void LoadProject(string filePath)
         {
-
             if (File.Exists(filePath))
             {
                 isLoading = true;
@@ -467,6 +478,231 @@ namespace GH_Toolkit_GUI
                 LoadSaveData(data);
                 isLoading = false;
             }
+        }
+        private void LoadFromChFolder(string folderPath)
+        {
+            string game = CurrentGame;
+            string platform = CurrentPlatform;
+            // Clear everything by loading the default template
+            DefaultTemplateCheck();
+            game_layout.Controls.OfType<RadioButton>().FirstOrDefault(r => r.Text == game).Checked = true;
+            platform_layout.Controls.OfType<RadioButton>().FirstOrDefault(r => r.Text == platform).Checked = true;
+            bool isOld = CurrentGame == GAME_GH3 || CurrentGame == GAME_GHA;
+            isProgrammaticChange = true;
+            foreach (string file in Directory.GetFiles(folderPath))
+            {
+                string ext = Path.GetExtension(file).ToLower();
+                if (ext == ".ini")
+                {
+                    var ini = iniParser.ReadIniFromPath(file);
+                    if (ini.Sections.ContainsSection("song"))
+                    {
+                        foreach (var key in ini["song"])
+                        {
+                            switch (key.KeyName)
+                            {
+                                case "name":
+                                    title_input.Text = key.Value;
+                                    break;
+                                case "artist":
+                                    artist_input.Text = key.Value;
+                                    break;
+                                case "charter":
+                                    chart_author_input.Text = key.Value;
+                                    break;
+                                case "frets":
+                                    if (chart_author_input.Text == string.Empty)
+                                    {
+                                        chart_author_input.Text = key.Value;
+                                    }
+                                    break;
+                                case "checksum":
+                                    song_checksum.Text = key.Value;
+                                    break;
+                                case "year":
+                                    year_input.Value = int.Parse(key.Value);
+                                    break;
+                                case "diff_band":
+                                case "diff_guitar":
+                                case "diff_bass":
+                                case "diff_drums":
+                                case "diff_vocals":
+                                    // Not supported yet
+                                    break;
+                                case "sustain_cutoff_threshold":
+                                    sustainThreshold.Value = decimal.Parse(key.Value) / 480;
+                                    break;
+                                case "hopo_frequency":
+                                    HmxHopoVal.Value = int.Parse(key.Value);
+                                    break;
+                                case "preview_start_time":
+                                    previewStartTime = int.Parse(key.Value);
+                                    break;
+                                case "preview_end_time":
+                                    previewEndTime = int.Parse(key.Value);
+                                    break;
+                            }
+                        }
+                    }
+                }
+                else if (Regex.IsMatch(file, audioRegex))
+                {
+                    string fileNoExt = Path.GetFileNameWithoutExtension(file);
+                    if (isOld)
+                    {
+                        switch (fileNoExt)
+                        {
+                            case "guitar":
+                                if (backing_input_gh3.Items.Count != 0)
+                                {
+                                    guitar_input_gh3.Text = file;
+                                }
+                                else
+                                {
+                                    backing_input_gh3.Items.Add(file);
+                                }
+                                break;
+                            case "rhythm":
+                                if (rhythm_input_gh3.Text != string.Empty)
+                                {
+                                    backing_input_gh3.Items.Add(file);
+                                }
+                                else
+                                {
+                                    rhythm_input_gh3.Text = file;
+                                }
+                                break;
+                            case "bass":
+                                if (rhythm_input_gh3.Text != string.Empty)
+                                {
+                                    backing_input_gh3.Items.Add(rhythm_input_gh3.Text);
+                                }
+                                rhythm_input_gh3.Text = file;
+                                break;
+                            case "crowd":
+                                crowd_input_gh3.Text = file;
+                                break;
+                            case "preview":
+                                gh3_rendered_preview_check.Checked = true;
+                                preview_audio_input_gh3.Text = file;
+                                break;
+                            case "song":
+                                bool removeGtr = false;
+                                if (backing_input_gh3.Items.Count != 0)
+                                {
+                                    foreach (string gtrCheck in backing_input_gh3.Items)
+                                    {
+                                        if (gtrCheck.ToLower().Contains("guitar"))
+                                        {
+                                            guitar_input_gh3.Text = gtrCheck;
+                                            removeGtr = true;
+                                        }
+                                    }
+                                    if (removeGtr)
+                                    {
+                                        backing_input_gh3.Items.Remove(guitar_input_gh3.Text);
+                                    }
+                                }
+                                backing_input_gh3.Items.Add(file);
+                                break;
+                            default:
+                                backing_input_gh3.Items.Add(file);
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        switch (fileNoExt)
+                        {
+                            case "drums_1":
+                                kickInput.Text = file;
+                                break;
+                            case "drums_2":
+                                snareInput.Text = file;
+                                break;
+                            case "drums_3":
+                                cymbalsInput.Text = file;
+                                break;
+                            case "drums_4":
+                                tomsInput.Text = file;
+                                break;
+                            case "guitar":
+                                if (backingInput.Items.Count != 0)
+                                {
+                                    guitarInput.Text = file;
+                                }
+                                else
+                                {
+                                    backingInput.Items.Add(file);
+                                }
+                                break;
+                            case "bass":
+                                if (bassInput.Text != string.Empty)
+                                {
+                                    backingInput.Items.Add(bassInput.Text);
+                                }
+                                bassInput.Text = file;
+                                break;
+                            case "rhythm":
+                                if (bassInput.Text != string.Empty)
+                                {
+                                    backingInput.Items.Add(file);
+                                }
+                                else
+                                {
+                                    bassInput.Text = file;
+                                }
+                                break;
+                            case "vocals":
+                                vocalsInput.Text = file;
+                                break;
+                            case "crowd":
+                                crowdInput.Text = file;
+                                break;
+                            case "song":
+                                bool removeGtr = false;
+                                if (backingInput.Items.Count != 0)
+                                {
+                                    foreach (string gtrCheck in backingInput.Items)
+                                    {
+                                        if (gtrCheck.ToLower().Contains("guitar"))
+                                        {
+                                            guitarInput.Text = gtrCheck;
+                                            removeGtr = true;
+                                        }
+                                    }
+                                    if (removeGtr)
+                                    {
+                                        backingInput.Items.Remove(guitarInput.Text);
+                                    }
+                                }
+                                backingInput.Items.Add(file);
+                                break;
+                            case "preview":
+                                renderedPreviewCheck.Checked = true;
+                                previewInput.Text = file;
+                                break;
+                            default:
+                                backingInput.Items.Add(file);
+                                break;
+                        }
+                    }
+                }
+                else if (Regex.IsMatch(file, midiRegexCh))
+                {
+                    if (isOld)
+                    {
+                        midi_file_input_gh3.Text = file;
+                    }
+                    else
+                    {
+                        midiFileInput.Text = file;
+                    }
+                }
+            }
+            UpdatePreviewFields();
+            isProgrammaticChange = false;
+            SetAll();
         }
     }
 }
