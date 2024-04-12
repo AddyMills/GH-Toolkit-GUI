@@ -8,13 +8,12 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
 using GH_Toolkit_Core.QB;
-using GH_Toolkit_Core.INI;
 using static GH_Toolkit_Core.QB.QBConstants;
 using static GH_Toolkit_Exceptions.Exceptions;
-using System.Drawing.Drawing2D;
-using System.Configuration;
-using System;
 using static GH_Toolkit_Core.Methods.Exceptions;
+using IniParser.Model;
+using IniParser;
+using IniParser.Model.Configuration;
 
 namespace GH_Toolkit_GUI
 {
@@ -33,6 +32,10 @@ namespace GH_Toolkit_GUI
         private static string SONGSPath = Path.Combine(DATAPath, "SONGS");
         private string GH3Path;
         private string GHAPath;
+        private string WtSongFolder;
+        private string ContentFolder;
+        private string MusicFolder;
+
         private static string downloadRef = "scripts\\guitar\\guitar_download.qb";
         private static string gh3DownloadSongs = "gh3_download_songs";
         private static string songlistRef = "scripts\\guitar\\songlist.qb";
@@ -919,7 +922,11 @@ namespace GH_Toolkit_GUI
             Pref.GhaFolderPath = folderPath;
             Pref.Save();
         }
-
+        private void UpdateGhwtModsFolder(string folderPath)
+        {
+            Pref.WtModsFolder = folderPath;
+            Pref.Save();
+        }
         // Compiling Logic
         private void PreCompileCheck()
         {
@@ -1000,7 +1007,17 @@ namespace GH_Toolkit_GUI
                         MessageBox.Show($"A backup of {regFolder}'s QB file has been created.\nIt can be copied back to your GH folder at any time in the settings menu.", "Backup Created", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                 }
-
+            }
+            if (game == GAME_GHWT)
+            {
+                if (CurrentPlatform == "PC")
+                {
+                    if (!Directory.Exists(Pref.WtModsFolder))
+                    {
+                        MessageBox.Show("Your GHWT mods folder has not been set. Please select your MODS folder now.", "Folder Required", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        UpdateGhwtModsFolder(AskForGamePath());
+                    }
+                }
             }
         }
         public static string AskForGamePath()
@@ -1191,9 +1208,28 @@ namespace GH_Toolkit_GUI
 
             if (CurrentPlatform == "PC")
             {
+                WtSongFolder = Path.Combine(Pref.WtModsFolder, song_checksum.Text);
+                ContentFolder = Path.Combine(WtSongFolder, "Content");
+                MusicFolder = Path.Combine(ContentFolder, "Music");
+                string pakName = Path.GetFileName(pakFile);
 
+                Directory.CreateDirectory(MusicFolder);
+
+                File.Move(pakFile, Path.Combine(ContentFolder, $"a{pakName}"), true);
+                WriteWtdeIni(WtSongFolder);
             }
             // Add code to delete the folder after processing eventually
+        }
+        private void WriteWtdeIni(string saveFolder)
+        {
+            var config = new IniParserConfiguration();
+            config.AssigmentSpacer = "";
+            var noSpaceParser = new IniParser.Parser.IniDataParser(config);
+
+            var parser = new FileIniDataParser(noSpaceParser);
+            var ini = GenerateWtdeIni();
+            var iniPath = Path.Combine(saveFolder, "song.ini");
+            parser.WriteFile(iniPath, ini);
         }
         private void MoveToGh3SongsFolder(string pakPath)
         {
@@ -1221,12 +1257,12 @@ namespace GH_Toolkit_GUI
             }
             File.Move(audioPath, savePath, true);
         }
+
         private QBStruct.QBStructData GenerateGh3SongListEntry()
         {
             var entry = new QBStruct.QBStructData();
             string pString = CurrentPlatform == CONSOLE_PS2 ? STRING : WIDESTRING; // Depends on the platform
             bool artistIsOther = artist_text_select.Text == "Other";
-            bool artistIsFamousBy = artist_text_select.Text == "As Made Famous By";
             string artistText = !artistIsOther ? $"artist_text_{artist_text_select.Text.ToLower().Replace(" ", "_")}" : artistTextCustom.Text;
             string artistType = artistIsOther ? pString : POINTER;
             string bassist = BassistName();
@@ -1237,7 +1273,7 @@ namespace GH_Toolkit_GUI
             entry.AddVarToStruct("artist", artist_input.Text, pString);
             entry.AddVarToStruct("year", $", {year_input.Value}", pString);
             entry.AddVarToStruct("artist_text", artistText, artistType);
-            entry.AddIntToStruct("original_artist", artistIsFamousBy ? 0 : 1);
+            entry.AddIntToStruct("original_artist", IsArtistFamousBy() ? 0 : 1);
             entry.AddVarToStruct("version", "gh3", QBKEY);
             entry.AddIntToStruct("leaderboard", 1);
             entry.AddIntToStruct("gem_offset", 0);
@@ -1262,6 +1298,104 @@ namespace GH_Toolkit_GUI
                 entry.AddVarToStruct("bassist", bassist, QBKEY);
             }
             return entry;
+        }
+        private string GetArtistText()
+        {
+            bool artistIsOther = artist_text_select.Text == "Other";
+            string artistText = !artistIsOther ? $"artist_text_{artist_text_select.Text.ToLower().Replace(" ", "_")}" : artistTextCustom.Text;
+            return artistText;
+        }
+        private bool IsArtistFamousBy()
+        {
+            return artist_text_select.Text == "As Made Famous By";
+        }
+        private IniData GenerateWtdeIni()
+        {
+            var config = new IniParserConfiguration();
+            config.AssigmentSpacer = "";
+
+            IniData wtdeIni = new IniData();
+            wtdeIni.Configuration = config;
+            var modInfo = new SectionData("ModInfo");
+            modInfo.Keys.AddKey("Name", song_checksum.Text);
+            modInfo.Keys.AddKey("Description", "Generated with Addy's Song Compiler");
+            modInfo.Keys.AddKey("Author", chart_author_input.Text);
+            modInfo.Keys.AddKey("Version", "1");
+
+
+            var songInfo = new SectionData("SongInfo");
+            songInfo.Keys.AddKey("Checksum", song_checksum.Text);
+            songInfo.Keys.AddKey("Title", title_input.Text);
+            songInfo.Keys.AddKey("Artist", artist_input.Text);
+            songInfo.Keys.AddKey("Year", year_input.Value.ToString());
+            songInfo.Keys.AddKey("ArtistText", GetArtistText());
+            songInfo.Keys.AddKey("OriginalArtist", IsArtistFamousBy() ? "0" : "1");
+            songInfo.Keys.AddKey("Leaderboard", "1");
+            songInfo.Keys.AddKey("Singer", vocalGenderSelect.Text);
+            songInfo.Keys.AddKey("Genre", genre_input.Text);
+            songInfo.Keys.AddKey("Countoff", countoffSelect.Text);
+            songInfo.Keys.AddKey("Volume", overallVolume.Value.ToString());
+
+            if (!string.IsNullOrEmpty(gameIconInput.Text))
+            {
+                songInfo.Keys.AddKey("GameIcon", gameIconInput.Text);
+            }
+            if (!string.IsNullOrEmpty(gameCategoryInput.Text))
+            {
+                songInfo.Keys.AddKey("SongIcon", gameCategoryInput.Text);
+            }
+            if (!string.IsNullOrEmpty(bandInput.Text))
+            {
+                songInfo.Keys.AddKey("SongIcon", bandInput.Text);
+            }
+            if (useNewClipsCheck.Checked)
+            {
+                songInfo.Keys.AddKey("UseNewClips", "1");
+            }
+            if (bSkeletonSelect.Text.ToLower() != DEFAULT && !string.IsNullOrEmpty(bSkeletonSelect.Text))
+            {
+                songInfo.Keys.AddKey("SkeletonTypeB", bSkeletonSelect.Text);
+            }
+            if (dSkeletonSelect.Text.ToLower() != DEFAULT && !string.IsNullOrEmpty(dSkeletonSelect.Text))
+            {
+                songInfo.Keys.AddKey("SkeletonTypeD", dSkeletonSelect.Text);
+            }
+            if (gSkeletonSelect.Text.ToLower() != DEFAULT && !string.IsNullOrEmpty(gSkeletonSelect.Text))
+            {
+                songInfo.Keys.AddKey("SkeletonTypeG", gSkeletonSelect.Text);
+            }
+            if (vSkeletonSelect.Text.ToLower() != DEFAULT && !string.IsNullOrEmpty(vSkeletonSelect.Text))
+            {
+                songInfo.Keys.AddKey("SkeletonTypeV", vSkeletonSelect.Text);
+            }
+            if (bassMicCheck.Checked)
+            {
+                songInfo.Keys.AddKey("MicForBassist", "1");
+            }
+            if (guitarMicCheck.Checked)
+            {
+                songInfo.Keys.AddKey("MicForGuitarist", "1");
+            }
+            if (Pref.OverrideBeatLines)
+            {
+                songInfo.Keys.AddKey("Low8Bars", beat8thLow.Value.ToString());
+                songInfo.Keys.AddKey("High8Bars", beat8thHigh.Value.ToString());
+                songInfo.Keys.AddKey("Low16Bars", beat16thLow.Value.ToString());
+                songInfo.Keys.AddKey("High16Bars", beat16thHigh.Value.ToString());
+            }
+            songInfo.Keys.AddKey("Cents", ((int)vocalTuningCents.Value).ToString());
+            songInfo.Keys.AddKey("WhammyCutoff", sustainThreshold.Value.ToString());
+            songInfo.Keys.AddKey("VocalsScrollSpeed", vocalScrollSpeed.Value.ToString());
+
+            if (modernStrobesCheck.Checked)
+            {
+                songInfo.Keys.AddKey("ModernStrobes", "1");
+            }
+            
+            wtdeIni.Sections.Add(modInfo);
+            wtdeIni.Sections.Add(songInfo);
+
+            return wtdeIni;
         }
         private string BassistName()
         {
@@ -1327,7 +1461,7 @@ namespace GH_Toolkit_GUI
             var (pakData, pabData) = pakCompiler.CompilePakFromDictionary(qbPak);
             OverwriteGh3Pak(pakData, pabData!);
         }
-        private async Task CompileGh3All()
+        private async Task CompileGh3Audio()
         {
             string gtrOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_guitar.mp3");
             string rhythmOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_rhythm.mp3");
@@ -1387,7 +1521,7 @@ namespace GH_Toolkit_GUI
                     decimal previewLength = previewEndTime / 1000;
                     if (gh3_set_end.Checked)
                     {
-                        previewLength = previewEndTime - previewStartTime;
+                        previewLength -= previewStart;
                     }
 
                     decimal fadeIn = UserPreferences.Default.PreviewFadeIn;
@@ -1405,6 +1539,7 @@ namespace GH_Toolkit_GUI
             catch (Exception ex)
             {
                 HandleException(ex, "Audio Compilation Failed!");
+                throw;
             }
             finally
             {
@@ -1418,14 +1553,108 @@ namespace GH_Toolkit_GUI
                 }
             }
         }
-        private int CompilePakGh3()
+        private async Task CompileGhwtAudio()
+        { 
+            string drums1Output = Path.Combine(compile_input.Text, $"{song_checksum.Text}_drums1.mp3");
+            string drums2Output = Path.Combine(compile_input.Text, $"{song_checksum.Text}_drums2.mp3");
+            string drums3Output = Path.Combine(compile_input.Text, $"{song_checksum.Text}_drums3.mp3");
+            string drums4Output = Path.Combine(compile_input.Text, $"{song_checksum.Text}_drums4.mp3");
+
+            string guitarOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_guitar.mp3");
+            string rhythmOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_rhythm.mp3");
+            string vocalsOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_vocals.mp3");
+
+            string crowdOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_crowd.mp3");
+            string backingOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_song.mp3");
+
+            string previewOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_preview.mp3");
+
+            string[] drumFiles = { drums1Output, drums2Output, drums3Output, drums4Output };
+            string[] otherFiles = { guitarOutput, rhythmOutput, vocalsOutput };
+            string[] backingFiles = { backingOutput, crowdOutput };
+
+            var filesToProcess = new List<string>();
+            filesToProcess.AddRange(drumFiles);
+            filesToProcess.AddRange(otherFiles);
+            filesToProcess.AddRange(backingFiles);
+            filesToProcess.Add(previewOutput);
+
+            string fsbOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}");
+            try
+            {
+                string[] backingPaths = backingInput.Items.Cast<string>().ToArray();
+
+                FSB fSB = new FSB();
+
+                Task drums1Stem = fSB.ConvertToMp3(kickInput.Text, drums1Output);
+                Task drums2Stem = fSB.ConvertToMp3(snareInput.Text, drums2Output);
+                Task drums3Stem = fSB.ConvertToMp3(cymbalsInput.Text, drums3Output);
+                Task drums4Stem = fSB.ConvertToMp3(tomsInput.Text, drums4Output);
+
+                Task guitarStem = fSB.ConvertToMp3(guitarInput.Text, guitarOutput);
+                Task rhythmStem = fSB.ConvertToMp3(bassInput.Text, rhythmOutput);
+                Task vocalsStem = fSB.ConvertToMp3(vocalsInput.Text, vocalsOutput);
+
+                Task backingStem = fSB.MixFiles(backingPaths, backingOutput);
+                Task crowdStem = fSB.ConvertToMp3(crowdInput.Text, crowdOutput);
+
+                var tasksToAwait = new List<Task> { drums1Stem, drums2Stem, drums3Stem, drums4Stem, guitarStem, rhythmStem, vocalsStem, backingStem, crowdStem };
+
+                // Await all started tasks. This ensures all conversions are completed before moving on.
+                await Task.WhenAll(tasksToAwait.ToArray());
+
+                // Create the preview audio
+                if (renderedPreviewCheck.Checked)
+                {
+                    Task previewStem = fSB.ConvertToMp3(guitarOutput, previewOutput);
+                    await previewStem;
+                }
+                else
+                {
+                    string[] previewFiles = { drums1Output, drums2Output, drums3Output, drums4Output, guitarOutput, rhythmOutput, vocalsOutput, backingOutput };
+                    decimal previewStart = previewStartTime / 1000;
+                    decimal previewLength = previewEndTime / 1000;
+                    if (setEndTime.Checked)
+                    {
+                        previewLength -= previewStart;
+                    }
+
+                    decimal fadeIn = UserPreferences.Default.PreviewFadeIn;
+                    decimal fadeOut = UserPreferences.Default.PreviewFadeOut;
+                    Task previewStem = fSB.MakePreview(previewFiles, previewOutput, previewStart, previewLength, fadeIn, fadeOut);
+                    await previewStem;
+                }
+                var fsbList = fSB.CombineFSB4File(drumFiles, otherFiles, backingFiles, [previewOutput], fsbOutput);
+
+                if (CurrentPlatform == "PC")
+                {
+                    foreach (string file in fsbList)
+                    {
+                        File.Move(file, Path.Combine(MusicFolder, $"{Path.GetFileName(file)}.xen"), true);
+                    }
+                }
+            }
+            finally
+            {
+                foreach (string file in filesToProcess)
+                {
+                    if (File.Exists(file))
+                    {
+                        File.Delete(file);
+                    }
+                }
+            }
+        }
+
+        private bool CompilePakGh3()
         {
-            int success = 0;
+            bool success = false;
             try
             {
                 SaveProject();
                 PreCompileCheck();
                 CompileGh3PakFile();
+                success = true;
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -1463,27 +1692,26 @@ namespace GH_Toolkit_GUI
                 {
                     HandleException(ex, "Compile Failed!");
                 }
-                success = -1;
             }
             catch (MidiCompileException ex)
             {
                 MidiFailException(ex);
-                success = -1;
             }
             catch (Exception ex)
             {
                 HandleException(ex, "Compile Failed!");
-                success = -1;
             }
             return success;
         }
-        private void CompilePakGhwt()
+        private bool CompilePakGhwt()
         {
+            bool success = false;
             try
             {
                 SaveProject();
                 PreCompileCheck();
                 CompileGhwtPakFile();
+                success = true;
             }
             catch (MidiCompileException ex)
             {
@@ -1493,6 +1721,7 @@ namespace GH_Toolkit_GUI
             {
                 HandleException(ex, "Compile Failed!");
             }
+            return success;
         }
         private void compile_pak_button_Click(object sender, EventArgs e)
         {
@@ -1500,7 +1729,7 @@ namespace GH_Toolkit_GUI
             {
                 CompilePakGh3();
             }
-            else
+            else if (CurrentGame == GAME_GHWT)
             {
                 CompilePakGhwt();
             }
@@ -1510,20 +1739,43 @@ namespace GH_Toolkit_GUI
             string compileText = compile_all_button.Text;
             compile_all_button.Text = "Compiling...";
             DisableCloseButton();
-            if (CurrentGame == GAME_GH3 || CurrentGame == GAME_GHA)
+            bool compileSuccess = false;
+            bool pakSuccess = false;
+            try
             {
-                int success = CompilePakGh3();
-                if (success == 0)
+                if (CurrentGame == GAME_GH3 || CurrentGame == GAME_GHA)
                 {
-                    await CompileGh3All();
-                    if (Pref.ShowPostCompile)
+                    pakSuccess = CompilePakGh3();
+                    if (pakSuccess)
                     {
-                        ShowPostCompile();
+                        await CompileGh3Audio();
+                        compileSuccess = true;
+                    }
+                }
+                else if (CurrentGame == GAME_GHWT)
+                {
+                    pakSuccess = CompilePakGhwt();
+                    if (pakSuccess)
+                    {
+                        await CompileGhwtAudio();
+                        compileSuccess = true;
                     }
                 }
             }
-            EnableCloseButton();
-            compile_all_button.Text = compileText;
+            catch (Exception ex)
+            {
+                // Errors are handled in the CompilePakGh3 and CompileGh3All methods
+            }
+            finally
+            {
+                EnableCloseButton();
+                compile_all_button.Text = compileText;
+                if (Pref.ShowPostCompile && compileSuccess)
+                {
+                    ShowPostCompile();
+                }
+            }
+            
         }
 
         private void ShowPostCompile()
