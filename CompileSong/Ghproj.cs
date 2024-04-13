@@ -1,4 +1,5 @@
 ﻿using GH_Toolkit_Core.INI;
+using IniParser.Model;
 using Newtonsoft.Json;
 using System.ComponentModel;
 using System.Text.RegularExpressions;
@@ -495,54 +496,22 @@ namespace GH_Toolkit_GUI
                 if (ext == ".ini")
                 {
                     var ini = iniParser.ReadIniFromPath(file);
-                    if (ini.Sections.ContainsSection("song"))
+                    string songData = null;
+
+                    // Check for the section in a case-insensitive manner
+                    foreach (var section in ini.Sections)
                     {
-                        foreach (var key in ini["song"])
+                        if (string.Equals(section.SectionName, "song", StringComparison.OrdinalIgnoreCase))
                         {
-                            switch (key.KeyName)
-                            {
-                                case "name":
-                                    title_input.Text = key.Value;
-                                    break;
-                                case "artist":
-                                    artist_input.Text = key.Value;
-                                    break;
-                                case "charter":
-                                    chart_author_input.Text = key.Value;
-                                    break;
-                                case "frets":
-                                    if (chart_author_input.Text == string.Empty)
-                                    {
-                                        chart_author_input.Text = key.Value;
-                                    }
-                                    break;
-                                case "checksum":
-                                    song_checksum.Text = key.Value;
-                                    break;
-                                case "year":
-                                    year_input.Value = int.Parse(key.Value);
-                                    break;
-                                case "diff_band":
-                                case "diff_guitar":
-                                case "diff_bass":
-                                case "diff_drums":
-                                case "diff_vocals":
-                                    // Not supported yet
-                                    break;
-                                case "sustain_cutoff_threshold":
-                                    sustainThreshold.Value = decimal.Parse(key.Value) / 480;
-                                    break;
-                                case "hopo_frequency":
-                                    HmxHopoVal.Value = int.Parse(key.Value);
-                                    break;
-                                case "preview_start_time":
-                                    previewStartTime = int.Parse(key.Value);
-                                    break;
-                                case "preview_end_time":
-                                    previewEndTime = int.Parse(key.Value);
-                                    break;
-                            }
+                            songData = section.SectionName; // This retains the original casing ("song" or "Song")
+                            break;
                         }
+                    }
+
+                    // Proceed only if a matching section was found
+                    if (songData != null)
+                    {
+                        GetDataFromSongIni(ini, songData);
                     }
                 }
                 else if (Regex.IsMatch(file, audioRegex))
@@ -703,6 +672,55 @@ namespace GH_Toolkit_GUI
             UpdatePreviewFields();
             isProgrammaticChange = false;
             SetAll();
+        }
+        private void GetDataFromSongIni(IniData ini, string iniSection)
+        {
+            foreach (var key in ini[iniSection])
+            {
+                switch (key.KeyName)
+                {
+                    case "name":
+                        title_input.Text = key.Value;
+                        break;
+                    case "artist":
+                        artist_input.Text = key.Value;
+                        break;
+                    case "charter":
+                        chart_author_input.Text = key.Value;
+                        break;
+                    case "frets":
+                        if (chart_author_input.Text == string.Empty)
+                        {
+                            chart_author_input.Text = key.Value;
+                        }
+                        break;
+                    case "checksum":
+                        song_checksum.Text = key.Value;
+                        break;
+                    case "year":
+                        year_input.Value = int.Parse(key.Value);
+                        break;
+                    case "diff_band":
+                    case "diff_guitar":
+                    case "diff_bass":
+                    case "diff_drums":
+                    case "diff_vocals":
+                        // Not supported yet
+                        break;
+                    case "sustain_cutoff_threshold":
+                        sustainThreshold.Value = decimal.Parse(key.Value) / 480;
+                        break;
+                    case "hopo_frequency":
+                        HmxHopoVal.Value = int.Parse(key.Value);
+                        break;
+                    case "preview_start_time":
+                        previewStartTime = int.Parse(key.Value);
+                        break;
+                    case "preview_end_time":
+                        previewEndTime = int.Parse(key.Value);
+                        break;
+                }
+            }
         }
     }
 }

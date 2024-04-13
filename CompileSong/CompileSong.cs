@@ -36,6 +36,9 @@ namespace GH_Toolkit_GUI
         private string ContentFolder;
         private string MusicFolder;
 
+        // This is needed to force all numbers to use decimals with a period as the decimal separator
+        private static CultureInfo Murica = new CultureInfo("en-US");
+
         private static string downloadRef = "scripts\\guitar\\guitar_download.qb";
         private static string gh3DownloadSongs = "gh3_download_songs";
         private static string songlistRef = "scripts\\guitar\\songlist.qb";
@@ -1327,14 +1330,14 @@ namespace GH_Toolkit_GUI
             songInfo.Keys.AddKey("Checksum", song_checksum.Text);
             songInfo.Keys.AddKey("Title", title_input.Text);
             songInfo.Keys.AddKey("Artist", artist_input.Text);
-            songInfo.Keys.AddKey("Year", year_input.Value.ToString());
+            songInfo.Keys.AddKey("Year", year_input.Value.ToString("G0", Murica));
             songInfo.Keys.AddKey("ArtistText", GetArtistText());
             songInfo.Keys.AddKey("OriginalArtist", IsArtistFamousBy() ? "0" : "1");
             songInfo.Keys.AddKey("Leaderboard", "1");
             songInfo.Keys.AddKey("Singer", vocalGenderSelect.Text);
             songInfo.Keys.AddKey("Genre", genre_input.Text);
             songInfo.Keys.AddKey("Countoff", countoffSelect.Text);
-            songInfo.Keys.AddKey("Volume", overallVolume.Value.ToString());
+            songInfo.Keys.AddKey("Volume", overallVolume.Value.ToString("G2", Murica));
 
             if (!string.IsNullOrEmpty(gameIconInput.Text))
             {
@@ -1383,9 +1386,9 @@ namespace GH_Toolkit_GUI
                 songInfo.Keys.AddKey("Low16Bars", beat16thLow.Value.ToString());
                 songInfo.Keys.AddKey("High16Bars", beat16thHigh.Value.ToString());
             }
-            songInfo.Keys.AddKey("Cents", ((int)vocalTuningCents.Value).ToString());
-            songInfo.Keys.AddKey("WhammyCutoff", sustainThreshold.Value.ToString());
-            songInfo.Keys.AddKey("VocalsScrollSpeed", vocalScrollSpeed.Value.ToString());
+            songInfo.Keys.AddKey("Cents", ((int)vocalTuningCents.Value).ToString("G0", Murica));
+            songInfo.Keys.AddKey("WhammyCutoff", sustainThreshold.Value.ToString("G2", Murica));
+            songInfo.Keys.AddKey("VocalsScrollSpeed", vocalScrollSpeed.Value.ToString("G2", Murica));
 
             if (modernStrobesCheck.Checked)
             {
