@@ -1637,6 +1637,11 @@ namespace GH_Toolkit_GUI
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                HandleException(ex, "Audio Compilation Failed!");
+                throw;
+            }
             finally
             {
                 foreach (string file in filesToProcess)
