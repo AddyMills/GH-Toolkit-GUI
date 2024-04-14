@@ -147,6 +147,10 @@ namespace GH_Toolkit_GUI
             [DefaultValue(0.5)]
             public decimal sustainThreshold { get; set; } = 0.5m;
             public decimal overallVolume { get; set; } = 0;
+            [DefaultValue(-7.0)]
+            public decimal previewVolume { get; set; } = -7m;
+            [DefaultValue(-7.0)]
+            public decimal previewVolumeGh3 { get; set; } = -7m;
             public bool isCover { get; set; } = false;
             public bool isP2Rhythm { get; set; } = false;
             public bool isCoopAudio { get; set; } = false;
@@ -219,6 +223,7 @@ namespace GH_Toolkit_GUI
                 backingPaths = string.Join(";", backingInput.Items.Cast<string>().ToArray()),
                 crowdPath = crowdInput.Text,
                 previewAudioPath = previewInput.Text,
+                previewVolume = previewVolume.Value,
                 // Song Data
                 midiPath = midiFileInput.Text,
                 perfPath = perfOverrideInput.Text,
@@ -260,6 +265,7 @@ namespace GH_Toolkit_GUI
                 previewAudioPathGh3 = preview_audio_input_gh3.Text,
                 gtrVolumeGh3 = gh3_gtr_vol.Value,
                 bandVolumeGh3 = gh3_band_vol.Value,
+                previewVolumeGh3 = previewVolumeGh3.Value,
                 // Song Data
                 midiPathGh3 = midi_file_input_gh3.Text,
                 perfPathGh3 = perf_override_input_gh3.Text,
@@ -327,6 +333,7 @@ namespace GH_Toolkit_GUI
             }
             crowd_input_gh3.Text = data.crowdPathGh3;
             preview_audio_input_gh3.Text = data.previewAudioPathGh3;
+            previewVolumeGh3.Value = data.previewVolumeGh3;
 
             // GH3 Song Data
             midi_file_input_gh3.Text = data.midiPathGh3;
@@ -382,6 +389,7 @@ namespace GH_Toolkit_GUI
             }
             crowdInput.Text = data.crowdPath;
             previewInput.Text = data.previewAudioPath;
+            previewVolume.Value = data.previewVolume;
 
             // Song Data
             midiFileInput.Text = data.midiPath;
