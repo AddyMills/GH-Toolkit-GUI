@@ -1529,7 +1529,7 @@ namespace GH_Toolkit_GUI
 
                     decimal fadeIn = UserPreferences.Default.PreviewFadeIn;
                     decimal fadeOut = UserPreferences.Default.PreviewFadeOut;
-                    Task previewStem = fsb.MakePreview(spFiles, previewOutput, previewStart, previewLength, fadeIn, fadeOut);
+                    Task previewStem = fsb.MakePreview(spFiles, previewOutput, previewStart, previewLength, fadeIn, fadeOut, previewVolumeGh3.Value);
                     await previewStem;
                 }
                 var (fsbOut, datOut) = fsb.CombineFSB3File(filesToProcess, fsbOutput);
@@ -1624,7 +1624,7 @@ namespace GH_Toolkit_GUI
 
                     decimal fadeIn = UserPreferences.Default.PreviewFadeIn;
                     decimal fadeOut = UserPreferences.Default.PreviewFadeOut;
-                    Task previewStem = fSB.MakePreview(previewFiles, previewOutput, previewStart, previewLength, fadeIn, fadeOut);
+                    Task previewStem = fSB.MakePreview(previewFiles, previewOutput, previewStart, previewLength, fadeIn, fadeOut, previewVolume.Value);
                     await previewStem;
                 }
                 var fsbList = fSB.CombineFSB4File(drumFiles, otherFiles, backingFiles, [previewOutput], fsbOutput);
