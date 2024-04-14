@@ -1621,7 +1621,6 @@ namespace GH_Toolkit_GUI
                     {
                         previewLength -= previewStart;
                     }
-
                     decimal fadeIn = UserPreferences.Default.PreviewFadeIn;
                     decimal fadeOut = UserPreferences.Default.PreviewFadeOut;
                     Task previewStem = fSB.MakePreview(previewFiles, previewOutput, previewStart, previewLength, fadeIn, fadeOut, previewVolume.Value);
