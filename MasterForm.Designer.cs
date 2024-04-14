@@ -28,13 +28,13 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MasterForm));
             toolStrip1 = new ToolStrip();
             FileButton = new ToolStripDropDownButton();
             button1 = new Button();
             tableLayoutPanel1 = new TableLayoutPanel();
             button2 = new Button();
             label1 = new Label();
+            consoleOutput = new TextBox();
             toolStrip1.SuspendLayout();
             tableLayoutPanel1.SuspendLayout();
             SuspendLayout();
@@ -53,7 +53,6 @@
             // 
             FileButton.DisplayStyle = ToolStripItemDisplayStyle.Text;
             FileButton.ForeColor = SystemColors.ControlText;
-            FileButton.Image = (Image)resources.GetObject("FileButton.Image");
             FileButton.ImageTransparentColor = Color.Magenta;
             FileButton.Name = "FileButton";
             FileButton.ShowDropDownArrow = false;
@@ -113,11 +112,23 @@
             label1.Text = "PC Tools";
             label1.TextAlign = ContentAlignment.MiddleCenter;
             // 
+            // consoleOutput
+            // 
+            consoleOutput.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            consoleOutput.Location = new Point(10, 217);
+            consoleOutput.Multiline = true;
+            consoleOutput.Name = "consoleOutput";
+            consoleOutput.ReadOnly = true;
+            consoleOutput.ScrollBars = ScrollBars.Vertical;
+            consoleOutput.Size = new Size(381, 221);
+            consoleOutput.TabIndex = 3;
+            // 
             // MasterForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(403, 450);
+            Controls.Add(consoleOutput);
             Controls.Add(tableLayoutPanel1);
             Controls.Add(toolStrip1);
             Name = "MasterForm";
@@ -138,5 +149,6 @@
         private TableLayoutPanel tableLayoutPanel1;
         private Button button2;
         private Label label1;
+        private TextBox consoleOutput;
     }
 }

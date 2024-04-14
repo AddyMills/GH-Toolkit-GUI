@@ -1484,6 +1484,7 @@ namespace GH_Toolkit_GUI
             string fsbOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}");
             try
             {
+                Console.WriteLine("Compiling Audio...");
                 string[] backingPaths = backing_input_gh3.Items.Cast<string>().ToArray();
 
                 string[] coopBackingPaths = coop_backing_input_gh3.Items.Cast<string>().ToArray();
@@ -1532,12 +1533,14 @@ namespace GH_Toolkit_GUI
                     Task previewStem = fsb.MakePreview(spFiles, previewOutput, previewStart, previewLength, fadeIn, fadeOut, previewVolumeGh3.Value);
                     await previewStem;
                 }
+                Console.WriteLine("Combining Audio...");
                 var (fsbOut, datOut) = fsb.CombineFSB3File(filesToProcess, fsbOutput);
                 if (CurrentPlatform == "PC")
                 {
                     MoveToGh3MusicFolder(fsbOut);
                     MoveToGh3MusicFolder(datOut);
                 }
+                Console.WriteLine("Audio Compilation Complete!");
             }
             catch (Exception ex)
             {
@@ -1585,6 +1588,7 @@ namespace GH_Toolkit_GUI
             string fsbOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}");
             try
             {
+                Console.WriteLine("Compiling Audio...");
                 string[] backingPaths = backingInput.Items.Cast<string>().ToArray();
 
                 FSB fSB = new FSB();
@@ -1626,6 +1630,7 @@ namespace GH_Toolkit_GUI
                     Task previewStem = fSB.MakePreview(previewFiles, previewOutput, previewStart, previewLength, fadeIn, fadeOut, previewVolume.Value);
                     await previewStem;
                 }
+                Console.WriteLine("Combining Audio...");
                 var fsbList = fSB.CombineFSB4File(drumFiles, otherFiles, backingFiles, [previewOutput], fsbOutput);
 
                 if (CurrentPlatform == "PC")
@@ -1635,6 +1640,7 @@ namespace GH_Toolkit_GUI
                         File.Move(file, Path.Combine(MusicFolder, $"{Path.GetFileName(file)}.xen"), true);
                     }
                 }
+                Console.WriteLine("Audio Compilation Complete!");
             }
             catch (Exception ex)
             {
@@ -1732,6 +1738,8 @@ namespace GH_Toolkit_GUI
         }
         private void compile_pak_button_Click(object sender, EventArgs e)
         {
+            Console.WriteLine($"Compiling song for {CurrentGame}");
+            var time1 = DateTime.Now;
             if (CurrentGame == GAME_GH3 || CurrentGame == GAME_GHA)
             {
                 CompilePakGh3();
@@ -1740,9 +1748,14 @@ namespace GH_Toolkit_GUI
             {
                 CompilePakGhwt();
             }
+            var time2 = DateTime.Now;
+            // Calculate the time it took to compile the song
+            var timeDiff = time2 - time1;
+            Console.WriteLine($"Chart compilation took {timeDiff.TotalSeconds.ToString("G3")} seconds");
         }
         private async void compile_all_button_Click(object sender, EventArgs e)
         {
+            Console.WriteLine($"Compiling chart and audio for {CurrentGame}");
             string compileText = compile_all_button.Text;
             compile_all_button.Text = "Compiling...";
             DisableCloseButton();
@@ -1750,6 +1763,7 @@ namespace GH_Toolkit_GUI
             bool pakSuccess = false;
             try
             {
+                var time1 = DateTime.Now;
                 if (CurrentGame == GAME_GH3 || CurrentGame == GAME_GHA)
                 {
                     pakSuccess = CompilePakGh3();
@@ -1768,6 +1782,10 @@ namespace GH_Toolkit_GUI
                         compileSuccess = true;
                     }
                 }
+                var time2 = DateTime.Now;
+
+                var timeDiff = time2 - time1;
+                Console.WriteLine($"Total compilation took {timeDiff.TotalSeconds.ToString("G3")} seconds");
             }
             catch (Exception ex)
             {

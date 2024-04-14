@@ -1,10 +1,12 @@
+using System.Text;
+
 namespace GH_Toolkit_GUI
-{
-    public partial class MasterForm : Form
+{    public partial class MasterForm : Form
     {
         public MasterForm(string inputFile = "")
         {
             InitializeComponent();
+            Console.SetOut(new TextBoxStreamWriter(consoleOutput));
             if (inputFile != "")
             {
                 ReadInputFile(inputFile);
@@ -23,7 +25,7 @@ namespace GH_Toolkit_GUI
         private void OpenCompileSongForm(string inputFile = "")
         {
             CompileSong compileSongForm = new CompileSong(inputFile);
-            compileSongForm.ShowDialog();
+            compileSongForm.Show();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -34,6 +36,33 @@ namespace GH_Toolkit_GUI
         private void button2_Click(object sender, EventArgs e)
         {
 
+        }
+    }
+    public class TextBoxStreamWriter : TextWriter
+    {
+        private TextBox _output = null;
+
+        public TextBoxStreamWriter(TextBox output)
+        {
+            _output = output;
+        }
+
+        public override void Write(char value)
+        {
+            base.Write(value);
+            if (_output.InvokeRequired)
+            {
+                _output.Invoke(new MethodInvoker(delegate { _output.AppendText(value.ToString()); }));
+            }
+            else
+            {
+                _output.AppendText(value.ToString());
+            }
+        }
+
+        public override Encoding Encoding
+        {
+            get { return Encoding.UTF8; }
         }
     }
 }
