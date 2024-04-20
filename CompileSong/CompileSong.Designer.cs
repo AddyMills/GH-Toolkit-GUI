@@ -221,6 +221,8 @@
             song_script_select_gh3 = new Button();
             label1 = new Label();
             venue_source_gh3 = new ComboBox();
+            label43 = new Label();
+            aerosmithBand = new ComboBox();
             compile_tab = new TabPage();
             compile_settings = new GroupBox();
             tableLayoutPanel9 = new TableLayoutPanel();
@@ -2373,7 +2375,7 @@
             tableLayoutPanel7.Controls.Add(label16, 0, 5);
             tableLayoutPanel7.Controls.Add(label17, 0, 6);
             tableLayoutPanel7.Controls.Add(label18, 0, 7);
-            tableLayoutPanel7.Controls.Add(label19, 0, 8);
+            tableLayoutPanel7.Controls.Add(label19, 0, 9);
             tableLayoutPanel7.Controls.Add(midi_file_input_gh3, 1, 0);
             tableLayoutPanel7.Controls.Add(perf_override_input_gh3, 1, 1);
             tableLayoutPanel7.Controls.Add(ska_files_input_gh3, 1, 2);
@@ -2381,22 +2383,25 @@
             tableLayoutPanel7.Controls.Add(song_script_input_gh3, 1, 5);
             tableLayoutPanel7.Controls.Add(countoff_select_gh3, 1, 6);
             tableLayoutPanel7.Controls.Add(vocal_gender_select_gh3, 1, 7);
-            tableLayoutPanel7.Controls.Add(bassist_select_gh3, 1, 8);
-            tableLayoutPanel7.Controls.Add(tableLayoutPanel8, 1, 11);
+            tableLayoutPanel7.Controls.Add(bassist_select_gh3, 1, 9);
+            tableLayoutPanel7.Controls.Add(tableLayoutPanel8, 1, 12);
             tableLayoutPanel7.Controls.Add(midi_file_select_gh3, 2, 0);
             tableLayoutPanel7.Controls.Add(perf_override_select_gh3, 2, 1);
             tableLayoutPanel7.Controls.Add(ska_files_select_gh3, 2, 2);
             tableLayoutPanel7.Controls.Add(song_script_select_gh3, 2, 5);
             tableLayoutPanel7.Controls.Add(label1, 0, 4);
             tableLayoutPanel7.Controls.Add(venue_source_gh3, 1, 4);
+            tableLayoutPanel7.Controls.Add(label43, 0, 8);
+            tableLayoutPanel7.Controls.Add(aerosmithBand, 1, 8);
             tableLayoutPanel7.Location = new Point(6, 6);
             tableLayoutPanel7.Name = "tableLayoutPanel7";
-            tableLayoutPanel7.RowCount = 13;
+            tableLayoutPanel7.RowCount = 14;
             tableLayoutPanel7.RowStyles.Add(new RowStyle());
             tableLayoutPanel7.RowStyles.Add(new RowStyle());
             tableLayoutPanel7.RowStyles.Add(new RowStyle());
             tableLayoutPanel7.RowStyles.Add(new RowStyle());
             tableLayoutPanel7.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
+            tableLayoutPanel7.RowStyles.Add(new RowStyle());
             tableLayoutPanel7.RowStyles.Add(new RowStyle());
             tableLayoutPanel7.RowStyles.Add(new RowStyle());
             tableLayoutPanel7.RowStyles.Add(new RowStyle());
@@ -2480,16 +2485,16 @@
             label18.Dock = DockStyle.Left;
             label18.Location = new Point(3, 204);
             label18.Name = "label18";
-            label18.Size = new Size(79, 29);
+            label18.Size = new Size(50, 29);
             label18.TabIndex = 6;
-            label18.Text = "Vocal Gender:";
+            label18.Text = "Vocalist:";
             label18.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // label19
             // 
             label19.AutoSize = true;
             label19.Dock = DockStyle.Left;
-            label19.Location = new Point(3, 233);
+            label19.Location = new Point(3, 262);
             label19.Name = "label19";
             label19.Size = new Size(45, 29);
             label19.TabIndex = 7;
@@ -2555,11 +2560,12 @@
             vocal_gender_select_gh3.Dock = DockStyle.Fill;
             vocal_gender_select_gh3.DropDownStyle = ComboBoxStyle.DropDownList;
             vocal_gender_select_gh3.FormattingEnabled = true;
-            vocal_gender_select_gh3.Items.AddRange(new object[] { "Male", "Female", "None" });
+            vocal_gender_select_gh3.Items.AddRange(new object[] { "Male", "Female", "None", "Bret Michaels", "Steven Tyler" });
             vocal_gender_select_gh3.Location = new Point(90, 207);
             vocal_gender_select_gh3.Name = "vocal_gender_select_gh3";
             vocal_gender_select_gh3.Size = new Size(462, 23);
             vocal_gender_select_gh3.TabIndex = 15;
+            vocal_gender_select_gh3.SelectedIndexChanged += vocal_gender_select_gh3_SelectedIndexChanged;
             // 
             // bassist_select_gh3
             // 
@@ -2567,7 +2573,7 @@
             bassist_select_gh3.DropDownStyle = ComboBoxStyle.DropDownList;
             bassist_select_gh3.FormattingEnabled = true;
             bassist_select_gh3.Items.AddRange(new object[] { "Default", "Axel", "Casey", "Izzy", "Judy", "Johnny", "Lars", "Midori", "Xavier", "Slash", "Tom Morello", "Lou", "God of Rock/Metalhead", "Grim Ripper/Elroy" });
-            bassist_select_gh3.Location = new Point(90, 236);
+            bassist_select_gh3.Location = new Point(90, 265);
             bassist_select_gh3.Name = "bassist_select_gh3";
             bassist_select_gh3.Size = new Size(462, 23);
             bassist_select_gh3.TabIndex = 16;
@@ -2584,7 +2590,7 @@
             tableLayoutPanel8.Controls.Add(gh3_band_vol_label, 2, 0);
             tableLayoutPanel8.Controls.Add(gh3_gtr_vol, 1, 0);
             tableLayoutPanel8.Controls.Add(gh3_band_vol, 3, 0);
-            tableLayoutPanel8.Location = new Point(87, 282);
+            tableLayoutPanel8.Location = new Point(87, 311);
             tableLayoutPanel8.Margin = new Padding(0);
             tableLayoutPanel8.Name = "tableLayoutPanel8";
             tableLayoutPanel8.RowCount = 1;
@@ -2695,6 +2701,28 @@
             venue_source_gh3.Name = "venue_source_gh3";
             venue_source_gh3.Size = new Size(462, 23);
             venue_source_gh3.TabIndex = 29;
+            // 
+            // label43
+            // 
+            label43.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            label43.AutoSize = true;
+            label43.Location = new Point(3, 240);
+            label43.Name = "label43";
+            label43.Size = new Size(81, 15);
+            label43.TabIndex = 30;
+            label43.Text = "Aerosmith:";
+            // 
+            // aerosmithBand
+            // 
+            aerosmithBand.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            aerosmithBand.DropDownStyle = ComboBoxStyle.DropDownList;
+            aerosmithBand.Enabled = false;
+            aerosmithBand.FormattingEnabled = true;
+            aerosmithBand.Items.AddRange(new object[] { "aerosmith_band", "aerosmith_band_backinthesaddle", "aerosmith_band_beyondbeautiful", "aerosmith_band_brightlightfright", "aerosmith_band_combination", "aerosmith_band_drawtheline", "aerosmith_band_dreamon", "aerosmith_band_joeperrybossbattle", "aerosmith_band_kingsandqueens", "aerosmith_band_letthemusicdothetalkin", "aerosmith_band_livinontheedge", "aerosmith_band_loveinanelevator", "aerosmith_band_makeit", "aerosmith_band_mamakin", "aerosmith_band_mercy", "aerosmith_band_miracas", "aerosmith_band_movinout", "aerosmith_band_nobodysfault", "aerosmith_band_nosurprize", "aerosmith_band_pandorasbox", "aerosmith_band_pink", "aerosmith_band_ragdoll", "aerosmith_band_ratsinthecellar", "aerosmith_band_shakinmycage", "aerosmith_band_sweetemotion", "aerosmith_band_talktalkin", "aerosmith_band_toysintheattic", "aerosmith_band_trainkeptarollin", "aerosmith_band_unclesalty", "aerosmith_band_walkthisway", "aerosmith_band_walkthiswayDMC" });
+            aerosmithBand.Location = new Point(90, 236);
+            aerosmithBand.Name = "aerosmithBand";
+            aerosmithBand.Size = new Size(462, 23);
+            aerosmithBand.TabIndex = 31;
             // 
             // compile_tab
             // 
@@ -3872,5 +3900,7 @@
         private NumericUpDown previewVolume;
         private Label label42;
         private NumericUpDown previewVolumeGh3;
+        private Label label43;
+        private ComboBox aerosmithBand;
     }
 }

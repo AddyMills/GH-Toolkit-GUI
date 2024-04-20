@@ -143,7 +143,11 @@ namespace GH_Toolkit_GUI
             bassist_select_gh3.SelectedIndex = 0;
             hopo_mode_select.SelectedIndex = 0;
 
+            skaFileSource.SelectedIndex = 0;
             venueSource.SelectedIndex = 2;
+            countoffSelect.SelectedIndex = 0;
+            vocalGenderSelect.SelectedIndex = 0;
+
 
             string[] skeletons = LoadTextFile(Path.Combine(ExeDirectory, "List Files", "skeletons.txt"));
             if (skeletons.Length == 0)
@@ -1263,12 +1267,17 @@ namespace GH_Toolkit_GUI
 
         private QBStruct.QBStructData GenerateGh3SongListEntry()
         {
+            string STEVEN = "Steven Tyler";
+
             var entry = new QBStruct.QBStructData();
             string pString = CurrentPlatform == CONSOLE_PS2 ? STRING : WIDESTRING; // Depends on the platform
             bool artistIsOther = artist_text_select.Text == "Other";
             string artistText = !artistIsOther ? $"artist_text_{artist_text_select.Text.ToLower().Replace(" ", "_")}" : artistTextCustom.Text;
             string artistType = artistIsOther ? pString : POINTER;
             string bassist = BassistName();
+            string singer = SingerName();
+            string gender = (singer == STEVEN) ? "male" : singer;
+            string band = singer == STEVEN ? aerosmithBand.Text : "default_band";
 
             entry.AddVarToStruct("checksum", song_checksum.Text, QBKEY);
             entry.AddVarToStruct("name", song_checksum.Text, STRING);
@@ -1281,10 +1290,14 @@ namespace GH_Toolkit_GUI
             entry.AddIntToStruct("leaderboard", 1);
             entry.AddIntToStruct("gem_offset", 0);
             entry.AddIntToStruct("input_offset", 0);
-            entry.AddVarToStruct("singer", vocal_gender_select_gh3.Text, QBKEY);
+            entry.AddVarToStruct("singer", gender, QBKEY);
             if (CurrentGame == "GHA")
             {
-                entry.AddVarToStruct("band", "default_band", QBKEY);
+                entry.AddVarToStruct("band", band, QBKEY);
+                if (singer == STEVEN)
+                {
+                    entry.AddVarToStruct("guitarist_checksum", "aerosmith", QBKEY);
+                }
             }
             entry.AddVarToStruct("keyboard", "false", QBKEY);
             entry.AddFloatToStruct("band_playback_volume", (float)gh3_band_vol.Value);
@@ -1349,7 +1362,7 @@ namespace GH_Toolkit_GUI
             }
             if (!string.IsNullOrEmpty(bandInput.Text))
             {
-                songInfo.Keys.AddKey("SongIcon", bandInput.Text);
+                songInfo.Keys.AddKey("Band", bandInput.Text);
             }
             if (useNewClipsCheck.Checked)
             {
@@ -1394,7 +1407,7 @@ namespace GH_Toolkit_GUI
             {
                 songInfo.Keys.AddKey("ModernStrobes", "1");
             }
-            
+
             wtdeIni.Sections.Add(modInfo);
             wtdeIni.Sections.Add(songInfo);
 
@@ -1420,6 +1433,15 @@ namespace GH_Toolkit_GUI
                 return CurrentPlatform == CONSOLE_PS2 ? "Elroy" : (CurrentGame == GAME_GH3 ? "Ripper" : "Default");
             }
             return bassist;
+        }
+        private string SingerName()
+        {
+            string singer = vocal_gender_select_gh3.Text;
+            if (singer == "Bret Michaels")
+            {
+                return "Bret";
+            }
+            return singer;
         }
         private void AddToPCSetlist()
         {
@@ -1521,8 +1543,8 @@ namespace GH_Toolkit_GUI
                 }
                 else
                 {
-                    decimal previewStart = previewStartTime / 1000;
-                    decimal previewLength = previewEndTime / 1000;
+                    decimal previewStart = previewStartTime / 1000m;
+                    decimal previewLength = previewEndTime / 1000m;
                     if (gh3_set_end.Checked)
                     {
                         previewLength -= previewStart;
@@ -1560,7 +1582,7 @@ namespace GH_Toolkit_GUI
             }
         }
         private async Task CompileGhwtAudio()
-        { 
+        {
             string drums1Output = Path.Combine(compile_input.Text, $"{song_checksum.Text}_drums1.mp3");
             string drums2Output = Path.Combine(compile_input.Text, $"{song_checksum.Text}_drums2.mp3");
             string drums3Output = Path.Combine(compile_input.Text, $"{song_checksum.Text}_drums3.mp3");
@@ -1591,19 +1613,19 @@ namespace GH_Toolkit_GUI
                 Console.WriteLine("Compiling Audio...");
                 string[] backingPaths = backingInput.Items.Cast<string>().ToArray();
 
-                FSB fSB = new FSB();
+                FSB fsb = new FSB();
 
-                Task drums1Stem = fSB.ConvertToMp3(kickInput.Text, drums1Output);
-                Task drums2Stem = fSB.ConvertToMp3(snareInput.Text, drums2Output);
-                Task drums3Stem = fSB.ConvertToMp3(cymbalsInput.Text, drums3Output);
-                Task drums4Stem = fSB.ConvertToMp3(tomsInput.Text, drums4Output);
+                Task drums1Stem = fsb.ConvertToMp3(kickInput.Text, drums1Output);
+                Task drums2Stem = fsb.ConvertToMp3(snareInput.Text, drums2Output);
+                Task drums3Stem = fsb.ConvertToMp3(cymbalsInput.Text, drums3Output);
+                Task drums4Stem = fsb.ConvertToMp3(tomsInput.Text, drums4Output);
 
-                Task guitarStem = fSB.ConvertToMp3(guitarInput.Text, guitarOutput);
-                Task rhythmStem = fSB.ConvertToMp3(bassInput.Text, rhythmOutput);
-                Task vocalsStem = fSB.ConvertToMp3(vocalsInput.Text, vocalsOutput);
+                Task guitarStem = fsb.ConvertToMp3(guitarInput.Text, guitarOutput);
+                Task rhythmStem = fsb.ConvertToMp3(bassInput.Text, rhythmOutput);
+                Task vocalsStem = fsb.ConvertToMp3(vocalsInput.Text, vocalsOutput);
 
-                Task backingStem = fSB.MixFiles(backingPaths, backingOutput);
-                Task crowdStem = fSB.ConvertToMp3(crowdInput.Text, crowdOutput);
+                Task backingStem = fsb.MixFiles(backingPaths, backingOutput);
+                Task crowdStem = fsb.ConvertToMp3(crowdInput.Text, crowdOutput);
 
                 var tasksToAwait = new List<Task> { drums1Stem, drums2Stem, drums3Stem, drums4Stem, guitarStem, rhythmStem, vocalsStem, backingStem, crowdStem };
 
@@ -1613,25 +1635,25 @@ namespace GH_Toolkit_GUI
                 // Create the preview audio
                 if (renderedPreviewCheck.Checked)
                 {
-                    Task previewStem = fSB.ConvertToMp3(guitarOutput, previewOutput);
+                    Task previewStem = fsb.ConvertToMp3(guitarOutput, previewOutput);
                     await previewStem;
                 }
                 else
                 {
                     string[] previewFiles = { drums1Output, drums2Output, drums3Output, drums4Output, guitarOutput, rhythmOutput, vocalsOutput, backingOutput };
-                    decimal previewStart = previewStartTime / 1000;
-                    decimal previewLength = previewEndTime / 1000;
+                    decimal previewStart = previewStartTime / 1000m;
+                    decimal previewLength = previewEndTime / 1000m;
                     if (setEndTime.Checked)
                     {
                         previewLength -= previewStart;
                     }
                     decimal fadeIn = UserPreferences.Default.PreviewFadeIn;
                     decimal fadeOut = UserPreferences.Default.PreviewFadeOut;
-                    Task previewStem = fSB.MakePreview(previewFiles, previewOutput, previewStart, previewLength, fadeIn, fadeOut, previewVolume.Value);
+                    Task previewStem = fsb.MakePreview(previewFiles, previewOutput, previewStart, previewLength, fadeIn, fadeOut, previewVolume.Value);
                     await previewStem;
                 }
                 Console.WriteLine("Combining Audio...");
-                var fsbList = fSB.CombineFSB4File(drumFiles, otherFiles, backingFiles, [previewOutput], fsbOutput);
+                var fsbList = fsb.CombineFSB4File(drumFiles, otherFiles, backingFiles, [previewOutput], fsbOutput);
 
                 if (CurrentPlatform == "PC")
                 {
@@ -1800,7 +1822,7 @@ namespace GH_Toolkit_GUI
                     ShowPostCompile();
                 }
             }
-            
+
         }
 
         private void ShowPostCompile()
@@ -1978,6 +2000,22 @@ namespace GH_Toolkit_GUI
                     string folderPath = folderDialog.SelectedPath;
                     LoadFromChFolder(folderPath);
                 }
+            }
+        }
+
+        private void vocal_gender_select_gh3_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (vocal_gender_select_gh3.SelectedIndex == 4)
+            {
+                aerosmithBand.Enabled = true;
+                if (aerosmithBand.SelectedIndex == -1)
+                {
+                    aerosmithBand.SelectedIndex = 0;
+                }
+            }
+            else
+            {
+                aerosmithBand.Enabled = false;
             }
         }
     }
