@@ -1298,6 +1298,29 @@ namespace GH_Toolkit_GUI
                 {
                     entry.AddVarToStruct("guitarist_checksum", "aerosmith", QBKEY);
                 }
+                if (Pref.OverrideBeatLines)
+                {
+                    var low8 = (int)beat8thLow.Value;
+                    var high8 = (int)beat8thHigh.Value;
+                    var low16 = (int)beat16thLow.Value;
+                    var high16 = (int)beat16thHigh.Value;
+                    if (low8 != 1)
+                    {
+                        entry.AddIntToStruct("thin_fretbar_8note_params_low_bpm", low8);
+                    }
+                    if (high8 != 180)
+                    {
+                        entry.AddIntToStruct("thin_fretbar_8note_params_high_bpm", high8);
+                    }
+                    if (low16 != 1)
+                    {
+                        entry.AddIntToStruct("thin_fretbar_16note_params_low_bpm", low16);
+                    }
+                    if (high16 != 120)
+                    {
+                        entry.AddIntToStruct("thin_fretbar_16note_params_high_bpm", high16);
+                    }
+                }
             }
             entry.AddVarToStruct("keyboard", "false", QBKEY);
             entry.AddFloatToStruct("band_playback_volume", (float)gh3_band_vol.Value);
@@ -1415,22 +1438,26 @@ namespace GH_Toolkit_GUI
         }
         private string BassistName()
         {
+            if (CurrentGame == GAME_GHA)
+            {
+                return "Default";
+            }
             string bassist = bassist_select_gh3.Text;
             if (bassist == "Tom Morello")
             {
-                return CurrentGame == GAME_GH3 ? "Morello" : "Default";
+                return "Morello";
             }
             else if (bassist == "Lou")
             {
-                return CurrentGame == GAME_GH3 ? "Satan" : "Default";
+                return "Satan";
             }
             else if (bassist == "God of Rock/Metalhead")
             {
-                return CurrentPlatform == CONSOLE_PS2 ? "Metalhead" : (CurrentGame == GAME_GH3 ? "RockGod" : "Default");
+                return CurrentPlatform == CONSOLE_PS2 ? "Metalhead" : "RockGod";
             }
             else if (bassist == "Grim Ripper/Elroy")
             {
-                return CurrentPlatform == CONSOLE_PS2 ? "Elroy" : (CurrentGame == GAME_GH3 ? "Ripper" : "Default");
+                return CurrentPlatform == CONSOLE_PS2 ? "Elroy" : "Ripper";
             }
             return bassist;
         }
