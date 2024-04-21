@@ -1277,7 +1277,6 @@ namespace GH_Toolkit_GUI
             string bassist = BassistName();
             string singer = SingerName();
             string gender = (singer == STEVEN) ? "male" : singer;
-            string band = singer == STEVEN ? aerosmithBand.Text : "default_band";
 
             entry.AddVarToStruct("checksum", song_checksum.Text, QBKEY);
             entry.AddVarToStruct("name", song_checksum.Text, STRING);
@@ -1293,6 +1292,7 @@ namespace GH_Toolkit_GUI
             entry.AddVarToStruct("singer", gender, QBKEY);
             if (CurrentGame == "GHA")
             {
+                string band = singer == STEVEN ? aerosmithBand.Text : "default_band";
                 entry.AddVarToStruct("band", band, QBKEY);
                 if (singer == STEVEN)
                 {
