@@ -1184,7 +1184,8 @@ namespace GH_Toolkit_GUI
                 venueSource: venue,
                 rhythmTrack: p2_rhythm_check.Checked,
                 overrideBeat: use_beat_check.Checked,
-                hopoType: hopo_mode_select.SelectedIndex);
+                hopoType: hopo_mode_select.SelectedIndex,
+                isSteven: vocal_gender_select_gh3.Text == "Steven Tyler");
 
             if (CurrentPlatform == "PC")
             {
