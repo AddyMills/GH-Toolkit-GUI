@@ -3062,7 +3062,6 @@
             // 
             platform_360.AutoSize = true;
             platform_360.Dock = DockStyle.Fill;
-            platform_360.Enabled = false;
             platform_360.Location = new Point(153, 3);
             platform_360.Name = "platform_360";
             platform_360.Size = new Size(144, 41);
@@ -3086,7 +3085,6 @@
             // 
             platform_ps3.AutoSize = true;
             platform_ps3.Dock = DockStyle.Fill;
-            platform_ps3.Enabled = false;
             platform_ps3.Location = new Point(303, 3);
             platform_ps3.Name = "platform_ps3";
             platform_ps3.Size = new Size(144, 41);
