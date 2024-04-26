@@ -18,6 +18,7 @@ using IniParser.Model.Configuration;
 using GH_Toolkit_Core.Methods;
 using GH_Toolkit_Core.Checksum;
 using GH_Toolkit_Core.PS360;
+using System;
 
 namespace GH_Toolkit_GUI
 {
@@ -1711,11 +1712,15 @@ namespace GH_Toolkit_GUI
         private void CreateConsolePackage()
         {
             string onyxExe = Path.Combine(Pref.OnyxCliPath, "onyx.exe");
+            string toCopyTo;
+            string[] onyxArgs;
+            string fileType;
             if (CurrentPlatform == platform_360.Text)
             {
+                fileType = "STFS";
                 Console.WriteLine("Compiling STFS file using Onyx CLI");
                 CreateOnyxYaml();
-                string toCopyTo = Path.Combine(ConsoleCompile, "360");
+                toCopyTo = Path.Combine(ConsoleCompile, "360");
                 string[] filesToCopy = Directory.GetFiles(ConsoleCompile);
                 foreach (string file in filesToCopy)
                 {
@@ -1726,30 +1731,78 @@ namespace GH_Toolkit_GUI
                     }
                     File.Copy(file, Path.Combine(toCopyTo, Path.GetFileName(file) + ".xen"), true);
                 }
-                string stfsSave = Path.Combine(ConsoleCompile, song_checksum.Text);
-                string[] onyxArgs = ["stfs", toCopyTo, "--to", stfsSave];
-                ProcessStartInfo startInfo = new ProcessStartInfo(onyxExe);
-                startInfo.CreateNoWindow = false;
-                startInfo.UseShellExecute = true;
-                startInfo.WindowStyle = ProcessWindowStyle.Normal;
-                startInfo.Arguments = string.Join(" ", onyxArgs);
-                try
-                {
-                    // Start the process with the info we specified.
-                    // Call WaitForExit and then the using statement will close.
-                    using (Process exeProcess = Process.Start(startInfo))
-                    {
-                        exeProcess.WaitForExit();
-                    }
-                }
-                catch
-                {
-                    throw new Exception("Onyx failed to create the STFS package.");
-                }
+                string stfsSave = Path.Combine(compile_input.Text, song_checksum.Text.ToUpper());
+                onyxArgs = ["stfs", toCopyTo, "--to", stfsSave];
             }
             else
             {
-                
+                fileType = "PKG";
+                Console.WriteLine("Compiling PKG file using Onyx CLI");
+                toCopyTo = Path.Combine(ConsoleCompile, "PS3");
+                string gameFiles = Path.Combine(toCopyTo, "USRDIR", song_checksum.Text.ToUpper());
+                Directory.CreateDirectory(gameFiles);
+                string ps3Resources = Path.Combine(ResourcePath, "PS3");
+                string currGameResources = Path.Combine(ps3Resources, CurrentGame);
+                string vramFile = Path.Combine(ps3Resources, "VRAM.PAK.PS3");
+                if (!Directory.Exists(ps3Resources) || !Directory.Exists(currGameResources))
+                {
+                    throw new Exception("Cannot find PS3 Resource folder.\n\nThis should be included with your toolkit.\nPlease re-download the toolkit.");
+                }
+                string[] filesToCopy = Directory.GetFiles(ConsoleCompile);
+                foreach (string file in filesToCopy)
+                {
+                    // Check if each file has an extension, if not skip it
+                    if (!file.Contains("."))
+                    {
+                        continue;
+                    }
+                    File.Copy(file, Path.Combine(gameFiles, Path.GetFileName(file).ToUpper() + ".PS3"), true);
+                    string fileExtension = Path.GetExtension(file);
+                    string fileNoExt = Path.GetFileNameWithoutExtension(file).ToLower();
+                    bool localeFile = fileNoExt.Contains("_text") && !fileNoExt.EndsWith("_text");
+                    if (fileExtension.ToLower() == ".pak" && !localeFile)
+                    {
+                        File.Copy(vramFile, Path.Combine(gameFiles, $"{fileNoExt}_VRAM.PAK.PS3").ToUpper(), true);
+                    }
+                }
+                foreach (string file in Directory.GetFiles(currGameResources))
+                {
+                    File.Copy(file, Path.Combine(toCopyTo, Path.GetFileName(file)), true);
+                }
+                string pkgSave = Path.Combine(compile_input.Text, $"{song_checksum.Text}.pkg".ToUpper());
+                string contentID = FileCreation.GetPs3Key(CurrentGame) + $"-{song_checksum.Text.ToUpper().Replace("_","").PadRight(16, '0')}";
+                onyxArgs = ["pkg", contentID, toCopyTo, "--to", pkgSave];
+            }
+            ProcessStartInfo startInfo = new ProcessStartInfo(onyxExe);
+            startInfo.CreateNoWindow = false;
+            startInfo.UseShellExecute = true;
+            //startInfo.RedirectStandardOutput = true;
+
+            startInfo.WindowStyle = ProcessWindowStyle.Normal;
+            startInfo.Arguments = string.Join(" ", onyxArgs);
+            try
+            {
+                // Start the process with the info we specified.
+                // Call WaitForExit and then the using statement will close.
+                using (Process exeProcess = new Process())
+                {
+                    exeProcess.StartInfo = startInfo;
+                    exeProcess.Start();
+
+                    //StreamReader reader = exeProcess.StandardOutput;
+                    //string output = reader.ReadToEnd();
+                    exeProcess.WaitForExit();
+
+                    //Console.WriteLine(output);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                Directory.Delete(toCopyTo, true);
             }
         }
         private async Task CompileGh3Audio()
@@ -2048,9 +2101,17 @@ namespace GH_Toolkit_GUI
             {
                 success = CompilePakGhwt();
             }
+
             if (success && CurrentPlatform == "PS3" || CurrentPlatform == platform_360.Text)
             {
-                CreateConsolePackage();
+                try
+                {
+                    CreateConsolePackage();
+                }
+                catch(Exception ex)
+                {
+                    HandleException(ex, "Console Package Creation Failed!");
+                }
             }
             var time2 = DateTime.Now;
             // Calculate the time it took to compile the song
@@ -2117,6 +2178,10 @@ namespace GH_Toolkit_GUI
             if (CurrentPlatform == platform_pc.Text)
             {
                 MessageBox.Show("Compilation has completed successfully!\n\nYour song has been added to the game and can be played immediately.", "Compilation Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                MessageBox.Show("Compilation has completed successfully!\n\nYour song has been packaged up and is ready to be installed on your console.\n\nIt can be found where you defined the song to be compiled to or next to your .ghproj file.", "Compilation Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
         // Toolstrip Logic
