@@ -403,15 +403,7 @@ namespace GH_Toolkit_GUI
             SetGenres(game);
             SetDrumkit();
             SetBeatLines();
-            // artist_text_select.SelectedIndex = 0;
-            if (isOld)
-            {
-
-            }
-            else
-            {
-
-            }
+            EnablePlatforms();
         }
         private void SetBeatLines()
         {
@@ -419,6 +411,37 @@ namespace GH_Toolkit_GUI
             beat8thHigh.Enabled = Pref.OverrideBeatLines;
             beat16thLow.Enabled = Pref.OverrideBeatLines;
             beat16thHigh.Enabled = Pref.OverrideBeatLines;
+        }
+        private void EnablePlatforms()
+        {
+            platform_pc.Enabled = true;
+            platform_ps2.Enabled = false;
+            platform_360.Enabled = true;
+            platform_ps3.Enabled = true;
+            if (CurrentGame == "GH3")
+            {
+                
+            }
+            else if (CurrentGame == "GHA")
+            {
+                platform_360.Enabled = false;
+                platform_ps3.Enabled = false;
+                platform_pc.Checked = true;
+            }
+            else if (CurrentGame == "GHWT")
+            {
+                platform_360.Enabled = false;
+                platform_ps3.Enabled = false;
+                platform_pc.Checked = true;
+            }
+            else
+            {
+                platform_pc.Enabled = false;
+                if (platform_pc.Checked || platform_ps2.Checked)
+                {
+                    platform_360.Checked = true;
+                }
+            }
         }
         private void SetGenres(string game)
         {
