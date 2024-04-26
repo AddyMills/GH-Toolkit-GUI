@@ -14,6 +14,7 @@ using static GH_Toolkit_Core.Methods.Exceptions;
 using IniParser.Model;
 using IniParser;
 using IniParser.Model.Configuration;
+using GH_Toolkit_Core.Methods;
 
 namespace GH_Toolkit_GUI
 {
@@ -35,6 +36,7 @@ namespace GH_Toolkit_GUI
         private string WtSongFolder;
         private string ContentFolder;
         private string MusicFolder;
+        private static string OnyxFolder = Path.Combine(ExeDirectory, "Tools", "Onyx");
 
         // This is needed to force all numbers to use decimals with a period as the decimal separator
         private static CultureInfo Murica = new CultureInfo("en-US");
@@ -1026,6 +1028,32 @@ namespace GH_Toolkit_GUI
                     }
                 }
             }
+            if (CurrentPlatform == "PS2")
+            {
+                if (Ps2IsoFolderPath == "")
+                {
+                    MessageBox.Show("Your PS2 ISO folder has not been set. Please select your ISO folder now.", "Folder Required", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    Ps2IsoFolderPath = AskForGamePath();
+                }
+            }
+            else if (CurrentPlatform != "PC")
+            {
+                var onyxExe = Path.Combine(OnyxFolder, "Onyx.exe");
+                while (!Directory.Exists(OnyxFolder) || !File.Exists(onyxExe))
+                {
+                    MessageBox.Show("Onyx has not been set. Please select your Onyx CLI folder now.", "Folder Required", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    var tempOnyxFolder = AskForGamePath();
+                    var tempOnyxExe = Path.Combine(tempOnyxFolder, "Onyx.exe");
+                    if (!File.Exists(tempOnyxExe))
+                    {
+                        MessageBox.Show("Onyx.exe was not found in the selected folder. Please select the correct folder.", "File Not Found", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    else
+                    {
+                        ReadWrite.CopyDirectory(tempOnyxFolder, OnyxFolder, true);
+                    }
+                }
+            }
         }
         public static string AskForGamePath()
         {
@@ -1191,6 +1219,14 @@ namespace GH_Toolkit_GUI
             {
                 AddToPCSetlist();
                 MoveToGh3SongsFolder(pakFile);
+            }
+            else if (CurrentPlatform == "PS2")
+            {
+                Console.WriteLine("How'd you get here?");
+            }
+            else
+            {
+
             }
             // Add code to delete the folder after processing eventually
         }
