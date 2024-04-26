@@ -224,6 +224,9 @@
             label43 = new Label();
             aerosmithBand = new ComboBox();
             compile_tab = new TabPage();
+            tableLayoutPanel20 = new TableLayoutPanel();
+            dlcChecksumLabel = new Label();
+            dlcChecksum = new Label();
             compile_settings = new GroupBox();
             tableLayoutPanel9 = new TableLayoutPanel();
             label20 = new Label();
@@ -338,6 +341,7 @@
             ((System.ComponentModel.ISupportInitialize)gh3_gtr_vol).BeginInit();
             ((System.ComponentModel.ISupportInitialize)gh3_band_vol).BeginInit();
             compile_tab.SuspendLayout();
+            tableLayoutPanel20.SuspendLayout();
             compile_settings.SuspendLayout();
             tableLayoutPanel9.SuspendLayout();
             tableLayoutPanel10.SuspendLayout();
@@ -2726,6 +2730,7 @@
             // 
             // compile_tab
             // 
+            compile_tab.Controls.Add(tableLayoutPanel20);
             compile_tab.Controls.Add(compile_settings);
             compile_tab.Controls.Add(platform_groupbox);
             compile_tab.Location = new Point(4, 24);
@@ -2735,6 +2740,42 @@
             compile_tab.TabIndex = 5;
             compile_tab.Text = "Compile";
             compile_tab.UseVisualStyleBackColor = true;
+            // 
+            // tableLayoutPanel20
+            // 
+            tableLayoutPanel20.ColumnCount = 2;
+            tableLayoutPanel20.ColumnStyles.Add(new ColumnStyle());
+            tableLayoutPanel20.ColumnStyles.Add(new ColumnStyle());
+            tableLayoutPanel20.Controls.Add(dlcChecksumLabel, 0, 0);
+            tableLayoutPanel20.Controls.Add(dlcChecksum, 1, 0);
+            tableLayoutPanel20.Location = new Point(12, 268);
+            tableLayoutPanel20.Name = "tableLayoutPanel20";
+            tableLayoutPanel20.RowCount = 1;
+            tableLayoutPanel20.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tableLayoutPanel20.Size = new Size(300, 20);
+            tableLayoutPanel20.TabIndex = 3;
+            // 
+            // dlcChecksumLabel
+            // 
+            dlcChecksumLabel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+            dlcChecksumLabel.AutoSize = true;
+            dlcChecksumLabel.Location = new Point(3, 0);
+            dlcChecksumLabel.Name = "dlcChecksumLabel";
+            dlcChecksumLabel.Size = new Size(91, 20);
+            dlcChecksumLabel.TabIndex = 0;
+            dlcChecksumLabel.Text = "DLC Checksum:";
+            dlcChecksumLabel.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // dlcChecksum
+            // 
+            dlcChecksum.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+            dlcChecksum.AutoSize = true;
+            dlcChecksum.Location = new Point(100, 0);
+            dlcChecksum.Name = "dlcChecksum";
+            dlcChecksum.Size = new Size(54, 20);
+            dlcChecksum.TabIndex = 1;
+            dlcChecksum.Text = "Hi mom!";
+            dlcChecksum.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // compile_settings
             // 
@@ -3605,6 +3646,8 @@
             ((System.ComponentModel.ISupportInitialize)gh3_gtr_vol).EndInit();
             ((System.ComponentModel.ISupportInitialize)gh3_band_vol).EndInit();
             compile_tab.ResumeLayout(false);
+            tableLayoutPanel20.ResumeLayout(false);
+            tableLayoutPanel20.PerformLayout();
             compile_settings.ResumeLayout(false);
             tableLayoutPanel9.ResumeLayout(false);
             tableLayoutPanel9.PerformLayout();
@@ -3900,5 +3943,8 @@
         private NumericUpDown previewVolumeGh3;
         private Label label43;
         private ComboBox aerosmithBand;
+        private TableLayoutPanel tableLayoutPanel20;
+        private Label dlcChecksumLabel;
+        private Label dlcChecksum;
     }
 }

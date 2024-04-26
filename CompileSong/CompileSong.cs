@@ -11,10 +11,13 @@ using GH_Toolkit_Core.QB;
 using static GH_Toolkit_Core.QB.QBConstants;
 using static GH_Toolkit_Exceptions.Exceptions;
 using static GH_Toolkit_Core.Methods.Exceptions;
+using GH_Toolkit_Core.PS360;
 using IniParser.Model;
 using IniParser;
 using IniParser.Model.Configuration;
 using GH_Toolkit_Core.Methods;
+using GH_Toolkit_Core.Checksum;
+using GH_Toolkit_Core.PS360;
 
 namespace GH_Toolkit_GUI
 {
@@ -23,6 +26,7 @@ namespace GH_Toolkit_GUI
         private int ghprojVersion = 1;
         private static string ExeLocation = Assembly.GetExecutingAssembly().Location;
         private static string ExeDirectory = Path.GetDirectoryName(ExeLocation);
+        private static string ResourcePath = Path.Combine(ExeDirectory, "Resources");
         private string DefaultTemplateFolder;
         private string DefaultTemplatePath;
         private string StartupProject;
@@ -36,7 +40,6 @@ namespace GH_Toolkit_GUI
         private string WtSongFolder;
         private string ContentFolder;
         private string MusicFolder;
-        private static string OnyxFolder = Path.Combine(ExeDirectory, "Tools", "Onyx");
 
         // This is needed to force all numbers to use decimals with a period as the decimal separator
         private static CultureInfo Murica = new CultureInfo("en-US");
@@ -51,6 +54,8 @@ namespace GH_Toolkit_GUI
 
         private string CurrentGame;
         private string CurrentPlatform;
+        private uint ConsoleChecksum;
+        private string ConsoleCompile = "";
 
         // Dictionary to hold the selected genre for each game
         private Dictionary<string, int> gameSelectedGenres = new Dictionary<string, int>()
@@ -221,6 +226,7 @@ namespace GH_Toolkit_GUI
             SetGameFields();
             updatePreviewStartTime();
             updatePreviewEndTime();
+            DisplayChecksum();
         }
         private void DefaultPaths()
         {
@@ -659,23 +665,25 @@ namespace GH_Toolkit_GUI
             {
                 if (radioButton.Checked)
                 {
-                    if (game == "GH3" || game == "GHA")
-                    {
-                        if (radioButton.Text == "PS2")
-                        {
-                            compile_label.Text = "Extracted ISO Folder:";
-                            compile_input.Text = Ps2IsoFolderPath;
-                        }
-                        else
-                        {
-                            compile_label.Text = "Compile Folder:";
-                            compile_input.Text = compileFolderPath;
-                        }
-                    }
                     // Update the Current Platform field
                     CurrentPlatform = radioButton.Text;
-
+                    DisplayChecksum();
                 }
+            }
+        }
+        private void DisplayChecksum()
+        {
+            if (CurrentPlatform == "Xbox 360" || CurrentPlatform == "PS3")
+            {
+                MakeConsoleChecksum();
+                dlcChecksumLabel.Visible = true;
+                dlcChecksum.Visible = true;
+                dlcChecksum.Text = ConsoleChecksum.ToString();
+            }
+            else
+            {
+                dlcChecksumLabel.Visible = false;
+                dlcChecksum.Visible = false;
             }
         }
         private void SelectFileFolder(object sender, EventArgs e)
@@ -1061,22 +1069,32 @@ namespace GH_Toolkit_GUI
             }
             else if (CurrentPlatform != "PC")
             {
-                var onyxExe = Path.Combine(OnyxFolder, "Onyx.exe");
-                while (!Directory.Exists(OnyxFolder) || !File.Exists(onyxExe))
+                string onyxPath = Pref.OnyxCliPath;
+                var onyxExe = Path.Combine(onyxPath, "onyx.exe");
+                bool showWarning = true;
+                while (!Directory.Exists(onyxPath) || !File.Exists(onyxExe))
                 {
-                    MessageBox.Show("Onyx has not been set. Please select your Onyx CLI folder now.", "Folder Required", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    if (showWarning)
+                    {
+                        MessageBox.Show("Onyx has not been found. Please select your Onyx CLI folder now.", "Folder Required", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        showWarning = false;
+                    }
                     var tempOnyxFolder = AskForGamePath();
-                    var tempOnyxExe = Path.Combine(tempOnyxFolder, "Onyx.exe");
+                    var tempOnyxExe = Path.Combine(tempOnyxFolder, "onyx.exe");
                     if (!File.Exists(tempOnyxExe))
                     {
                         MessageBox.Show("Onyx.exe was not found in the selected folder. Please select the correct folder.", "File Not Found", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     else
                     {
-                        ReadWrite.CopyDirectory(tempOnyxFolder, OnyxFolder, true);
+                        Pref.OnyxCliPath = tempOnyxFolder;
+                        Pref.Save();
+                        onyxPath = tempOnyxFolder;
+                        onyxExe = tempOnyxExe;
                     }
                 }
             }
+            ConsoleCompile = Path.Combine(compile_input.Text, "Console");
         }
         public static string AskForGamePath()
         {
@@ -1216,15 +1234,28 @@ namespace GH_Toolkit_GUI
             }
             return venue;
         }
+        private string GetSongChecksum()
+        {
+            if (CurrentPlatform == "PC" || CurrentPlatform == "PS2")
+            {
+                return song_checksum.Text;
+            }
+            else
+            {
+                return $"dlc{ConsoleChecksum}";
+            }
+        }
         private void CompileGh3PakFile()
         {
 
             string venue = GetVenue(venue_source_gh3.SelectedIndex);
 
+            string checksum = GetSongChecksum();
+
             string pakFile = PAK.CreateSongPackage(
                 midiPath: midi_file_input_gh3.Text,
                 savePath: compile_input.Text,
-                songName: song_checksum.Text,
+                songName: checksum,
                 game: CurrentGame,
                 gameConsole: CurrentPlatform,
                 hopoThreshold: (int)HmxHopoVal.Value,
@@ -1249,9 +1280,17 @@ namespace GH_Toolkit_GUI
             }
             else
             {
-
+                File.Move(pakFile, Path.Combine(ConsoleCompile, $"dlc{ConsoleChecksum}_song.pak"), true);
+                CreateConsoleFilesGh3();
             }
             // Add code to delete the folder after processing eventually
+        }
+        private void MakeConsoleChecksum()
+        {
+            int minNum = 1000000000;
+            string qbString = $"{CurrentGame}{artist_input.Text}{title_input.Text}{year_input.Value}{isCover.Checked}";
+            var qbKey = CRC.QBKeyUInt(qbString);
+            ConsoleChecksum = (uint)(minNum + (qbKey % minNum));
         }
         private void CompileGhwtPakFile()
         {
@@ -1329,6 +1368,7 @@ namespace GH_Toolkit_GUI
         {
             string STEVEN = "Steven Tyler";
 
+            string checksum = GetSongChecksum();
             var entry = new QBStruct.QBStructData();
             string pString = CurrentPlatform == CONSOLE_PS2 ? STRING : WIDESTRING; // Depends on the platform
             bool artistIsOther = artist_text_select.Text == "Other";
@@ -1338,8 +1378,8 @@ namespace GH_Toolkit_GUI
             string singer = SingerName();
             string gender = (singer == STEVEN) ? "male" : singer;
 
-            entry.AddVarToStruct("checksum", song_checksum.Text, QBKEY);
-            entry.AddVarToStruct("name", song_checksum.Text, STRING);
+            entry.AddVarToStruct("checksum", checksum, QBKEY);
+            entry.AddVarToStruct("name", checksum, STRING);
             entry.AddVarToStruct("title", title_input.Text, pString);
             entry.AddVarToStruct("artist", artist_input.Text, pString);
             entry.AddVarToStruct("year", $", {year_input.Value}", pString);
@@ -1573,16 +1613,156 @@ namespace GH_Toolkit_GUI
             var (pakData, pabData) = pakCompiler.CompilePakFromDictionary(qbPak);
             OverwriteGh3Pak(pakData, pabData!);
         }
+        private void CreateConsoleSetlistGh3()
+        {
+            var songListEntry = GenerateGh3SongListEntry();
+            var gh3Resource = Path.Combine(ResourcePath, "GH3");
+            var textChecksum = $"download\\download_song{ConsoleChecksum}.qb";
+            var pakCompiler = new PAK.PakCompiler(CurrentGame, CurrentPlatform, split: false);
+            if (!Directory.Exists(gh3Resource))
+            {
+                throw new Exception("Cannot find GH3 Resource folder.\n\nThis should be included with your toolkit.\nPlease re-download the toolkit.");
+            }
+            string[] locales = ["", "_f", "_g", "_i", "_s"];
+            foreach (string locale in locales)
+            {
+                string songlistPath = Path.Combine(gh3Resource, $"blank_songlist{locale}.q");
+                var songlist = QB.ParseQFromFile(songlistPath);
+                FileCreation.AddToSonglistGh3(songlist, songListEntry);
+                string localeDirectory = Path.Combine(ConsoleCompile, $"dl{ConsoleChecksum}_text{locale}");
+                string qbFile = Path.Combine(localeDirectory, textChecksum);
+                string qbDirectory = Path.GetDirectoryName(qbFile);
+                Directory.CreateDirectory(qbDirectory);
+                var qbBytes = QB.CompileQbFile(songlist, textChecksum, CurrentGame, CurrentPlatform);
+                File.WriteAllBytes(qbFile, qbBytes);
+                var (pakData, _) = pakCompiler.CompilePAK(localeDirectory, CurrentPlatform);
+                var pakSave = $"{localeDirectory}.pak";
+                File.WriteAllBytes(pakSave, pakData);
+                Directory.Delete(localeDirectory, true);
+            }
+        }
+        private void CreateConsoleScriptsGh3()
+        {
+            var gh3Resource = Path.Combine(ResourcePath, "GH3");
+            var scriptChecksum = $"download\\dl{ConsoleChecksum}.q";
+            var pakCompiler = new PAK.PakCompiler(CurrentGame, CurrentPlatform, split: false);
+            if (!Directory.Exists(gh3Resource))
+            {
+                throw new Exception("Cannot find GH3 Resource folder.\n\nThis should be included with your toolkit.\nPlease re-download the toolkit.");
+            }
+            string scriptPath = Path.Combine(gh3Resource, "script_override.q");
+            string pakPath = Path.Combine(ConsoleCompile,$"dl{ConsoleChecksum}");
+            string savePath = Path.Combine(pakPath, scriptChecksum);
+            string saveDirectory = Path.GetDirectoryName(savePath);
+            Directory.CreateDirectory(saveDirectory);
+            File.Copy(scriptPath, savePath, true);
+            var (pakData, _) = pakCompiler.CompilePAK(pakPath, CurrentPlatform);
+            var pakSave = $"{pakPath}.pak";
+            File.WriteAllBytes(pakSave, pakData);
+            Directory.Delete(pakPath, true);
+        }
+        private void CreateOnyxYaml()
+        {
+            string packageName = $"{title_input.Text} by {artist_input.Text}";
+            string yaml = YAML.CreateOnyxYaml(CurrentGame, packageName);
+            if (yaml == "Fail")
+            {
+                throw new Exception("Could not find YAML template.\n\nFailed to create Onyx YAML file.");
+            }
+            string onyxResource = Path.Combine(ResourcePath, "Onyx");
+            string thumbnailResource = Path.Combine(onyxResource, $"{CurrentGame}-thumbnail.png");
+            string onyxRepack = Path.Combine(ConsoleCompile, "360", "onyx-repack");
+            Directory.CreateDirectory(onyxRepack);
+            string yamlPath = Path.Combine(onyxRepack, $"repack-stfs.yaml");
+            string thumbnailPath = Path.Combine(onyxRepack, "thumbnail.png");
+            string titleThumbnailPath = Path.Combine(onyxRepack, "title-thumbnail.png");
+
+            File.WriteAllText(yamlPath, yaml);
+            File.Copy(thumbnailResource, thumbnailPath, true);
+            File.Copy(thumbnailResource, titleThumbnailPath, true);
+        }
+        private void AddExtension()
+        {
+            foreach (string file in Directory.GetFiles(ConsoleCompile))
+            {
+                if (file.ToLower().EndsWith(".ps3") || file.ToLower().EndsWith(".xen"))
+                {
+                    File.Move(file, file.Substring(0, file.Length - 4));
+                }
+                if (CurrentPlatform == "PS3")
+                {
+                    File.Move(file, file.ToUpper() + ".PS3");
+                }
+                else
+                {
+                    File.Move(file, file.ToLower() + ".xen");
+                }
+            }
+        }
+        private void CreateConsoleFilesGh3()
+        {
+            var otherChecksum = $"download\\dl{ConsoleChecksum}.qb";
+            Directory.CreateDirectory(ConsoleCompile);
+            CreateConsoleSetlistGh3();
+            CreateConsoleScriptsGh3();
+            // text pak is download\download_song{x}.qb where x is the checksum
+            // other pak is download\dl{x}.qb where x is the checksum
+        }
+        private void CreateConsolePackage()
+        {
+            string onyxExe = Path.Combine(Pref.OnyxCliPath, "onyx.exe");
+            if (CurrentPlatform == platform_360.Text)
+            {
+                Console.WriteLine("Compiling STFS file using Onyx CLI");
+                CreateOnyxYaml();
+                string toCopyTo = Path.Combine(ConsoleCompile, "360");
+                string[] filesToCopy = Directory.GetFiles(ConsoleCompile);
+                foreach (string file in filesToCopy)
+                {
+                    // Check if each file has an extension, if not skip it
+                    if (!file.Contains("."))
+                    {
+                        continue;
+                    }
+                    File.Copy(file, Path.Combine(toCopyTo, Path.GetFileName(file) + ".xen"), true);
+                }
+                string stfsSave = Path.Combine(ConsoleCompile, song_checksum.Text);
+                string[] onyxArgs = ["stfs", toCopyTo, "--to", stfsSave];
+                ProcessStartInfo startInfo = new ProcessStartInfo(onyxExe);
+                startInfo.CreateNoWindow = false;
+                startInfo.UseShellExecute = true;
+                startInfo.WindowStyle = ProcessWindowStyle.Normal;
+                startInfo.Arguments = string.Join(" ", onyxArgs);
+                try
+                {
+                    // Start the process with the info we specified.
+                    // Call WaitForExit and then the using statement will close.
+                    using (Process exeProcess = Process.Start(startInfo))
+                    {
+                        exeProcess.WaitForExit();
+                    }
+                }
+                catch
+                {
+                    throw new Exception("Onyx failed to create the STFS package.");
+                }
+            }
+            else
+            {
+                
+            }
+        }
         private async Task CompileGh3Audio()
         {
-            string gtrOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_guitar.mp3");
-            string rhythmOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_rhythm.mp3");
-            string backingOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_song.mp3");
-            string coopGtrOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_coop_guitar.mp3");
-            string coopRhythmOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_coop_rhythm.mp3");
-            string coopBackingOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_coop_song.mp3");
-            string crowdOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_crowd.mp3");
-            string previewOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_preview.mp3");
+            string fileName = (CurrentPlatform == "PC" || CurrentPlatform == "PS2") ? song_checksum.Text : $"dlc{ConsoleChecksum}";
+            string gtrOutput = Path.Combine(compile_input.Text, $"{fileName}_guitar.mp3");
+            string rhythmOutput = Path.Combine(compile_input.Text, $"{fileName}_rhythm.mp3");
+            string backingOutput = Path.Combine(compile_input.Text, $"{fileName}_song.mp3");
+            string coopGtrOutput = Path.Combine(compile_input.Text, $"{fileName}_coop_guitar.mp3");
+            string coopRhythmOutput = Path.Combine(compile_input.Text, $"{fileName}_coop_rhythm.mp3");
+            string coopBackingOutput = Path.Combine(compile_input.Text, $"{fileName}_coop_song.mp3");
+            string crowdOutput = Path.Combine(compile_input.Text, $"{fileName}_crowd.mp3");
+            string previewOutput = Path.Combine(compile_input.Text, $"{fileName}_preview.mp3");
             string[] spFiles = { gtrOutput, rhythmOutput, backingOutput };
             string[] coopFiles = { coopGtrOutput, coopRhythmOutput, coopBackingOutput };
             var filesToProcess = new List<string>();
@@ -1590,7 +1770,7 @@ namespace GH_Toolkit_GUI
             filesToProcess.AddRange(coopFiles);
             filesToProcess.Add(crowdOutput);
             filesToProcess.Add(previewOutput);
-            string fsbOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}");
+            string fsbOutput = Path.Combine(compile_input.Text, GetSongChecksum());
             try
             {
                 Console.WriteLine("Compiling Audio...");
@@ -1648,6 +1828,15 @@ namespace GH_Toolkit_GUI
                 {
                     MoveToGh3MusicFolder(fsbOut);
                     MoveToGh3MusicFolder(datOut);
+                }
+                else if (CurrentPlatform == "PS2")
+                {
+
+                }
+                else
+                {
+                    File.Move(fsbOut, Path.Combine(ConsoleCompile, $"dlc{ConsoleChecksum}.fsb"), true);
+                    File.Move(datOut, Path.Combine(ConsoleCompile, $"dlc{ConsoleChecksum}.dat"), true);
                 }
                 Console.WriteLine("Audio Compilation Complete!");
             }
@@ -1848,14 +2037,20 @@ namespace GH_Toolkit_GUI
         private void compile_pak_button_Click(object sender, EventArgs e)
         {
             Console.WriteLine($"Compiling song for {CurrentGame}");
+            MakeConsoleChecksum();
             var time1 = DateTime.Now;
+            bool success = false;
             if (CurrentGame == GAME_GH3 || CurrentGame == GAME_GHA)
             {
-                CompilePakGh3();
+                success = CompilePakGh3();
             }
             else if (CurrentGame == GAME_GHWT)
             {
-                CompilePakGhwt();
+                success = CompilePakGhwt();
+            }
+            if (success && CurrentPlatform == "PS3" || CurrentPlatform == platform_360.Text)
+            {
+                CreateConsolePackage();
             }
             var time2 = DateTime.Now;
             // Calculate the time it took to compile the song
@@ -1865,8 +2060,9 @@ namespace GH_Toolkit_GUI
         private async void compile_all_button_Click(object sender, EventArgs e)
         {
             Console.WriteLine($"Compiling chart and audio for {CurrentGame}");
+            MakeConsoleChecksum();
             string compileText = compile_all_button.Text;
-            compile_all_button.Text = "Compiling...";
+            compile_all_button.Text = COMPILING;
             DisableCloseButton();
             bool compileSuccess = false;
             bool pakSuccess = false;
@@ -1890,6 +2086,10 @@ namespace GH_Toolkit_GUI
                         await CompileGhwtAudio();
                         compileSuccess = true;
                     }
+                }
+                if (compileSuccess && CurrentPlatform == "PS3" || CurrentPlatform == platform_360.Text)
+                {
+                    CreateConsolePackage();
                 }
                 var time2 = DateTime.Now;
 
