@@ -979,6 +979,7 @@ namespace GH_Toolkit_GUI
             {
                 CreateChecksum();
             }
+            ConsoleCompile = Path.Combine(compile_input.Text, "Console");
             string game = CurrentGame;
             if (game == "GH3" || game == "GHA")
             {
@@ -1094,8 +1095,12 @@ namespace GH_Toolkit_GUI
                         onyxExe = tempOnyxExe;
                     }
                 }
+                if (!Directory.Exists(ConsoleCompile))
+                {
+                    Directory.CreateDirectory(ConsoleCompile);
+                }
             }
-            ConsoleCompile = Path.Combine(compile_input.Text, "Console");
+            
         }
         public static string AskForGamePath()
         {
@@ -1715,6 +1720,8 @@ namespace GH_Toolkit_GUI
             string toCopyTo;
             string[] onyxArgs;
             string fileType;
+            bool hasAudio = false;
+            bool hasDat = CurrentGame == GAME_GH3 ? false : true;
             if (CurrentPlatform == platform_360.Text)
             {
                 fileType = "STFS";
@@ -1728,6 +1735,14 @@ namespace GH_Toolkit_GUI
                     if (!file.Contains("."))
                     {
                         continue;
+                    }
+                    if (file.ToLower().EndsWith(".fsb"))
+                    {
+                        hasAudio = true;
+                    }
+                    if (file.ToLower().EndsWith(".dat"))
+                    {
+                        hasDat = true;
                     }
                     File.Copy(file, Path.Combine(toCopyTo, Path.GetFileName(file) + ".xen"), true);
                 }
@@ -1743,7 +1758,7 @@ namespace GH_Toolkit_GUI
                 Directory.CreateDirectory(gameFiles);
                 string ps3Resources = Path.Combine(ResourcePath, "PS3");
                 string currGameResources = Path.Combine(ps3Resources, CurrentGame);
-                string vramFile = Path.Combine(ps3Resources, "VRAM.PAK.PS3");
+                string vramFile = Path.Combine(ps3Resources, $"VRAM_{CurrentGame}");
                 if (!Directory.Exists(ps3Resources) || !Directory.Exists(currGameResources))
                 {
                     throw new Exception("Cannot find PS3 Resource folder.\n\nThis should be included with your toolkit.\nPlease re-download the toolkit.");
@@ -1755,6 +1770,14 @@ namespace GH_Toolkit_GUI
                     if (!file.Contains("."))
                     {
                         continue;
+                    }
+                    if (file.ToLower().EndsWith(".fsb"))
+                    {
+                        hasAudio = true;
+                    }
+                    if (file.ToLower().EndsWith(".dat"))
+                    {
+                        hasDat = true;
                     }
                     File.Copy(file, Path.Combine(gameFiles, Path.GetFileName(file).ToUpper() + ".PS3"), true);
                     string fileExtension = Path.GetExtension(file);
@@ -1770,13 +1793,17 @@ namespace GH_Toolkit_GUI
                     File.Copy(file, Path.Combine(toCopyTo, Path.GetFileName(file)), true);
                 }
                 string pkgSave = Path.Combine(compile_input.Text, $"{song_checksum.Text}.pkg".ToUpper());
-                string contentID = FileCreation.GetPs3Key(CurrentGame) + $"-{song_checksum.Text.ToUpper().Replace("_","").PadRight(16, '0')}";
+                string contentID = FileCreation.GetPs3Key(CurrentGame) + $"-{song_checksum.Text.ToUpper().Replace("_","").PadLeft(16, '0')}";
                 onyxArgs = ["pkg", contentID, toCopyTo, "--to", pkgSave];
+            }
+            if (!hasAudio || !hasDat)
+            {
+                throw new Exception($"Missing audio or dat file for {fileType} creation. Please compile all files first!");
             }
             ProcessStartInfo startInfo = new ProcessStartInfo(onyxExe);
             startInfo.CreateNoWindow = false;
             startInfo.UseShellExecute = true;
-            //startInfo.RedirectStandardOutput = true;
+            // startInfo.RedirectStandardOutput = true;
 
             startInfo.WindowStyle = ProcessWindowStyle.Normal;
             startInfo.Arguments = string.Join(" ", onyxArgs);
@@ -1789,11 +1816,11 @@ namespace GH_Toolkit_GUI
                     exeProcess.StartInfo = startInfo;
                     exeProcess.Start();
 
-                    //StreamReader reader = exeProcess.StandardOutput;
-                    //string output = reader.ReadToEnd();
+                    // StreamReader reader = exeProcess.StandardOutput;
+                    // string output = reader.ReadToEnd();
                     exeProcess.WaitForExit();
 
-                    //Console.WriteLine(output);
+                    // Console.WriteLine(output);
                 }
             }
             catch (Exception ex)
@@ -2102,7 +2129,7 @@ namespace GH_Toolkit_GUI
                 success = CompilePakGhwt();
             }
 
-            if (success && CurrentPlatform == "PS3" || CurrentPlatform == platform_360.Text)
+            if (success && (CurrentPlatform == "PS3" || CurrentPlatform == platform_360.Text))
             {
                 try
                 {
@@ -2116,7 +2143,12 @@ namespace GH_Toolkit_GUI
             var time2 = DateTime.Now;
             // Calculate the time it took to compile the song
             var timeDiff = time2 - time1;
-            Console.WriteLine($"Chart compilation took {timeDiff.TotalSeconds.ToString("G3")} seconds");
+            string process = success ? "Chart compilation took" : "Compilation failed after";
+            Console.WriteLine($"{process} {timeDiff.TotalSeconds.ToString("G3")} seconds");
+            if (Pref.ShowPostCompile && success)
+            {
+                ShowPostCompile();
+            }
         }
         private async void compile_all_button_Click(object sender, EventArgs e)
         {
@@ -2155,7 +2187,8 @@ namespace GH_Toolkit_GUI
                 var time2 = DateTime.Now;
 
                 var timeDiff = time2 - time1;
-                Console.WriteLine($"Total compilation took {timeDiff.TotalSeconds.ToString("G3")} seconds");
+                string process = compileSuccess ? "Chart compilation took" : "Compilation failed after";
+                Console.WriteLine($"{process} {timeDiff.TotalSeconds.ToString("G3")} seconds");
             }
             catch (Exception ex)
             {
@@ -2181,7 +2214,7 @@ namespace GH_Toolkit_GUI
             }
             else
             {
-                MessageBox.Show("Compilation has completed successfully!\n\nYour song has been packaged up and is ready to be installed on your console.\n\nIt can be found where you defined the song to be compiled to or next to your .ghproj file.", "Compilation Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Compilation has completed successfully!\n\nYour song has been packaged up and is ready to be installed on your console.\n\nIt can be found where you defined the song to be compiled to or next to your .ghproj file.\n\nDon't forget to add it to your custom cache!", "Compilation Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
         // Toolstrip Logic
