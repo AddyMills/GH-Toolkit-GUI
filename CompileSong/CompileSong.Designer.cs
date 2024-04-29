@@ -288,6 +288,8 @@
             toolStripSeparator1 = new ToolStripSeparator();
             saveTemplateToolStripMenuItem = new ToolStripMenuItem();
             loadTemplateToolStripMenuItem = new ToolStripMenuItem();
+            toolStripSeparator2 = new ToolStripSeparator();
+            exportSongArchiveToolStripMenuItem = new ToolStripMenuItem();
             toolStripSplitButton1 = new ToolStripDropDownButton();
             settingsToolStripMenuItem = new ToolStripMenuItem();
             tableLayoutPanel12 = new TableLayoutPanel();
@@ -3427,7 +3429,7 @@
             // toolStripButton1
             // 
             toolStripButton1.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            toolStripButton1.DropDownItems.AddRange(new ToolStripItem[] { newToolStripMenuItem, openToolStripMenuItem, saveToolStripMenuItem, saveAsToolStripMenuItem, toolStripSeparator1, saveTemplateToolStripMenuItem, loadTemplateToolStripMenuItem });
+            toolStripButton1.DropDownItems.AddRange(new ToolStripItem[] { newToolStripMenuItem, openToolStripMenuItem, saveToolStripMenuItem, saveAsToolStripMenuItem, toolStripSeparator1, saveTemplateToolStripMenuItem, loadTemplateToolStripMenuItem, toolStripSeparator2, exportSongArchiveToolStripMenuItem });
             toolStripButton1.Name = "toolStripButton1";
             toolStripButton1.Size = new Size(38, 22);
             toolStripButton1.Text = "File";
@@ -3482,6 +3484,17 @@
             loadTemplateToolStripMenuItem.Size = new Size(186, 22);
             loadTemplateToolStripMenuItem.Text = "Load Template";
             loadTemplateToolStripMenuItem.Click += loadTemplateToolStripMenuItem_Click;
+            // 
+            // toolStripSeparator2
+            // 
+            toolStripSeparator2.Name = "toolStripSeparator2";
+            toolStripSeparator2.Size = new Size(183, 6);
+            // 
+            // exportSongArchiveToolStripMenuItem
+            // 
+            exportSongArchiveToolStripMenuItem.Name = "exportSongArchiveToolStripMenuItem";
+            exportSongArchiveToolStripMenuItem.Size = new Size(186, 22);
+            exportSongArchiveToolStripMenuItem.Text = "Export Song Archive";
             // 
             // toolStripSplitButton1
             // 
@@ -3590,7 +3603,7 @@
             Controls.Add(compiler_tabs);
             MinimumSize = new Size(18, 698);
             Name = "CompileSong";
-            Text = "Compile a Song";
+            Text = "Work with Songs";
             compiler_tabs.ResumeLayout(false);
             metadata_tab.ResumeLayout(false);
             tableLayoutPanel2.ResumeLayout(false);
@@ -3946,5 +3959,7 @@
         private TableLayoutPanel tableLayoutPanel20;
         private Label dlcChecksumLabel;
         private Label dlcChecksum;
+        private ToolStripSeparator toolStripSeparator2;
+        private ToolStripMenuItem exportSongArchiveToolStripMenuItem;
     }
 }

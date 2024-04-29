@@ -406,11 +406,11 @@ namespace GH_Toolkit_GUI
                 return;
             }
             bool isOld = game == "GH3" || game == "GHA";
+            EnablePlatforms();
             SetTabs(isOld);
             SetGenres(game);
             SetDrumkit();
             SetBeatLines();
-            EnablePlatforms();
         }
         private void SetBeatLines()
         {
@@ -427,7 +427,7 @@ namespace GH_Toolkit_GUI
             platform_ps3.Enabled = true;
             if (CurrentGame == "GH3")
             {
-                
+
             }
             else if (CurrentGame == "GHA")
             {
@@ -1100,7 +1100,7 @@ namespace GH_Toolkit_GUI
                     Directory.CreateDirectory(ConsoleCompile);
                 }
             }
-            
+
         }
         public static string AskForGamePath()
         {
@@ -1657,7 +1657,7 @@ namespace GH_Toolkit_GUI
                 throw new Exception("Cannot find GH3 Resource folder.\n\nThis should be included with your toolkit.\nPlease re-download the toolkit.");
             }
             string scriptPath = Path.Combine(gh3Resource, "script_override.q");
-            string pakPath = Path.Combine(ConsoleCompile,$"dl{ConsoleChecksum}");
+            string pakPath = Path.Combine(ConsoleCompile, $"dl{ConsoleChecksum}");
             string savePath = Path.Combine(pakPath, scriptChecksum);
             string saveDirectory = Path.GetDirectoryName(savePath);
             Directory.CreateDirectory(saveDirectory);
@@ -1793,7 +1793,7 @@ namespace GH_Toolkit_GUI
                     File.Copy(file, Path.Combine(toCopyTo, Path.GetFileName(file)), true);
                 }
                 string pkgSave = Path.Combine(compile_input.Text, $"{song_checksum.Text}.pkg".ToUpper());
-                string contentID = FileCreation.GetPs3Key(CurrentGame) + $"-{song_checksum.Text.ToUpper().Replace("_","").PadLeft(16, '0')}";
+                string contentID = FileCreation.GetPs3Key(CurrentGame) + $"-{song_checksum.Text.ToUpper().Replace("_", "").PadLeft(16, '0')}";
                 onyxArgs = ["pkg", contentID, toCopyTo, "--to", pkgSave];
             }
             if (!hasAudio || !hasDat)
@@ -2135,7 +2135,7 @@ namespace GH_Toolkit_GUI
                 {
                     CreateConsolePackage();
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     HandleException(ex, "Console Package Creation Failed!");
                 }
