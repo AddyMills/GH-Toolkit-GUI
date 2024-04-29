@@ -32,9 +32,9 @@
             FileButton = new ToolStripDropDownButton();
             button1 = new Button();
             tableLayoutPanel1 = new TableLayoutPanel();
-            button2 = new Button();
-            label1 = new Label();
+            importSGH = new Button();
             consoleOutput = new TextBox();
+            label1 = new Label();
             toolStrip1.SuspendLayout();
             tableLayoutPanel1.SuspendLayout();
             SuspendLayout();
@@ -76,7 +76,7 @@
             tableLayoutPanel1.ColumnCount = 1;
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tableLayoutPanel1.Controls.Add(button1, 0, 0);
-            tableLayoutPanel1.Controls.Add(button2, 0, 2);
+            tableLayoutPanel1.Controls.Add(importSGH, 0, 2);
             tableLayoutPanel1.Controls.Add(label1, 0, 1);
             tableLayoutPanel1.Location = new Point(10, 22);
             tableLayoutPanel1.Margin = new Padding(3, 2, 3, 2);
@@ -88,29 +88,17 @@
             tableLayoutPanel1.Size = new Size(381, 190);
             tableLayoutPanel1.TabIndex = 2;
             // 
-            // button2
+            // importSGH
             // 
-            button2.Dock = DockStyle.Fill;
-            button2.Enabled = false;
-            button2.Location = new Point(3, 104);
-            button2.Margin = new Padding(3, 2, 3, 2);
-            button2.Name = "button2";
-            button2.Size = new Size(375, 84);
-            button2.TabIndex = 2;
-            button2.Text = "Songlist Manager";
-            button2.UseVisualStyleBackColor = true;
-            button2.Click += button2_Click;
-            // 
-            // label1
-            // 
-            label1.AutoSize = true;
-            label1.Dock = DockStyle.Fill;
-            label1.Location = new Point(3, 87);
-            label1.Name = "label1";
-            label1.Size = new Size(375, 15);
-            label1.TabIndex = 3;
-            label1.Text = "PC Tools";
-            label1.TextAlign = ContentAlignment.MiddleCenter;
+            importSGH.Dock = DockStyle.Fill;
+            importSGH.Location = new Point(3, 104);
+            importSGH.Margin = new Padding(3, 2, 3, 2);
+            importSGH.Name = "importSGH";
+            importSGH.Size = new Size(375, 84);
+            importSGH.TabIndex = 2;
+            importSGH.Text = "Import SGH Archive";
+            importSGH.UseVisualStyleBackColor = true;
+            importSGH.Click += button2_Click;
             // 
             // consoleOutput
             // 
@@ -122,6 +110,17 @@
             consoleOutput.ScrollBars = ScrollBars.Vertical;
             consoleOutput.Size = new Size(381, 221);
             consoleOutput.TabIndex = 3;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Dock = DockStyle.Fill;
+            label1.Location = new Point(3, 87);
+            label1.Name = "label1";
+            label1.Size = new Size(375, 15);
+            label1.TabIndex = 3;
+            label1.Text = "Other Tools";
+            label1.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // MasterForm
             // 
@@ -147,8 +146,8 @@
         private ToolStripDropDownButton FileButton;
         private Button button1;
         private TableLayoutPanel tableLayoutPanel1;
-        private Button button2;
-        private Label label1;
+        private Button importSGH;
         private TextBox consoleOutput;
+        private Label label1;
     }
 }

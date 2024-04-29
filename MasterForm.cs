@@ -19,6 +19,10 @@ namespace GH_Toolkit_GUI
             {
                 OpenCompileSongForm(inputFile);
             }
+            else if (Path.GetExtension(inputFile.ToLower()) == ".sgh")
+            {
+                ImportSGHForm(inputFile);
+            }
 
         }
 
@@ -28,6 +32,12 @@ namespace GH_Toolkit_GUI
             compileSongForm.Show();
         }
 
+        private void ImportSGHForm(string inputFile = "")
+        {
+            ImportSGH importSGHForm = new ImportSGH(inputFile);
+            importSGHForm.Show();
+        }
+
         private void button1_Click(object sender, EventArgs e)
         {
             OpenCompileSongForm();
@@ -35,7 +45,7 @@ namespace GH_Toolkit_GUI
 
         private void button2_Click(object sender, EventArgs e)
         {
-
+            ImportSGHForm();
         }
     }
     public class TextBoxStreamWriter : TextWriter
