@@ -1348,17 +1348,22 @@ namespace GH_Toolkit_GUI
             }
             File.Move(audioPath, savePath, true);
         }
-
-        private QBStruct.QBStructData GenerateGh3SongListEntry()
+        private GhMetadata PackageMetadata()
         {
-            var songListEntry = new Gh3SongEntry
+            return new GhMetadata
             {
-                Checksum = GetSongChecksum(),
+                Checksum = song_checksum.Text,
+                ChecksumConsole = GetSongChecksum(),
+                CompileFolder = compile_input.Text,
                 Title = title_input.Text,
                 Artist = artist_input.Text,
                 ArtistTextSelect = artist_text_select.Text,
                 ArtistTextCustom = artistTextCustom.Text,
                 Year = (int)year_input.Value,
+                CoverArtist = cover_artist_input.Text,
+                CoverYear = (int)cover_year_input.Value,
+                Genre = genre_input.Text,
+                ChartAuthor = chart_author_input.Text,
                 Bassist = BassistName(),
                 Singer = SingerName(),
                 IsArtistFamousBy = IsArtistFamousBy(),
@@ -1375,6 +1380,11 @@ namespace GH_Toolkit_GUI
                 Countoff = countoff_select_gh3.Text,
                 HopoThreshold = (float)nsHopoThreshold
             };
+        }
+        private QBStruct.QBStructData GenerateGh3SongListEntry()
+        {
+            var songListEntry = PackageMetadata();
+
             return songListEntry.GenerateGh3SongListEntry(CurrentGame, CurrentPlatform);
         }
         private string GetArtistText()
@@ -1515,7 +1525,7 @@ namespace GH_Toolkit_GUI
             var (pakData, pabData) = AddToDownloadList(GetGh3PakFile(), CurrentPlatform, song_checksum.Text, songListEntry);
             OverwriteGh3Pak(pakData, pabData!);
         }
-        private void CreateOnyxYaml()
+        /*private void CreateOnyxYaml()
         {
             string packageName = $"{title_input.Text} by {artist_input.Text}";
             string yaml = YAML.CreateOnyxYaml(CurrentGame, packageName);
@@ -1534,7 +1544,7 @@ namespace GH_Toolkit_GUI
             File.WriteAllText(yamlPath, yaml);
             File.Copy(thumbnailResource, thumbnailPath, true);
             File.Copy(thumbnailResource, titleThumbnailPath, true);
-        }
+        }*/
         private void CreateConsoleFilesGh3()
         {
             var otherChecksum = $"download\\dl{ConsoleChecksum}.qb";
@@ -1546,121 +1556,8 @@ namespace GH_Toolkit_GUI
         }
         private void CreateConsolePackage()
         {
-            string onyxExe = Path.Combine(Pref.OnyxCliPath, "onyx.exe");
-            string toCopyTo;
-            string[] onyxArgs;
-            string fileType;
-            bool hasAudio = false;
-            bool hasDat = CurrentGame == GAME_GH3 ? false : true;
-            if (CurrentPlatform == platform_360.Text)
-            {
-                fileType = "STFS";
-                Console.WriteLine("Compiling STFS file using Onyx CLI");
-                CreateOnyxYaml();
-                toCopyTo = Path.Combine(ConsoleCompile, "360");
-                string[] filesToCopy = Directory.GetFiles(ConsoleCompile);
-                foreach (string file in filesToCopy)
-                {
-                    // Check if each file has an extension, if not skip it
-                    if (!file.Contains("."))
-                    {
-                        continue;
-                    }
-                    if (file.ToLower().EndsWith(".fsb"))
-                    {
-                        hasAudio = true;
-                    }
-                    if (file.ToLower().EndsWith(".dat"))
-                    {
-                        hasDat = true;
-                    }
-                    File.Copy(file, Path.Combine(toCopyTo, Path.GetFileName(file) + ".xen"), true);
-                }
-                string stfsSave = Path.Combine(compile_input.Text, song_checksum.Text.ToUpper());
-                onyxArgs = ["stfs", toCopyTo, "--to", stfsSave];
-            }
-            else
-            {
-                fileType = "PKG";
-                Console.WriteLine("Compiling PKG file using Onyx CLI");
-                toCopyTo = Path.Combine(ConsoleCompile, "PS3");
-                string gameFiles = Path.Combine(toCopyTo, "USRDIR", song_checksum.Text.ToUpper());
-                Directory.CreateDirectory(gameFiles);
-                string ps3Resources = Path.Combine(ResourcePath, "PS3");
-                string currGameResources = Path.Combine(ps3Resources, CurrentGame);
-                string vramFile = Path.Combine(ps3Resources, $"VRAM_{CurrentGame}");
-                if (!Directory.Exists(ps3Resources) || !Directory.Exists(currGameResources))
-                {
-                    throw new Exception("Cannot find PS3 Resource folder.\n\nThis should be included with your toolkit.\nPlease re-download the toolkit.");
-                }
-                string[] filesToCopy = Directory.GetFiles(ConsoleCompile);
-                foreach (string file in filesToCopy)
-                {
-                    // Check if each file has an extension, if not skip it
-                    if (!file.Contains("."))
-                    {
-                        continue;
-                    }
-                    if (file.ToLower().EndsWith(".fsb"))
-                    {
-                        hasAudio = true;
-                    }
-                    if (file.ToLower().EndsWith(".dat"))
-                    {
-                        hasDat = true;
-                    }
-                    File.Copy(file, Path.Combine(gameFiles, Path.GetFileName(file).ToUpper() + ".PS3"), true);
-                    string fileExtension = Path.GetExtension(file);
-                    string fileNoExt = Path.GetFileNameWithoutExtension(file).ToLower();
-                    bool localeFile = fileNoExt.Contains("_text") && !fileNoExt.EndsWith("_text");
-                    if (fileExtension.ToLower() == ".pak" && !localeFile)
-                    {
-                        File.Copy(vramFile, Path.Combine(gameFiles, $"{fileNoExt}_VRAM.PAK.PS3").ToUpper(), true);
-                    }
-                }
-                foreach (string file in Directory.GetFiles(currGameResources))
-                {
-                    File.Copy(file, Path.Combine(toCopyTo, Path.GetFileName(file)), true);
-                }
-                string pkgSave = Path.Combine(compile_input.Text, $"{song_checksum.Text}.pkg".ToUpper());
-                string contentID = FileCreation.GetPs3Key(CurrentGame) + $"-{song_checksum.Text.ToUpper().Replace("_", "").PadLeft(16, '0')}";
-                onyxArgs = ["pkg", contentID, toCopyTo, "--to", pkgSave];
-            }
-            if (!hasAudio || !hasDat)
-            {
-                throw new Exception($"Missing audio or dat file for {fileType} creation. Please compile all files first!");
-            }
-            ProcessStartInfo startInfo = new ProcessStartInfo(onyxExe);
-            startInfo.CreateNoWindow = false;
-            startInfo.UseShellExecute = true;
-            // startInfo.RedirectStandardOutput = true;
-
-            startInfo.WindowStyle = ProcessWindowStyle.Normal;
-            startInfo.Arguments = string.Join(" ", onyxArgs);
-            try
-            {
-                // Start the process with the info we specified.
-                // Call WaitForExit and then the using statement will close.
-                using (Process exeProcess = new Process())
-                {
-                    exeProcess.StartInfo = startInfo;
-                    exeProcess.Start();
-
-                    // StreamReader reader = exeProcess.StandardOutput;
-                    // string output = reader.ReadToEnd();
-                    exeProcess.WaitForExit();
-
-                    // Console.WriteLine(output);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-            finally
-            {
-                Directory.Delete(toCopyTo, true);
-            }
+            var metadata = PackageMetadata();
+            metadata.CreateConsolePackage(CurrentGame, CurrentPlatform, ConsoleCompile, ResourcePath, Pref.OnyxCliPath);
         }
         private async Task CompileGh3Audio()
         {
