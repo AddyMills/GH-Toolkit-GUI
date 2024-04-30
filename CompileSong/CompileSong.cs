@@ -11,6 +11,7 @@ using GH_Toolkit_Core.QB;
 using static GH_Toolkit_Core.QB.QBConstants;
 using static GH_Toolkit_Exceptions.Exceptions;
 using static GH_Toolkit_Core.Methods.Exceptions;
+using static GH_Toolkit_Core.Methods.CreateForGame;
 using GH_Toolkit_Core.PS360;
 using IniParser.Model;
 using IniParser;
@@ -44,14 +45,6 @@ namespace GH_Toolkit_GUI
 
         // This is needed to force all numbers to use decimals with a period as the decimal separator
         private static CultureInfo Murica = new CultureInfo("en-US");
-
-        private static string downloadRef = "scripts\\guitar\\guitar_download.qb";
-        private static string gh3DownloadSongs = "gh3_download_songs";
-        private static string songlistRef = "scripts\\guitar\\songlist.qb";
-        private static string downloadSonglist = "download_songlist";
-        private static string gh3Songlist = "gh3_songlist";
-        private static string downloadProps = "download_songlist_props";
-        private static string permanentProps = "permanent_songlist_props";
 
         private string CurrentGame;
         private string CurrentPlatform;
@@ -1161,26 +1154,12 @@ namespace GH_Toolkit_GUI
         }
         private void OverwriteGh3Pak(byte[] pakData, byte[] pabData)
         {
+            OverwriteSplitPak(GetGh3PakFile(), pakData, pabData, DOTXEN);
+            /*
             string qbPakLocation = GetGh3PakFile();
             string qbPabLocation = qbPakLocation.Replace(DOT_PAK_XEN, DOT_PAB_XEN);
             File.WriteAllBytes(qbPakLocation, pakData);
-            File.WriteAllBytes(qbPabLocation, pabData);
-        }
-        private void FirstTimeDownloadSonglist()
-        {
-            string qbPakLocation = GetGh3PakFile();
-            var pakCompiler = new PAK.PakCompiler(CurrentGame, CurrentPlatform, split: true);
-            var qbPak = PAK.PakEntryDictFromFile(qbPakLocation);
-            var downloadQb = qbPak[downloadRef];
-            var downloadQbEntries = QB.QbEntryDictFromBytes(downloadQb.EntryData, "big");
-            var downloadSonglist = downloadQbEntries[gh3DownloadSongs].Data as QBStruct.QBStructData;
-            var tier1 = downloadSonglist["tier1"] as QBStruct.QBStructData;
-            tier1.DeleteItem("defaultunlocked");
-            tier1.AddFlagToStruct("unlockall", QBKEY);
-            byte[] downloadQbBytes = QB.CompileQbFromDict(downloadQbEntries, downloadRef, CurrentGame, CurrentPlatform);
-            downloadQb.EntryData = downloadQbBytes;
-            var (pakData, pabData) = pakCompiler.CompilePakFromDictionary(qbPak);
-            OverwriteGh3Pak(pakData, pabData!);
+            File.WriteAllBytes(qbPabLocation, pabData);*/
         }
         private void CreateChecksum()
         {
@@ -1372,77 +1351,31 @@ namespace GH_Toolkit_GUI
 
         private QBStruct.QBStructData GenerateGh3SongListEntry()
         {
-            string STEVEN = "Steven Tyler";
-
-            string checksum = GetSongChecksum();
-            var entry = new QBStruct.QBStructData();
-            string pString = CurrentPlatform == CONSOLE_PS2 ? STRING : WIDESTRING; // Depends on the platform
-            bool artistIsOther = artist_text_select.Text == "Other";
-            string artistText = !artistIsOther ? $"artist_text_{artist_text_select.Text.ToLower().Replace(" ", "_")}" : artistTextCustom.Text;
-            string artistType = artistIsOther ? pString : POINTER;
-            string bassist = BassistName();
-            string singer = SingerName();
-            string gender = (singer == STEVEN) ? "male" : singer;
-
-            entry.AddVarToStruct("checksum", checksum, QBKEY);
-            entry.AddVarToStruct("name", checksum, STRING);
-            entry.AddVarToStruct("title", title_input.Text, pString);
-            entry.AddVarToStruct("artist", artist_input.Text, pString);
-            entry.AddVarToStruct("year", $", {year_input.Value}", pString);
-            entry.AddVarToStruct("artist_text", artistText, artistType);
-            entry.AddIntToStruct("original_artist", IsArtistFamousBy() ? 0 : 1);
-            entry.AddVarToStruct("version", "gh3", QBKEY);
-            entry.AddIntToStruct("leaderboard", 1);
-            entry.AddIntToStruct("gem_offset", 0);
-            entry.AddIntToStruct("input_offset", 0);
-            entry.AddVarToStruct("singer", gender, QBKEY);
-            if (CurrentGame == "GHA")
+            var songListEntry = new Gh3SongEntry
             {
-                string band = singer == STEVEN ? aerosmithBand.Text : "default_band";
-                entry.AddVarToStruct("band", band, QBKEY);
-                if (singer == STEVEN)
-                {
-                    entry.AddVarToStruct("guitarist_checksum", "aerosmith", QBKEY);
-                }
-                if (Pref.OverrideBeatLines)
-                {
-                    var low8 = (int)beat8thLow.Value;
-                    var high8 = (int)beat8thHigh.Value;
-                    var low16 = (int)beat16thLow.Value;
-                    var high16 = (int)beat16thHigh.Value;
-                    if (low8 != 1)
-                    {
-                        entry.AddIntToStruct("thin_fretbar_8note_params_low_bpm", low8);
-                    }
-                    if (high8 != 180)
-                    {
-                        entry.AddIntToStruct("thin_fretbar_8note_params_high_bpm", high8);
-                    }
-                    if (low16 != 1)
-                    {
-                        entry.AddIntToStruct("thin_fretbar_16note_params_low_bpm", low16);
-                    }
-                    if (high16 != 120)
-                    {
-                        entry.AddIntToStruct("thin_fretbar_16note_params_high_bpm", high16);
-                    }
-                }
-            }
-            entry.AddVarToStruct("keyboard", "false", QBKEY);
-            entry.AddFloatToStruct("band_playback_volume", (float)gh3_band_vol.Value);
-            entry.AddFloatToStruct("guitar_playback_volume", (float)gh3_gtr_vol.Value);
-            entry.AddVarToStruct("countoff", countoff_select_gh3.Text, STRING);
-            entry.AddIntToStruct("rhythm_track", p2_rhythm_check.Checked ? 1 : 0);
-            if (coop_audio_check.Checked)
-            {
-                entry.AddFlagToStruct("use_coop_notetracks", QBKEY);
-            }
-            entry.AddFloatToStruct("hammer_on_measure_scale", (float)nsHopoThreshold);
-            if (bassist != "Default")
-            {
-                entry.AddVarToStruct("bassist", bassist, QBKEY);
-            }
-            return entry;
+                Checksum = GetSongChecksum(),
+                Title = title_input.Text,
+                Artist = artist_input.Text,
+                ArtistTextSelect = artist_text_select.Text,
+                ArtistTextCustom = artistTextCustom.Text,
+                Year = (int)year_input.Value,
+                Bassist = BassistName(),
+                Singer = SingerName(),
+                IsArtistFamousBy = IsArtistFamousBy(),
+                AerosmithBand = aerosmithBand.Text,
+                Beat8thLow = (int)beat8thLow.Value,
+                Beat8thHigh = (int)beat8thHigh.Value,
+                Beat16thLow = (int)beat16thLow.Value,
+                Beat16thHigh = (int)beat16thHigh.Value,
+                OverrideBeatLines = Pref.OverrideBeatLines,
+                CoopAudioCheck = coop_audio_check.Checked,
+                P2RhythmCheck = p2_rhythm_check.Checked,
+                BandVol = (float)gh3_band_vol.Value,
+                GtrVol = (float)gh3_gtr_vol.Value,
+                Countoff = countoff_select_gh3.Text,
+                HopoThreshold = (float)nsHopoThreshold
+            };
+            return songListEntry.GenerateGh3SongListEntry(CurrentGame, CurrentPlatform);
         }
         private string GetArtistText()
         {
@@ -1578,94 +1511,9 @@ namespace GH_Toolkit_GUI
         }
         private void AddToPCSetlist()
         {
-            //ReplaceGh3PakFiles();
-            string qbPakLocation = GetGh3PakFile();
-            var pakCompiler = new PAK.PakCompiler(CurrentGame, CurrentPlatform, split: true);
-            var qbPak = PAK.PakEntryDictFromFile(qbPakLocation);
-            var songList = qbPak[songlistRef];
-            var songListEntries = QB.QbEntryDictFromBytes(songList.EntryData, "big");
-            var dlSongList = songListEntries[gh3Songlist].Data as QBArray.QBArrayNode;
-            var dlSongListProps = songListEntries[permanentProps].Data as QBStruct.QBStructData;
-            var songPropsTest = songListEntries["permanent_songlist_props"].Data as QBStruct.QBStructData;
             var songListEntry = GenerateGh3SongListEntry();
-            var songIndex = dlSongList.GetItemIndex(song_checksum.Text, QBKEY);
-            if (songIndex == -1)
-            {
-                dlSongList.AddQbkeyToArray(song_checksum.Text);
-                dlSongListProps.AddStructToStruct(song_checksum.Text, songListEntry);
-            }
-            else
-            {
-                dlSongListProps[song_checksum.Text] = songListEntry;
-            }
-            byte[] songlistBytes = QB.CompileQbFromDict(songListEntries, songlistRef, CurrentGame, CurrentPlatform);
-            songList.OverwriteData(songlistBytes);
-
-            var downloadQb = qbPak[downloadRef];
-            var downloadQbEntries = QB.QbEntryDictFromBytes(downloadQb.EntryData, "big");
-            var downloadlist = downloadQbEntries[gh3DownloadSongs].Data as QBStruct.QBStructData;
-            var tier1 = downloadlist["tier1"] as QBStruct.QBStructData;
-            var songArray = tier1["songs"] as QBArray.QBArrayNode;
-
-
-            if (songArray.GetItemIndex(song_checksum.Text, QBKEY) == -1)
-            {
-                songArray.AddQbkeyToArray(song_checksum.Text);
-                tier1["defaultunlocked"] = songArray.Items.Count;
-            }
-            byte[] downloadQbBytes = QB.CompileQbFromDict(downloadQbEntries, downloadRef, CurrentGame, CurrentPlatform);
-            downloadQb.OverwriteData(downloadQbBytes);
-
-            var (pakData, pabData) = pakCompiler.CompilePakFromDictionary(qbPak);
+            var (pakData, pabData) = AddToDownloadList(GetGh3PakFile(), CurrentPlatform, song_checksum.Text, songListEntry);
             OverwriteGh3Pak(pakData, pabData!);
-        }
-        private void CreateConsoleSetlistGh3()
-        {
-            var songListEntry = GenerateGh3SongListEntry();
-            var gh3Resource = Path.Combine(ResourcePath, "GH3");
-            var textChecksum = $"download\\download_song{ConsoleChecksum}.qb";
-            var pakCompiler = new PAK.PakCompiler(CurrentGame, CurrentPlatform, split: false);
-            if (!Directory.Exists(gh3Resource))
-            {
-                throw new Exception("Cannot find GH3 Resource folder.\n\nThis should be included with your toolkit.\nPlease re-download the toolkit.");
-            }
-            string[] locales = ["", "_f", "_g", "_i", "_s"];
-            foreach (string locale in locales)
-            {
-                string songlistPath = Path.Combine(gh3Resource, $"blank_songlist{locale}.q");
-                var songlist = QB.ParseQFromFile(songlistPath);
-                FileCreation.AddToSonglistGh3(songlist, songListEntry);
-                string localeDirectory = Path.Combine(ConsoleCompile, $"dl{ConsoleChecksum}_text{locale}");
-                string qbFile = Path.Combine(localeDirectory, textChecksum);
-                string qbDirectory = Path.GetDirectoryName(qbFile);
-                Directory.CreateDirectory(qbDirectory);
-                var qbBytes = QB.CompileQbFile(songlist, textChecksum, CurrentGame, CurrentPlatform);
-                File.WriteAllBytes(qbFile, qbBytes);
-                var (pakData, _) = pakCompiler.CompilePAK(localeDirectory, CurrentPlatform);
-                var pakSave = $"{localeDirectory}.pak";
-                File.WriteAllBytes(pakSave, pakData);
-                Directory.Delete(localeDirectory, true);
-            }
-        }
-        private void CreateConsoleScriptsGh3()
-        {
-            var gh3Resource = Path.Combine(ResourcePath, "GH3");
-            var scriptChecksum = $"download\\dl{ConsoleChecksum}.q";
-            var pakCompiler = new PAK.PakCompiler(CurrentGame, CurrentPlatform, split: false);
-            if (!Directory.Exists(gh3Resource))
-            {
-                throw new Exception("Cannot find GH3 Resource folder.\n\nThis should be included with your toolkit.\nPlease re-download the toolkit.");
-            }
-            string scriptPath = Path.Combine(gh3Resource, "script_override.q");
-            string pakPath = Path.Combine(ConsoleCompile, $"dl{ConsoleChecksum}");
-            string savePath = Path.Combine(pakPath, scriptChecksum);
-            string saveDirectory = Path.GetDirectoryName(savePath);
-            Directory.CreateDirectory(saveDirectory);
-            File.Copy(scriptPath, savePath, true);
-            var (pakData, _) = pakCompiler.CompilePAK(pakPath, CurrentPlatform);
-            var pakSave = $"{pakPath}.pak";
-            File.WriteAllBytes(pakSave, pakData);
-            Directory.Delete(pakPath, true);
         }
         private void CreateOnyxYaml()
         {
@@ -1687,30 +1535,12 @@ namespace GH_Toolkit_GUI
             File.Copy(thumbnailResource, thumbnailPath, true);
             File.Copy(thumbnailResource, titleThumbnailPath, true);
         }
-        private void AddExtension()
-        {
-            foreach (string file in Directory.GetFiles(ConsoleCompile))
-            {
-                if (file.ToLower().EndsWith(".ps3") || file.ToLower().EndsWith(".xen"))
-                {
-                    File.Move(file, file.Substring(0, file.Length - 4));
-                }
-                if (CurrentPlatform == "PS3")
-                {
-                    File.Move(file, file.ToUpper() + ".PS3");
-                }
-                else
-                {
-                    File.Move(file, file.ToLower() + ".xen");
-                }
-            }
-        }
         private void CreateConsoleFilesGh3()
         {
             var otherChecksum = $"download\\dl{ConsoleChecksum}.qb";
             Directory.CreateDirectory(ConsoleCompile);
-            CreateConsoleSetlistGh3();
-            CreateConsoleScriptsGh3();
+            CreateConsoleDownloadFiles(ConsoleChecksum, CurrentGame, CurrentPlatform, ConsoleCompile, ResourcePath, [GenerateGh3SongListEntry()]);
+            //CreateConsoleDownloadScriptsGh3();
             // text pak is download\download_song{x}.qb where x is the checksum
             // other pak is download\dl{x}.qb where x is the checksum
         }
