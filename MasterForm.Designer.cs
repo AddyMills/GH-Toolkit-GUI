@@ -33,8 +33,9 @@
             button1 = new Button();
             tableLayoutPanel1 = new TableLayoutPanel();
             importSGH = new Button();
-            consoleOutput = new TextBox();
             label1 = new Label();
+            consoleOutput = new TextBox();
+            button2 = new Button();
             toolStrip1.SuspendLayout();
             tableLayoutPanel1.SuspendLayout();
             SuspendLayout();
@@ -65,7 +66,7 @@
             button1.Dock = DockStyle.Fill;
             button1.Location = new Point(3, 3);
             button1.Name = "button1";
-            button1.Size = new Size(375, 81);
+            button1.Size = new Size(375, 52);
             button1.TabIndex = 1;
             button1.Text = "Compile a Song";
             button1.UseVisualStyleBackColor = true;
@@ -78,27 +79,40 @@
             tableLayoutPanel1.Controls.Add(button1, 0, 0);
             tableLayoutPanel1.Controls.Add(importSGH, 0, 2);
             tableLayoutPanel1.Controls.Add(label1, 0, 1);
+            tableLayoutPanel1.Controls.Add(button2, 0, 3);
             tableLayoutPanel1.Location = new Point(10, 22);
             tableLayoutPanel1.Margin = new Padding(3, 2, 3, 2);
             tableLayoutPanel1.Name = "tableLayoutPanel1";
-            tableLayoutPanel1.RowCount = 3;
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+            tableLayoutPanel1.RowCount = 4;
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 33.3333321F));
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 15F));
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 33.3333321F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 33.3333321F));
             tableLayoutPanel1.Size = new Size(381, 190);
             tableLayoutPanel1.TabIndex = 2;
             // 
             // importSGH
             // 
             importSGH.Dock = DockStyle.Fill;
-            importSGH.Location = new Point(3, 104);
+            importSGH.Location = new Point(3, 75);
             importSGH.Margin = new Padding(3, 2, 3, 2);
             importSGH.Name = "importSGH";
-            importSGH.Size = new Size(375, 84);
+            importSGH.Size = new Size(375, 54);
             importSGH.TabIndex = 2;
             importSGH.Text = "Import SGH Archive";
             importSGH.UseVisualStyleBackColor = true;
             importSGH.Click += button2_Click;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Dock = DockStyle.Fill;
+            label1.Location = new Point(3, 58);
+            label1.Name = "label1";
+            label1.Size = new Size(375, 15);
+            label1.TabIndex = 3;
+            label1.Text = "Other Tools";
+            label1.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // consoleOutput
             // 
@@ -111,16 +125,16 @@
             consoleOutput.Size = new Size(381, 221);
             consoleOutput.TabIndex = 3;
             // 
-            // label1
+            // button2
             // 
-            label1.AutoSize = true;
-            label1.Dock = DockStyle.Fill;
-            label1.Location = new Point(3, 87);
-            label1.Name = "label1";
-            label1.Size = new Size(375, 15);
-            label1.TabIndex = 3;
-            label1.Text = "Other Tools";
-            label1.TextAlign = ContentAlignment.MiddleCenter;
+            button2.AutoSize = true;
+            button2.Dock = DockStyle.Fill;
+            button2.Location = new Point(3, 134);
+            button2.Name = "button2";
+            button2.Size = new Size(375, 53);
+            button2.TabIndex = 4;
+            button2.Text = "PC Songlist Manager";
+            button2.UseVisualStyleBackColor = true;
             // 
             // MasterForm
             // 
@@ -149,5 +163,6 @@
         private Button importSGH;
         private TextBox consoleOutput;
         private Label label1;
+        private Button button2;
     }
 }
