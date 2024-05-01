@@ -97,8 +97,9 @@
             // ConsoleSelect
             // 
             ConsoleSelect.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            ConsoleSelect.DropDownStyle = ComboBoxStyle.DropDownList;
             ConsoleSelect.FormattingEnabled = true;
-            ConsoleSelect.Items.AddRange(new object[] { "PC", "Xbox 360", "PS3" });
+            ConsoleSelect.Items.AddRange(new object[] { "PC", "360", "PS3" });
             ConsoleSelect.Location = new Point(62, 10);
             ConsoleSelect.Name = "ConsoleSelect";
             ConsoleSelect.Size = new Size(348, 23);
@@ -140,7 +141,7 @@
             convertButton.Name = "convertButton";
             convertButton.Size = new Size(407, 23);
             convertButton.TabIndex = 3;
-            convertButton.Text = "Import!";
+            convertButton.Text = "Convert!";
             convertButton.UseVisualStyleBackColor = false;
             convertButton.Click += convertButton_Click;
             // 
