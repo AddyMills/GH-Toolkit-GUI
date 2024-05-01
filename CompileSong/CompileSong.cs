@@ -12,6 +12,7 @@ using static GH_Toolkit_Core.QB.QBConstants;
 using static GH_Toolkit_Exceptions.Exceptions;
 using static GH_Toolkit_Core.Methods.Exceptions;
 using static GH_Toolkit_Core.Methods.CreateForGame;
+using static GH_Toolkit_GUI.PreCompileChecks;
 using GH_Toolkit_Core.PS360;
 using IniParser.Model;
 using IniParser;
@@ -26,17 +27,11 @@ namespace GH_Toolkit_GUI
     public partial class CompileSong : Form
     {
         private int ghprojVersion = 1;
-        private static string ExeLocation = Assembly.GetExecutingAssembly().Location;
-        private static string ExeDirectory = Path.GetDirectoryName(ExeLocation);
-        private static string ResourcePath = Path.Combine(ExeDirectory, "Resources");
+        
         private string DefaultTemplateFolder;
         private string DefaultTemplatePath;
         private string StartupProject;
 
-        private static string DATAPath = "DATA";
-        private static string PAKPath = Path.Combine(DATAPath, "PAK");
-        private static string MUSICPath = Path.Combine(DATAPath, "MUSIC");
-        private static string SONGSPath = Path.Combine(DATAPath, "SONGS");
         private string GH3Path;
         private string GHAPath;
         private string WtSongFolder;
@@ -669,7 +664,7 @@ namespace GH_Toolkit_GUI
         {
             if (CurrentPlatform == "Xbox 360" || CurrentPlatform == "PS3")
             {
-                MakeConsoleChecksum();
+                SetConsoleChecksum();
                 dlcChecksumLabel.Visible = true;
                 dlcChecksum.Visible = true;
                 dlcChecksum.Text = ConsoleChecksum.ToString();
@@ -942,20 +937,6 @@ namespace GH_Toolkit_GUI
             isProgrammaticChange = false;
         }
 
-        private void UpdateGh3FilePreference(string pakPath, string pabPath, string folderPath)
-        {
-            Pref.Gh3QbPak = pakPath;
-            Pref.Gh3QbPab = pabPath;
-            Pref.Gh3FolderPath = folderPath;
-            Pref.Save();
-        }
-        private void UpdateGhaFilePreference(string pakPath, string pabPath, string folderPath)
-        {
-            Pref.GhaQbPak = pakPath;
-            Pref.GhaQbPab = pabPath;
-            Pref.GhaFolderPath = folderPath;
-            Pref.Save();
-        }
         private void UpdateGhwtModsFolder(string folderPath)
         {
             Pref.WtModsFolder = folderPath;
@@ -976,72 +957,7 @@ namespace GH_Toolkit_GUI
             string game = CurrentGame;
             if (game == "GH3" || game == "GHA")
             {
-                string platform = CurrentPlatform;
-                if (platform == "PC")
-                {
-                    string backupLocation = Path.Combine(ExeDirectory, "Backups", game);
-                    string qbPakLocation = Path.Combine(backupLocation, "qb");
-                    if (!File.Exists(qbPakLocation + DOT_PAK_XEN))
-                    {
-                        var regLookup = new RegistryLookup();
-                        string regFolder = game == "GH3" ? "Guitar Hero III" : "Guitar Hero Aerosmith";
-                        string regPath = $@"SOFTWARE\WOW6432Node\Aspyr\{regFolder}";
-                        string regValue = "Path";
-                        string ghPath = regLookup.GetRegistryValue(regPath, regValue);
-
-                        try
-                        {
-                            // Check if ghPath is null or an empty string
-                            if (string.IsNullOrEmpty(ghPath))
-                            {
-                                // Call the method that pops up a window asking for the game path
-                                ghPath = AskForGamePath();
-                                string exeName = CurrentGame == GAME_GH3 ? "GH3" : "Guitar Hero Aerosmith";
-                                string ghExePath = Path.Combine(ghPath, $"{exeName}.exe");
-                                if (!File.Exists(ghExePath))
-                                {
-                                    throw new Exception($"The game executable was not found at the specified path: {ghExePath}");
-                                }
-                            }
-                        }
-                        catch (OperationCanceledException)
-                        {
-                            MessageBox.Show($"{regFolder}'s game path is required to proceed.\n\nCancelling compilation.", "Path Required", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            throw;
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show($"An error occurred while trying to get the game path.\n\n{ex.Message}\n\nCancelling compilation.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            throw;
-                        }
-
-                        Directory.CreateDirectory(backupLocation);
-                        string ghQbPakPath = Path.Combine(ghPath, PAKPath, "qb.pak.xen");
-                        string ghQbPabPath = Path.Combine(ghPath, PAKPath, "qb.pab.xen");
-                        try
-                        {
-                            File.Copy(ghQbPakPath, qbPakLocation + DOT_PAK_XEN);
-                            File.Copy(ghQbPabPath, qbPakLocation + DOT_PAB_XEN);
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show($"An error occurred while trying to backup {regFolder}'s QB.PAK file.\n\n{ex.Message}\n\nCancelling compilation.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            throw;
-                        }
-
-                        if (game == "GH3")
-                        {
-                            UpdateGh3FilePreference(ghQbPakPath, ghQbPabPath, ghPath);
-                        }
-                        else
-                        {
-                            UpdateGhaFilePreference(ghQbPakPath, ghQbPabPath, ghPath);
-                        }
-                        ReplaceGh3PakFiles();
-
-                        MessageBox.Show($"A backup of {regFolder}'s QB file has been created.\nIt can be copied back to your GH folder at any time in the settings menu.", "Backup Created", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                }
+                Gh3PcCheck(game);
             }
             if (game == GAME_GHWT)
             {
@@ -1064,30 +980,7 @@ namespace GH_Toolkit_GUI
             }
             else if (CurrentPlatform != "PC")
             {
-                string onyxPath = Pref.OnyxCliPath;
-                var onyxExe = Path.Combine(onyxPath, "onyx.exe");
-                bool showWarning = true;
-                while (!Directory.Exists(onyxPath) || !File.Exists(onyxExe))
-                {
-                    if (showWarning)
-                    {
-                        MessageBox.Show("Onyx has not been found. Please select your Onyx CLI folder now.", "Folder Required", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        showWarning = false;
-                    }
-                    var tempOnyxFolder = AskForGamePath();
-                    var tempOnyxExe = Path.Combine(tempOnyxFolder, "onyx.exe");
-                    if (!File.Exists(tempOnyxExe))
-                    {
-                        MessageBox.Show("Onyx.exe was not found in the selected folder. Please select the correct folder.", "File Not Found", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    else
-                    {
-                        Pref.OnyxCliPath = tempOnyxFolder;
-                        Pref.Save();
-                        onyxPath = tempOnyxFolder;
-                        onyxExe = tempOnyxExe;
-                    }
-                }
+                OnyxCheck();
                 if (!Directory.Exists(ConsoleCompile))
                 {
                     Directory.CreateDirectory(ConsoleCompile);
@@ -1095,42 +988,9 @@ namespace GH_Toolkit_GUI
             }
 
         }
-        public static string AskForGamePath()
-        {
-
-            string folderPath = "";
-            while (true) // Keep showing the dialog until a valid path is selected or the user cancels
-            {
-                using (var dialog = new FolderBrowserDialog())
-                {
-                    dialog.ShowNewFolderButton = false;
-                    DialogResult result = dialog.ShowDialog();
-
-                    if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(dialog.SelectedPath))
-                    {
-                        if (Directory.Exists(dialog.SelectedPath))
-                        {
-                            return dialog.SelectedPath; // Return the selected path if it's valid
-                        }
-                        else
-                        {
-                            MessageBox.Show("The selected path does not exist. Please select a valid path.", "Invalid Path", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                    }
-                    else if (result == DialogResult.Cancel)
-                    {
-                        throw new OperationCanceledException("User cancelled the path selection."); // Throw an exception if the user cancels
-                    }
-                    else
-                    {
-                        MessageBox.Show("Please select a valid path.", "Path Required", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                }
-            }
-        }
         private void ReplaceGh3PakFiles()
         {
-            string qbPakLocation = GetGh3PakFile();
+            string qbPakLocation = GetGh3PakFile(CurrentGame);
             // Might make this use the backup instead in the future...
             string replaceLocation = Path.Combine(ExeDirectory, "Replacements", CurrentPlatform, CurrentGame, "QB");
 
@@ -1149,18 +1009,10 @@ namespace GH_Toolkit_GUI
                     }
                 }
                 var (pakData, pabData) = pakCompiler.CompilePakFromDictionary(qbPak);
-                OverwriteGh3Pak(pakData, pabData!);
+                OverwriteGh3Pak(pakData, pabData!, CurrentGame);
             }
         }
-        private void OverwriteGh3Pak(byte[] pakData, byte[] pabData)
-        {
-            OverwriteSplitPak(GetGh3PakFile(), pakData, pabData, DOTXEN);
-            /*
-            string qbPakLocation = GetGh3PakFile();
-            string qbPabLocation = qbPakLocation.Replace(DOT_PAK_XEN, DOT_PAB_XEN);
-            File.WriteAllBytes(qbPakLocation, pakData);
-            File.WriteAllBytes(qbPabLocation, pabData);*/
-        }
+
         private void CreateChecksum()
         {
             // Normalize the string to get the diacritics separated
@@ -1180,28 +1032,7 @@ namespace GH_Toolkit_GUI
             // Return the normalized string without diacritics and non-alphabetic characters
             song_checksum.Text = alphanumericOnly;
         }
-        private string GetGh3PakFile()
-        {
-            if (CurrentGame == "GH3")
-            {
-                return UserPreferences.Default.Gh3QbPak;
-            }
-            else
-            {
-                return UserPreferences.Default.GhaQbPak;
-            }
-        }
-        private string GetGh3Folder()
-        {
-            if (CurrentGame == "GH3")
-            {
-                return UserPreferences.Default.Gh3FolderPath;
-            }
-            else
-            {
-                return UserPreferences.Default.GhaFolderPath;
-            }
-        }
+
         private string GetVenue(int venueType)
         {
             string venue;
@@ -1270,12 +1101,10 @@ namespace GH_Toolkit_GUI
             }
             // Add code to delete the folder after processing eventually
         }
-        private void MakeConsoleChecksum()
+        private void SetConsoleChecksum()
         {
-            int minNum = 1000000000;
             string qbString = $"{CurrentGame}{artist_input.Text}{title_input.Text}{year_input.Value}{isCover.Checked}";
-            var qbKey = CRC.QBKeyUInt(qbString);
-            ConsoleChecksum = (uint)(minNum + (qbKey % minNum));
+            ConsoleChecksum = MakeConsoleChecksum([qbString]);
         }
         private void CompileGhwtPakFile()
         {
@@ -1324,7 +1153,7 @@ namespace GH_Toolkit_GUI
         }
         private void MoveToGh3SongsFolder(string pakPath)
         {
-            string gameFolder = GetGh3Folder();
+            string gameFolder = GetGh3Folder(CurrentGame);
             string saveFolder = Path.Combine(gameFolder, SONGSPath);
             string savePath = Path.Combine(saveFolder, Path.GetFileName(pakPath));
             if (!Directory.Exists(saveFolder))
@@ -1335,7 +1164,7 @@ namespace GH_Toolkit_GUI
         }
         private void MoveToGh3MusicFolder(string audioPath)
         {
-            string gameFolder = GetGh3Folder();
+            string gameFolder = GetGh3Folder(CurrentGame);
             string saveFolder = Path.Combine(gameFolder, MUSICPath);
             string savePath = Path.Combine(saveFolder, Path.GetFileName(audioPath));
             if (!savePath.EndsWith(".xen"))
@@ -1522,8 +1351,8 @@ namespace GH_Toolkit_GUI
         private void AddToPCSetlist()
         {
             var songListEntry = GenerateGh3SongListEntry();
-            var (pakData, pabData) = AddToDownloadList(GetGh3PakFile(), CurrentPlatform, song_checksum.Text, songListEntry);
-            OverwriteGh3Pak(pakData, pabData!);
+            var (pakData, pabData) = AddToDownloadList(GetGh3PakFile(CurrentGame), CurrentPlatform, [songListEntry]);
+            OverwriteGh3Pak(pakData, pabData!, CurrentGame);
         }
         /*private void CreateOnyxYaml()
         {
@@ -1785,7 +1614,7 @@ namespace GH_Toolkit_GUI
                 if (nextSteps == DialogResult.OK)
                 {
                     string removePath = Path.Combine(ExeDirectory, "Tools", "RemoveReadOnly", "RemoveReadOnly.exe");
-                    string gamePath = GetGh3Folder();
+                    string gamePath = GetGh3Folder(CurrentGame);
                     ProcessStartInfo startInfo = new ProcessStartInfo(removePath);
                     startInfo.CreateNoWindow = false;
                     startInfo.UseShellExecute = true;
@@ -1844,7 +1673,7 @@ namespace GH_Toolkit_GUI
         private void compile_pak_button_Click(object sender, EventArgs e)
         {
             Console.WriteLine($"Compiling song for {CurrentGame}");
-            MakeConsoleChecksum();
+            SetConsoleChecksum();
             var time1 = DateTime.Now;
             bool success = false;
             if (CurrentGame == GAME_GH3 || CurrentGame == GAME_GHA)
@@ -1880,7 +1709,7 @@ namespace GH_Toolkit_GUI
         private async void compile_all_button_Click(object sender, EventArgs e)
         {
             Console.WriteLine($"Compiling chart and audio for {CurrentGame}");
-            MakeConsoleChecksum();
+            SetConsoleChecksum();
             string compileText = compile_all_button.Text;
             compile_all_button.Text = COMPILING;
             DisableCloseButton();
