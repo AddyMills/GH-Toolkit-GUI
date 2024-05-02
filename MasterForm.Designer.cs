@@ -34,8 +34,8 @@
             tableLayoutPanel1 = new TableLayoutPanel();
             importSGH = new Button();
             label1 = new Label();
+            songlistManagerButton = new Button();
             consoleOutput = new TextBox();
-            button2 = new Button();
             toolStrip1.SuspendLayout();
             tableLayoutPanel1.SuspendLayout();
             SuspendLayout();
@@ -79,7 +79,7 @@
             tableLayoutPanel1.Controls.Add(button1, 0, 0);
             tableLayoutPanel1.Controls.Add(importSGH, 0, 2);
             tableLayoutPanel1.Controls.Add(label1, 0, 1);
-            tableLayoutPanel1.Controls.Add(button2, 0, 3);
+            tableLayoutPanel1.Controls.Add(songlistManagerButton, 0, 3);
             tableLayoutPanel1.Location = new Point(10, 22);
             tableLayoutPanel1.Margin = new Padding(3, 2, 3, 2);
             tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -114,6 +114,18 @@
             label1.Text = "Other Tools";
             label1.TextAlign = ContentAlignment.MiddleCenter;
             // 
+            // songlistManagerButton
+            // 
+            songlistManagerButton.AutoSize = true;
+            songlistManagerButton.Dock = DockStyle.Fill;
+            songlistManagerButton.Location = new Point(3, 134);
+            songlistManagerButton.Name = "songlistManagerButton";
+            songlistManagerButton.Size = new Size(375, 53);
+            songlistManagerButton.TabIndex = 4;
+            songlistManagerButton.Text = "PC Songlist Manager";
+            songlistManagerButton.UseVisualStyleBackColor = true;
+            songlistManagerButton.Click += songlistManagerClick;
+            // 
             // consoleOutput
             // 
             consoleOutput.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
@@ -124,17 +136,6 @@
             consoleOutput.ScrollBars = ScrollBars.Vertical;
             consoleOutput.Size = new Size(381, 221);
             consoleOutput.TabIndex = 3;
-            // 
-            // button2
-            // 
-            button2.AutoSize = true;
-            button2.Dock = DockStyle.Fill;
-            button2.Location = new Point(3, 134);
-            button2.Name = "button2";
-            button2.Size = new Size(375, 53);
-            button2.TabIndex = 4;
-            button2.Text = "PC Songlist Manager";
-            button2.UseVisualStyleBackColor = true;
             // 
             // MasterForm
             // 
@@ -163,6 +164,6 @@
         private Button importSGH;
         private TextBox consoleOutput;
         private Label label1;
-        private Button button2;
+        private Button songlistManagerButton;
     }
 }

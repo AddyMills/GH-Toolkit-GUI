@@ -35,6 +35,7 @@ namespace GH_Toolkit_GUI
             WtModsFolder.Text = Pref.WtModsFolder;
             Gh3FolderPath.Text = Pref.Gh3FolderPath;
             GhaFolderPath.Text = Pref.GhaFolderPath;
+            SongManagerDeleteSongs.Checked = Pref.SongManagerDeleteSongs;
         }
         private void SaveData()
         {
@@ -44,6 +45,7 @@ namespace GH_Toolkit_GUI
             Pref.PreviewFadeOut = PreviewFadeOut.Value;
             Pref.EncryptAudio = EncryptAudio.Checked;
             Pref.WtModsFolder = WtModsFolder.Text;
+            Pref.SongManagerDeleteSongs = SongManagerDeleteSongs.Checked;
             // Do not save Gh3/Gha folder paths as they are read-only fields
             Pref.Save();
         }

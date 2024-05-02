@@ -1,7 +1,8 @@
 using System.Text;
 
 namespace GH_Toolkit_GUI
-{    public partial class MasterForm : Form
+{
+    public partial class MasterForm : Form
     {
         public MasterForm(string inputFile = "")
         {
@@ -46,6 +47,12 @@ namespace GH_Toolkit_GUI
         private void button2_Click(object sender, EventArgs e)
         {
             ImportSGHForm();
+        }
+
+        private void songlistManagerClick(object sender, EventArgs e)
+        {
+            SongListManager songListManager = new SongListManager();
+            songListManager.Show();
         }
     }
     public class TextBoxStreamWriter : TextWriter

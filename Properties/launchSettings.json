@@ -2,7 +2,7 @@
   "profiles": {
     "GH-Toolkit-GUI": {
       "commandName": "Project",
-      "commandLineArgs": "\"D:\\RB\\Songs\\Focus\\Compile\\addy_hocuspocus.ghproj\""
+      "commandLineArgs": "\"D:\\RB\\Songs\\Focus\\Compile\\addy_hocuspocus.sgh\""
     }
   }
 }

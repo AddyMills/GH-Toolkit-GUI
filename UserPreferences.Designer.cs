@@ -178,5 +178,17 @@ namespace GH_Toolkit_GUI {
                 this["OnyxCliPath"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool SongManagerDeleteSongs {
+            get {
+                return ((bool)(this["SongManagerDeleteSongs"]));
+            }
+            set {
+                this["SongManagerDeleteSongs"] = value;
+            }
+        }
     }
 }
