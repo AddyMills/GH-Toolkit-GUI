@@ -13,6 +13,7 @@ using static GH_Toolkit_Exceptions.Exceptions;
 using static GH_Toolkit_Core.Methods.Exceptions;
 using static GH_Toolkit_Core.Methods.CreateForGame;
 using static GH_Toolkit_GUI.PreCompileChecks;
+using GH_Toolkit_Core.Methods;
 using GH_Toolkit_Core.PS360;
 using IniParser.Model;
 using IniParser;
@@ -27,7 +28,7 @@ namespace GH_Toolkit_GUI
     public partial class CompileSong : Form
     {
         private int ghprojVersion = 1;
-        
+
         private string DefaultTemplateFolder;
         private string DefaultTemplatePath;
         private string StartupProject;
@@ -84,6 +85,7 @@ namespace GH_Toolkit_GUI
 
         private bool isProgrammaticChange = false;
         private bool isLoading = false;
+        private bool isExport = false;
         private UserPreferences Pref = UserPreferences.Default;
 
 
@@ -970,7 +972,7 @@ namespace GH_Toolkit_GUI
                     }
                 }
             }
-            if (CurrentPlatform == "PS2")
+            if (CurrentPlatform == "PS2" && !isExport)
             {
                 if (Ps2IsoFolderPath == "")
                 {
@@ -981,12 +983,20 @@ namespace GH_Toolkit_GUI
             else if (CurrentPlatform != "PC")
             {
                 OnyxCheck();
-                if (!Directory.Exists(ConsoleCompile))
-                {
-                    Directory.CreateDirectory(ConsoleCompile);
-                }
+                CreateConsoleFolder();
+            }
+            else if (isExport)
+            {
+                CreateConsoleFolder();
             }
 
+        }
+        private void CreateConsoleFolder()
+        {
+            if (!Directory.Exists(ConsoleCompile))
+            {
+                Directory.CreateDirectory(ConsoleCompile);
+            }
         }
         private void ReplaceGh3PakFiles()
         {
@@ -1085,7 +1095,16 @@ namespace GH_Toolkit_GUI
                 hopoType: hopo_mode_select.SelectedIndex,
                 isSteven: vocal_gender_select_gh3.Text == "Steven Tyler");
 
-            if (CurrentPlatform == "PC")
+            if (isExport) 
+            {
+                File.Move(pakFile, Path.Combine(ConsoleCompile, $"{checksum}_song.pak"), true);
+                var songEntry = GenerateGh3SongListEntry();
+                QB.QBItem songItem = new QB.QBItem((string)songEntry["checksum"], songEntry);
+                var saveQb = Path.Combine(ConsoleCompile, "songs.info");
+                var bytes = QB.CompileQbFile([songItem], "songs.info", GAME_GH3, CONSOLE_XBOX);
+                File.WriteAllBytes(saveQb, bytes);
+            }
+            else if (CurrentPlatform == "PC")
             {
                 AddToPCSetlist();
                 MoveToGh3SongsFolder(pakFile);
@@ -1181,8 +1200,7 @@ namespace GH_Toolkit_GUI
         {
             return new GhMetadata
             {
-                Checksum = song_checksum.Text,
-                ChecksumConsole = GetSongChecksum(),
+                Checksum = GetSongChecksum(),
                 CompileFolder = compile_input.Text,
                 Title = title_input.Text,
                 Artist = artist_input.Text,
@@ -1354,26 +1372,6 @@ namespace GH_Toolkit_GUI
             var (pakData, pabData) = AddToDownloadList(GetGh3PakFile(CurrentGame), CurrentPlatform, [songListEntry]);
             OverwriteGh3Pak(pakData, pabData!, CurrentGame);
         }
-        /*private void CreateOnyxYaml()
-        {
-            string packageName = $"{title_input.Text} by {artist_input.Text}";
-            string yaml = YAML.CreateOnyxYaml(CurrentGame, packageName);
-            if (yaml == "Fail")
-            {
-                throw new Exception("Could not find YAML template.\n\nFailed to create Onyx YAML file.");
-            }
-            string onyxResource = Path.Combine(ResourcePath, "Onyx");
-            string thumbnailResource = Path.Combine(onyxResource, $"{CurrentGame}-thumbnail.png");
-            string onyxRepack = Path.Combine(ConsoleCompile, "360", "onyx-repack");
-            Directory.CreateDirectory(onyxRepack);
-            string yamlPath = Path.Combine(onyxRepack, $"repack-stfs.yaml");
-            string thumbnailPath = Path.Combine(onyxRepack, "thumbnail.png");
-            string titleThumbnailPath = Path.Combine(onyxRepack, "title-thumbnail.png");
-
-            File.WriteAllText(yamlPath, yaml);
-            File.Copy(thumbnailResource, thumbnailPath, true);
-            File.Copy(thumbnailResource, titleThumbnailPath, true);
-        }*/
         private void CreateConsoleFilesGh3()
         {
             var otherChecksum = $"download\\dl{ConsoleChecksum}.qb";
@@ -1390,7 +1388,7 @@ namespace GH_Toolkit_GUI
         }
         private async Task CompileGh3Audio()
         {
-            string fileName = (CurrentPlatform == "PC" || CurrentPlatform == "PS2") ? song_checksum.Text : $"dlc{ConsoleChecksum}";
+            string fileName = GetSongChecksum();
             string gtrOutput = Path.Combine(compile_input.Text, $"{fileName}_guitar.mp3");
             string rhythmOutput = Path.Combine(compile_input.Text, $"{fileName}_rhythm.mp3");
             string backingOutput = Path.Combine(compile_input.Text, $"{fileName}_song.mp3");
@@ -1460,7 +1458,12 @@ namespace GH_Toolkit_GUI
                 }
                 Console.WriteLine("Combining Audio...");
                 var (fsbOut, datOut) = fsb.CombineFSB3File(filesToProcess, fsbOutput);
-                if (CurrentPlatform == "PC")
+                if (isExport)
+                {
+                    File.Move(fsbOut, Path.Combine(ConsoleCompile, $"{fileName}.fsb"), true);
+                    File.Move(datOut, Path.Combine(ConsoleCompile, $"{fileName}.dat"), true);
+                }
+                else if (CurrentPlatform == "PC")
                 {
                     MoveToGh3MusicFolder(fsbOut);
                     MoveToGh3MusicFolder(datOut);
@@ -1592,7 +1595,65 @@ namespace GH_Toolkit_GUI
                 }
             }
         }
+        private async Task CompileAll()
+        {
+            Console.WriteLine($"Compiling chart and audio for {CurrentGame}");
+            SetConsoleChecksum();
+            string compileText = compile_all_button.Text;
+            compile_all_button.Text = COMPILING;
+            DisableCloseButton();
+            bool compileSuccess = false;
+            bool pakSuccess = false;
+            try
+            {
+                var time1 = DateTime.Now;
+                if (CurrentGame == GAME_GH3 || CurrentGame == GAME_GHA)
+                {
+                    pakSuccess = CompilePakGh3();
+                    if (pakSuccess)
+                    {
+                        await CompileGh3Audio();
+                        compileSuccess = true;
+                    }
+                }
+                else if (CurrentGame == GAME_GHWT)
+                {
+                    pakSuccess = CompilePakGhwt();
+                    if (pakSuccess)
+                    {
+                        await CompileGhwtAudio();
+                        compileSuccess = true;
+                    }
+                }
+                if (!isExport && compileSuccess && (CurrentPlatform == "PS3" || CurrentPlatform == platform_360.Text))
+                {
+                    CreateConsolePackage();
+                }
+                else if (isExport)
+                {
+                    Console.WriteLine("Packing up the song for export...");
+                    GHTCP.MakeUnprotectedZip(ConsoleCompile, Path.Combine(compile_input.Text, $"{GetSongChecksum()}.sgh"));
+                }
+                var time2 = DateTime.Now;
 
+                var timeDiff = time2 - time1;
+                string process = compileSuccess ? (isExport ? "Exporting took" : "Chart compilation took") : "Compilation failed after";
+                Console.WriteLine($"{process} {timeDiff.TotalSeconds.ToString("G3")} seconds");
+            }
+            catch (Exception ex)
+            {
+                // Errors are handled in the CompilePakGh3 and CompileGh3All methods
+            }
+            finally
+            {
+                EnableCloseButton();
+                compile_all_button.Text = compileText;
+                if (Pref.ShowPostCompile && compileSuccess)
+                {
+                    ShowPostCompile();
+                }
+            }
+        }
         private bool CompilePakGh3()
         {
             bool success = false;
@@ -1708,63 +1769,16 @@ namespace GH_Toolkit_GUI
         }
         private async void compile_all_button_Click(object sender, EventArgs e)
         {
-            Console.WriteLine($"Compiling chart and audio for {CurrentGame}");
-            SetConsoleChecksum();
-            string compileText = compile_all_button.Text;
-            compile_all_button.Text = COMPILING;
-            DisableCloseButton();
-            bool compileSuccess = false;
-            bool pakSuccess = false;
-            try
-            {
-                var time1 = DateTime.Now;
-                if (CurrentGame == GAME_GH3 || CurrentGame == GAME_GHA)
-                {
-                    pakSuccess = CompilePakGh3();
-                    if (pakSuccess)
-                    {
-                        await CompileGh3Audio();
-                        compileSuccess = true;
-                    }
-                }
-                else if (CurrentGame == GAME_GHWT)
-                {
-                    pakSuccess = CompilePakGhwt();
-                    if (pakSuccess)
-                    {
-                        await CompileGhwtAudio();
-                        compileSuccess = true;
-                    }
-                }
-                if (compileSuccess && CurrentPlatform == "PS3" || CurrentPlatform == platform_360.Text)
-                {
-                    CreateConsolePackage();
-                }
-                var time2 = DateTime.Now;
-
-                var timeDiff = time2 - time1;
-                string process = compileSuccess ? "Chart compilation took" : "Compilation failed after";
-                Console.WriteLine($"{process} {timeDiff.TotalSeconds.ToString("G3")} seconds");
-            }
-            catch (Exception ex)
-            {
-                // Errors are handled in the CompilePakGh3 and CompileGh3All methods
-            }
-            finally
-            {
-                EnableCloseButton();
-                compile_all_button.Text = compileText;
-                if (Pref.ShowPostCompile && compileSuccess)
-                {
-                    ShowPostCompile();
-                }
-            }
-
+            await CompileAll();
         }
 
         private void ShowPostCompile()
         {
-            if (CurrentPlatform == platform_pc.Text)
+            if (isExport)
+            { 
+                MessageBox.Show("Export has completed successfully!\n\nYour song has been packaged up and is ready to be shared with others.\n\nIt can be found where you defined the song to be compiled to or next to your .ghproj file.", "Export Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else if (CurrentPlatform == platform_pc.Text)
             {
                 MessageBox.Show("Compilation has completed successfully!\n\nYour song has been added to the game and can be played immediately.", "Compilation Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
@@ -1958,6 +1972,18 @@ namespace GH_Toolkit_GUI
             {
                 aerosmithBand.Enabled = false;
             }
+        }
+
+        private async void exportSongArchiveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (CurrentGame != GAME_GH3)
+            {
+                MessageBox.Show("Exporting song archives is currently only available for Guitar Hero III songs.", "Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            isExport = true;
+            await CompileAll();
+            isExport = false;
         }
     }
 }

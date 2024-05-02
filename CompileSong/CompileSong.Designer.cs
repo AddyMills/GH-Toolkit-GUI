@@ -3495,6 +3495,7 @@
             exportSongArchiveToolStripMenuItem.Name = "exportSongArchiveToolStripMenuItem";
             exportSongArchiveToolStripMenuItem.Size = new Size(186, 22);
             exportSongArchiveToolStripMenuItem.Text = "Export Song Archive";
+            exportSongArchiveToolStripMenuItem.Click += exportSongArchiveToolStripMenuItem_Click;
             // 
             // toolStripSplitButton1
             // 
