@@ -36,6 +36,7 @@
             tableLayoutPanel3 = new TableLayoutPanel();
             importSghFile = new Button();
             convertButton = new Button();
+            tableLayoutPanel4 = new TableLayoutPanel();
             tableLayoutPanel1.SuspendLayout();
             tableLayoutPanel2.SuspendLayout();
             tableLayoutPanel3.SuspendLayout();
@@ -110,21 +111,23 @@
             tableLayoutPanel3.ColumnCount = 1;
             tableLayoutPanel3.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tableLayoutPanel3.Controls.Add(importSghFile, 0, 0);
-            tableLayoutPanel3.Controls.Add(convertButton, 0, 2);
+            tableLayoutPanel3.Controls.Add(convertButton, 0, 3);
+            tableLayoutPanel3.Controls.Add(tableLayoutPanel4, 0, 1);
             tableLayoutPanel3.Dock = DockStyle.Fill;
             tableLayoutPanel3.Location = new Point(3, 253);
             tableLayoutPanel3.Name = "tableLayoutPanel3";
-            tableLayoutPanel3.RowCount = 3;
-            tableLayoutPanel3.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33333F));
-            tableLayoutPanel3.RowStyles.Add(new RowStyle(SizeType.Percent, 33.3333321F));
-            tableLayoutPanel3.RowStyles.Add(new RowStyle(SizeType.Percent, 33.3333321F));
+            tableLayoutPanel3.RowCount = 4;
+            tableLayoutPanel3.RowStyles.Add(new RowStyle(SizeType.Percent, 25.0006237F));
+            tableLayoutPanel3.RowStyles.Add(new RowStyle(SizeType.Percent, 24.9981289F));
+            tableLayoutPanel3.RowStyles.Add(new RowStyle(SizeType.Percent, 25.0006275F));
+            tableLayoutPanel3.RowStyles.Add(new RowStyle(SizeType.Percent, 25.0006237F));
             tableLayoutPanel3.Size = new Size(413, 194);
             tableLayoutPanel3.TabIndex = 3;
             // 
             // importSghFile
             // 
             importSghFile.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            importSghFile.Location = new Point(3, 20);
+            importSghFile.Location = new Point(3, 12);
             importSghFile.Name = "importSghFile";
             importSghFile.Size = new Size(407, 23);
             importSghFile.TabIndex = 1;
@@ -137,13 +140,27 @@
             convertButton.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             convertButton.BackColor = Color.OliveDrab;
             convertButton.ForeColor = SystemColors.ButtonFace;
-            convertButton.Location = new Point(3, 149);
+            convertButton.Location = new Point(3, 157);
             convertButton.Name = "convertButton";
             convertButton.Size = new Size(407, 23);
             convertButton.TabIndex = 3;
             convertButton.Text = "Convert!";
             convertButton.UseVisualStyleBackColor = false;
             convertButton.Click += convertButton_Click;
+            // 
+            // tableLayoutPanel4
+            // 
+            tableLayoutPanel4.ColumnCount = 2;
+            tableLayoutPanel4.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tableLayoutPanel4.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tableLayoutPanel4.Dock = DockStyle.Fill;
+            tableLayoutPanel4.Location = new Point(0, 48);
+            tableLayoutPanel4.Margin = new Padding(0);
+            tableLayoutPanel4.Name = "tableLayoutPanel4";
+            tableLayoutPanel4.RowCount = 1;
+            tableLayoutPanel4.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+            tableLayoutPanel4.Size = new Size(413, 48);
+            tableLayoutPanel4.TabIndex = 6;
             // 
             // ImportSGH
             // 
@@ -170,5 +187,6 @@
         private ComboBox ConsoleSelect;
         private TableLayoutPanel tableLayoutPanel3;
         private Button convertButton;
+        private TableLayoutPanel tableLayoutPanel4;
     }
 }
