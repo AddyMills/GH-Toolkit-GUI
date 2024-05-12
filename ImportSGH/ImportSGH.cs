@@ -163,8 +163,8 @@ namespace GH_Toolkit_GUI
                 else
                 {
                     string sghName = $"{SghFolder}_{platform}";
-                    string sghFolderName = CreateForGame.ReplaceNonAlphanumeric(Path.GetFileName(SghFolder));
-                    CreateForGame.CreateConsoleDownloadFiles(checksum, GAME_GH3, platform, compilePath, ResourcePath, toImport);
+                    string sghFolderName = ReplaceNonAlphanumeric(Path.GetFileName(SghFolder));
+                    CreateConsoleDownloadFiles(checksum, GAME_GH3, platform, compilePath, ResourcePath, toImport);
                     string[] onyxArgs;
                     if (platform == CONSOLE_PS3)
                     {
