@@ -243,7 +243,10 @@ namespace GH_Toolkit_GUI
         {
             foreach (string file in Directory.GetFiles(compilePath))
             {
-                File.Move(file, Path.ChangeExtension(file, extension), true);
+                if (Path.GetExtension(file).ToLower() != extension.ToLower())
+                {
+                    File.Move(file, file + extension, true);
+                }
             }
         }
         private void importSgh_Click(object sender, EventArgs e)
