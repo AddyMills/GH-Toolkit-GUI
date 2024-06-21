@@ -1248,6 +1248,7 @@ namespace GH_Toolkit_GUI
         {
             var config = new IniParserConfiguration();
             config.AssigmentSpacer = "";
+            bool cover = isCover.Checked;
 
             IniData wtdeIni = new IniData();
             wtdeIni.Configuration = config;
@@ -1264,7 +1265,12 @@ namespace GH_Toolkit_GUI
             songInfo.Keys.AddKey("Artist", artist_input.Text);
             songInfo.Keys.AddKey("Year", year_input.Value.ToString("G0", Murica));
             songInfo.Keys.AddKey("ArtistText", GetArtistText());
-            songInfo.Keys.AddKey("OriginalArtist", IsArtistFamousBy() ? "0" : "1");
+            if (cover)
+            {
+                songInfo.Keys.AddKey("CoverArtist", cover_artist_input.Text);   
+                songInfo.Keys.AddKey("CoverYear", cover_year_input.Value.ToString("G0", Murica));
+            }
+            songInfo.Keys.AddKey("OriginalArtist", cover ? "0" : "1");
             songInfo.Keys.AddKey("Leaderboard", "1");
             songInfo.Keys.AddKey("Singer", vocalGenderSelect.Text);
             songInfo.Keys.AddKey("Genre", genre_input.Text);
