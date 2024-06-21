@@ -51,6 +51,7 @@ namespace GH_Toolkit_GUI
         }
         private void LoadSGH()
         {
+            List<string> duplicates = new List<string>();
             ClearAll();
             try
             {
@@ -75,10 +76,20 @@ namespace GH_Toolkit_GUI
                         var songName = songData["name"] as string;
                         var songTitle = songData["title"] as string;
                         var songArtist = songData["artist"] as string;
+                        if (MasterList.ContainsKey(songName))
+                        {
+                            duplicates.Add(songName);
+                            continue;
+                        }
                         songList.Items.Add($"{songName} ({songTitle} - {songArtist})", true);
                         MasterList.Add(songName, songData);
                     }
                 }
+                if (duplicates.Count > 0)
+                {
+                    MessageBox.Show($"The following songs are duplicates and will not be imported:\n\n{string.Join("\n", duplicates)}", "Duplicates Found!");
+                }
+
             }
             catch (Exception e)
             {
@@ -106,13 +117,29 @@ namespace GH_Toolkit_GUI
 
                 DeleteTempFiles(compilePath);
 
+                var failedSongs = new List<string>();
+
                 foreach (string song in songList.CheckedItems)
                 {
                     string songName = song.Split(' ')[0];
-                    toImport.Add(MasterList[songName]);
+                    try
+                    {
+                        toImport.Add(MasterList[songName]);
+                    }
+                    catch (Exception e)
+                    {
+                        failedSongs.Add(song);
+                    }
+                }
+
+                if (failedSongs.Count > 0)
+                {
+                    int successCount = songList.CheckedItems.Count - failedSongs.Count;
+                    MessageBox.Show($"The following songs failed to import due to bad short names:\n\n{string.Join("\n", failedSongs)}\n\nPress OK to continue with the remaining {successCount} songs.", "Failed to Import Songs");
                 }
 
                 PrepareFileNames(compilePath);
+
 
                 var first = toImport[0];
                 string[] checksumStrings = [(string)first["checksum"], (string)first["Title"], (string)first["Artist"], "123456"];
