@@ -1143,7 +1143,8 @@ namespace GH_Toolkit_GUI
                 skaSource: GetSkaSourceGhwt(),
                 venueSource: venue,
                 overrideBeat: use_beat_check.Checked,
-                hopoType: hopo_mode_select.SelectedIndex);
+                hopoType: hopo_mode_select.SelectedIndex,
+                easyOpens: easyOpenCheckbox.Checked);
 
             if (CurrentPlatform == "PC")
             {

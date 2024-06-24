@@ -161,6 +161,7 @@ namespace GH_Toolkit_GUI
             public bool bassMic { get; set; } = false;
             public bool useNewClips { get; set; } = false;
             public bool modernStrobes { get; set; } = false;
+            public bool easyOpen { get; set; } = false;
         }
         private class SaveDataOld
         {
@@ -226,6 +227,7 @@ namespace GH_Toolkit_GUI
                 previewVolume = previewVolume.Value,
                 // Song Data
                 midiPath = midiFileInput.Text,
+                easyOpen = easyOpenCheckbox.Checked,
                 perfPath = perfOverrideInput.Text,
                 skaPath = skaFilesInput.Text,
                 songScriptPath = songScriptInput.Text,
@@ -393,6 +395,7 @@ namespace GH_Toolkit_GUI
 
             // Song Data
             midiFileInput.Text = data.midiPath;
+            easyOpenCheckbox.Checked = data.easyOpen;
             perfOverrideInput.Text = data.perfPath;
             skaFilesInput.Text = data.skaPath;
             songScriptInput.Text = data.songScriptPath;
