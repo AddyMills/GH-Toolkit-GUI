@@ -1226,7 +1226,7 @@ namespace GH_Toolkit_GUI
                 BandVol = (float)gh3_band_vol.Value,
                 GtrVol = (float)gh3_gtr_vol.Value,
                 Countoff = countoff_select_gh3.Text,
-                HopoThreshold = (float)nsHopoThreshold
+                HopoThreshold = 500f
             };
         }
         private QBStruct.QBStructData GenerateGh3SongListEntry()
