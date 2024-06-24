@@ -299,6 +299,7 @@
             compile_select = new Button();
             project_select = new Button();
             compile_input = new TextBox();
+            easyOpenCheckbox = new CheckBox();
             compiler_tabs.SuspendLayout();
             metadata_tab.SuspendLayout();
             tableLayoutPanel2.SuspendLayout();
@@ -1935,41 +1936,43 @@
             tableLayoutPanel15.ColumnStyles.Add(new ColumnStyle());
             tableLayoutPanel15.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tableLayoutPanel15.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 60F));
-            tableLayoutPanel15.Controls.Add(label53, 0, 12);
+            tableLayoutPanel15.Controls.Add(label53, 0, 13);
             tableLayoutPanel15.Controls.Add(label44, 0, 0);
-            tableLayoutPanel15.Controls.Add(label45, 0, 1);
-            tableLayoutPanel15.Controls.Add(label46, 0, 2);
-            tableLayoutPanel15.Controls.Add(label47, 0, 3);
-            tableLayoutPanel15.Controls.Add(label48, 0, 5);
-            tableLayoutPanel15.Controls.Add(label49, 0, 6);
-            tableLayoutPanel15.Controls.Add(label50, 0, 8);
+            tableLayoutPanel15.Controls.Add(label45, 0, 2);
+            tableLayoutPanel15.Controls.Add(label46, 0, 3);
+            tableLayoutPanel15.Controls.Add(label47, 0, 4);
+            tableLayoutPanel15.Controls.Add(label48, 0, 6);
+            tableLayoutPanel15.Controls.Add(label49, 0, 7);
+            tableLayoutPanel15.Controls.Add(label50, 0, 9);
             tableLayoutPanel15.Controls.Add(midiFileInput, 1, 0);
-            tableLayoutPanel15.Controls.Add(perfOverrideInput, 1, 1);
-            tableLayoutPanel15.Controls.Add(skaFilesInput, 1, 2);
-            tableLayoutPanel15.Controls.Add(skaFileSource, 1, 3);
-            tableLayoutPanel15.Controls.Add(songScriptInput, 1, 5);
-            tableLayoutPanel15.Controls.Add(countoffSelect, 1, 6);
-            tableLayoutPanel15.Controls.Add(vocalGenderSelect, 1, 8);
+            tableLayoutPanel15.Controls.Add(perfOverrideInput, 1, 2);
+            tableLayoutPanel15.Controls.Add(skaFilesInput, 1, 3);
+            tableLayoutPanel15.Controls.Add(skaFileSource, 1, 4);
+            tableLayoutPanel15.Controls.Add(songScriptInput, 1, 6);
+            tableLayoutPanel15.Controls.Add(countoffSelect, 1, 7);
+            tableLayoutPanel15.Controls.Add(vocalGenderSelect, 1, 9);
             tableLayoutPanel15.Controls.Add(midiFileSelect, 2, 0);
-            tableLayoutPanel15.Controls.Add(perfOverrideSelect, 2, 1);
-            tableLayoutPanel15.Controls.Add(skaFilesSelect, 2, 2);
-            tableLayoutPanel15.Controls.Add(songScriptSelect, 2, 5);
-            tableLayoutPanel15.Controls.Add(label54, 0, 4);
-            tableLayoutPanel15.Controls.Add(venueSource, 1, 4);
-            tableLayoutPanel15.Controls.Add(label51, 0, 9);
-            tableLayoutPanel15.Controls.Add(overallVolume, 1, 12);
-            tableLayoutPanel15.Controls.Add(vocalScrollSpeed, 1, 9);
-            tableLayoutPanel15.Controls.Add(label52, 0, 10);
-            tableLayoutPanel15.Controls.Add(vocalTuningCents, 1, 10);
-            tableLayoutPanel15.Controls.Add(label55, 0, 11);
-            tableLayoutPanel15.Controls.Add(sustainThreshold, 1, 11);
-            tableLayoutPanel15.Controls.Add(label56, 0, 13);
-            tableLayoutPanel15.Controls.Add(tableLayoutPanel16, 1, 13);
-            tableLayoutPanel15.Controls.Add(label65, 0, 7);
-            tableLayoutPanel15.Controls.Add(drumKitSelect, 1, 7);
+            tableLayoutPanel15.Controls.Add(perfOverrideSelect, 2, 2);
+            tableLayoutPanel15.Controls.Add(skaFilesSelect, 2, 3);
+            tableLayoutPanel15.Controls.Add(songScriptSelect, 2, 6);
+            tableLayoutPanel15.Controls.Add(label54, 0, 5);
+            tableLayoutPanel15.Controls.Add(venueSource, 1, 5);
+            tableLayoutPanel15.Controls.Add(label51, 0, 10);
+            tableLayoutPanel15.Controls.Add(overallVolume, 1, 13);
+            tableLayoutPanel15.Controls.Add(vocalScrollSpeed, 1, 10);
+            tableLayoutPanel15.Controls.Add(label52, 0, 11);
+            tableLayoutPanel15.Controls.Add(vocalTuningCents, 1, 11);
+            tableLayoutPanel15.Controls.Add(label55, 0, 12);
+            tableLayoutPanel15.Controls.Add(sustainThreshold, 1, 12);
+            tableLayoutPanel15.Controls.Add(label56, 0, 14);
+            tableLayoutPanel15.Controls.Add(tableLayoutPanel16, 1, 14);
+            tableLayoutPanel15.Controls.Add(label65, 0, 8);
+            tableLayoutPanel15.Controls.Add(drumKitSelect, 1, 8);
+            tableLayoutPanel15.Controls.Add(easyOpenCheckbox, 1, 1);
             tableLayoutPanel15.Location = new Point(7, 5);
             tableLayoutPanel15.Name = "tableLayoutPanel15";
-            tableLayoutPanel15.RowCount = 16;
+            tableLayoutPanel15.RowCount = 17;
+            tableLayoutPanel15.RowStyles.Add(new RowStyle());
             tableLayoutPanel15.RowStyles.Add(new RowStyle());
             tableLayoutPanel15.RowStyles.Add(new RowStyle());
             tableLayoutPanel15.RowStyles.Add(new RowStyle());
@@ -1993,7 +1996,7 @@
             // 
             label53.Anchor = AnchorStyles.Left;
             label53.AutoSize = true;
-            label53.Location = new Point(3, 355);
+            label53.Location = new Point(3, 380);
             label53.Margin = new Padding(3, 2, 3, 2);
             label53.Name = "label53";
             label53.Size = new Size(90, 15);
@@ -2016,7 +2019,7 @@
             // 
             label45.Anchor = AnchorStyles.Left;
             label45.AutoSize = true;
-            label45.Location = new Point(3, 36);
+            label45.Location = new Point(3, 61);
             label45.Name = "label45";
             label45.Size = new Size(79, 15);
             label45.TabIndex = 1;
@@ -2027,7 +2030,7 @@
             // 
             label46.Anchor = AnchorStyles.Left;
             label46.AutoSize = true;
-            label46.Location = new Point(3, 65);
+            label46.Location = new Point(3, 90);
             label46.Name = "label46";
             label46.Size = new Size(57, 15);
             label46.TabIndex = 2;
@@ -2038,7 +2041,7 @@
             // 
             label47.Anchor = AnchorStyles.Left;
             label47.AutoSize = true;
-            label47.Location = new Point(3, 94);
+            label47.Location = new Point(3, 119);
             label47.Name = "label47";
             label47.Size = new Size(70, 15);
             label47.TabIndex = 3;
@@ -2049,7 +2052,7 @@
             // 
             label48.Anchor = AnchorStyles.Left;
             label48.AutoSize = true;
-            label48.Location = new Point(3, 152);
+            label48.Location = new Point(3, 177);
             label48.Name = "label48";
             label48.Size = new Size(75, 15);
             label48.TabIndex = 4;
@@ -2060,7 +2063,7 @@
             // 
             label49.Anchor = AnchorStyles.Left;
             label49.AutoSize = true;
-            label49.Location = new Point(3, 181);
+            label49.Location = new Point(3, 206);
             label49.Name = "label49";
             label49.Size = new Size(63, 15);
             label49.TabIndex = 5;
@@ -2071,7 +2074,7 @@
             // 
             label50.Anchor = AnchorStyles.Left;
             label50.AutoSize = true;
-            label50.Location = new Point(3, 239);
+            label50.Location = new Point(3, 264);
             label50.Name = "label50";
             label50.Size = new Size(79, 15);
             label50.TabIndex = 6;
@@ -2089,7 +2092,7 @@
             // perfOverrideInput
             // 
             perfOverrideInput.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            perfOverrideInput.Location = new Point(120, 32);
+            perfOverrideInput.Location = new Point(120, 57);
             perfOverrideInput.Name = "perfOverrideInput";
             perfOverrideInput.Size = new Size(432, 23);
             perfOverrideInput.TabIndex = 10;
@@ -2097,7 +2100,7 @@
             // skaFilesInput
             // 
             skaFilesInput.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            skaFilesInput.Location = new Point(120, 61);
+            skaFilesInput.Location = new Point(120, 86);
             skaFilesInput.Name = "skaFilesInput";
             skaFilesInput.Size = new Size(432, 23);
             skaFilesInput.TabIndex = 11;
@@ -2108,7 +2111,7 @@
             skaFileSource.DropDownStyle = ComboBoxStyle.DropDownList;
             skaFileSource.FormattingEnabled = true;
             skaFileSource.Items.AddRange(new object[] { "Guitar Hero World Tour+/Blender Export", "Guitar Hero: Aerosmith", "Guitar Hero 3" });
-            skaFileSource.Location = new Point(120, 90);
+            skaFileSource.Location = new Point(120, 115);
             skaFileSource.Name = "skaFileSource";
             skaFileSource.Size = new Size(432, 23);
             skaFileSource.TabIndex = 12;
@@ -2116,7 +2119,7 @@
             // songScriptInput
             // 
             songScriptInput.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            songScriptInput.Location = new Point(120, 148);
+            songScriptInput.Location = new Point(120, 173);
             songScriptInput.Name = "songScriptInput";
             songScriptInput.Size = new Size(432, 23);
             songScriptInput.TabIndex = 13;
@@ -2127,7 +2130,7 @@
             countoffSelect.DropDownStyle = ComboBoxStyle.DropDownList;
             countoffSelect.FormattingEnabled = true;
             countoffSelect.Items.AddRange(new object[] { "HiHat01", "HiHat02", "HiHat03", "Sticks_Huge", "Sticks_Normal", "Sticks_Tiny" });
-            countoffSelect.Location = new Point(120, 177);
+            countoffSelect.Location = new Point(120, 202);
             countoffSelect.Name = "countoffSelect";
             countoffSelect.Size = new Size(432, 23);
             countoffSelect.TabIndex = 14;
@@ -2138,7 +2141,7 @@
             vocalGenderSelect.DropDownStyle = ComboBoxStyle.DropDownList;
             vocalGenderSelect.FormattingEnabled = true;
             vocalGenderSelect.Items.AddRange(new object[] { "Male", "Female", "None" });
-            vocalGenderSelect.Location = new Point(120, 235);
+            vocalGenderSelect.Location = new Point(120, 260);
             vocalGenderSelect.Name = "vocalGenderSelect";
             vocalGenderSelect.Size = new Size(432, 23);
             vocalGenderSelect.TabIndex = 15;
@@ -2154,7 +2157,7 @@
             // 
             // perfOverrideSelect
             // 
-            perfOverrideSelect.Location = new Point(558, 32);
+            perfOverrideSelect.Location = new Point(558, 57);
             perfOverrideSelect.Name = "perfOverrideSelect";
             perfOverrideSelect.Size = new Size(54, 23);
             perfOverrideSelect.TabIndex = 25;
@@ -2163,7 +2166,7 @@
             // 
             // skaFilesSelect
             // 
-            skaFilesSelect.Location = new Point(558, 61);
+            skaFilesSelect.Location = new Point(558, 86);
             skaFilesSelect.Name = "skaFilesSelect";
             skaFilesSelect.Size = new Size(54, 23);
             skaFilesSelect.TabIndex = 26;
@@ -2172,7 +2175,7 @@
             // 
             // songScriptSelect
             // 
-            songScriptSelect.Location = new Point(558, 148);
+            songScriptSelect.Location = new Point(558, 173);
             songScriptSelect.Name = "songScriptSelect";
             songScriptSelect.Size = new Size(54, 23);
             songScriptSelect.TabIndex = 27;
@@ -2183,7 +2186,7 @@
             // 
             label54.Anchor = AnchorStyles.Left;
             label54.AutoSize = true;
-            label54.Location = new Point(3, 123);
+            label54.Location = new Point(3, 148);
             label54.Name = "label54";
             label54.Size = new Size(81, 15);
             label54.TabIndex = 28;
@@ -2196,7 +2199,7 @@
             venueSource.DropDownStyle = ComboBoxStyle.DropDownList;
             venueSource.FormattingEnabled = true;
             venueSource.Items.AddRange(new object[] { "Guitar Hero 3", "Guitar Hero: Aerosmith", "Guitar Hero World Tour" });
-            venueSource.Location = new Point(120, 119);
+            venueSource.Location = new Point(120, 144);
             venueSource.Name = "venueSource";
             venueSource.Size = new Size(432, 23);
             venueSource.TabIndex = 29;
@@ -2205,7 +2208,7 @@
             // 
             label51.Anchor = AnchorStyles.Left;
             label51.AutoSize = true;
-            label51.Location = new Point(3, 267);
+            label51.Location = new Point(3, 292);
             label51.Name = "label51";
             label51.Size = new Size(105, 15);
             label51.TabIndex = 7;
@@ -2217,7 +2220,7 @@
             overallVolume.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             overallVolume.DecimalPlaces = 2;
             overallVolume.Increment = new decimal(new int[] { 5, 0, 0, 131072 });
-            overallVolume.Location = new Point(120, 351);
+            overallVolume.Location = new Point(120, 376);
             overallVolume.Maximum = new decimal(new int[] { 10, 0, 0, 0 });
             overallVolume.Minimum = new decimal(new int[] { 999, 0, 0, int.MinValue });
             overallVolume.Name = "overallVolume";
@@ -2229,7 +2232,7 @@
             vocalScrollSpeed.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             vocalScrollSpeed.DecimalPlaces = 2;
             vocalScrollSpeed.Increment = new decimal(new int[] { 1, 0, 0, 131072 });
-            vocalScrollSpeed.Location = new Point(120, 263);
+            vocalScrollSpeed.Location = new Point(120, 288);
             vocalScrollSpeed.Margin = new Padding(3, 2, 3, 2);
             vocalScrollSpeed.Maximum = new decimal(new int[] { 10, 0, 0, 0 });
             vocalScrollSpeed.Name = "vocalScrollSpeed";
@@ -2241,7 +2244,7 @@
             // 
             label52.Anchor = AnchorStyles.Left;
             label52.AutoSize = true;
-            label52.Location = new Point(3, 295);
+            label52.Location = new Point(3, 320);
             label52.Name = "label52";
             label52.Size = new Size(111, 15);
             label52.TabIndex = 31;
@@ -2251,7 +2254,7 @@
             // vocalTuningCents
             // 
             vocalTuningCents.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            vocalTuningCents.Location = new Point(120, 291);
+            vocalTuningCents.Location = new Point(120, 316);
             vocalTuningCents.Margin = new Padding(3, 2, 3, 2);
             vocalTuningCents.Maximum = new decimal(new int[] { 50, 0, 0, 0 });
             vocalTuningCents.Minimum = new decimal(new int[] { 50, 0, 0, int.MinValue });
@@ -2263,7 +2266,7 @@
             // 
             label55.Anchor = AnchorStyles.Left;
             label55.AutoSize = true;
-            label55.Location = new Point(3, 325);
+            label55.Location = new Point(3, 350);
             label55.Name = "label55";
             label55.Size = new Size(103, 15);
             label55.TabIndex = 33;
@@ -2275,7 +2278,7 @@
             sustainThreshold.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             sustainThreshold.DecimalPlaces = 2;
             sustainThreshold.Increment = new decimal(new int[] { 5, 0, 0, 131072 });
-            sustainThreshold.Location = new Point(120, 321);
+            sustainThreshold.Location = new Point(120, 346);
             sustainThreshold.Margin = new Padding(3, 2, 3, 2);
             sustainThreshold.Maximum = new decimal(new int[] { 3, 0, 0, 0 });
             sustainThreshold.Name = "sustainThreshold";
@@ -2287,7 +2290,7 @@
             // 
             label56.Anchor = AnchorStyles.Left;
             label56.AutoSize = true;
-            label56.Location = new Point(3, 384);
+            label56.Location = new Point(3, 409);
             label56.Name = "label56";
             label56.Size = new Size(80, 15);
             label56.TabIndex = 35;
@@ -2302,7 +2305,7 @@
             tableLayoutPanel16.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             tableLayoutPanel16.Controls.Add(guitarMicCheck, 0, 0);
             tableLayoutPanel16.Controls.Add(bassMicCheck, 1, 0);
-            tableLayoutPanel16.Location = new Point(117, 377);
+            tableLayoutPanel16.Location = new Point(117, 402);
             tableLayoutPanel16.Margin = new Padding(0);
             tableLayoutPanel16.Name = "tableLayoutPanel16";
             tableLayoutPanel16.RowCount = 1;
@@ -2338,7 +2341,7 @@
             // 
             label65.Anchor = AnchorStyles.Left;
             label65.AutoSize = true;
-            label65.Location = new Point(3, 210);
+            label65.Location = new Point(3, 235);
             label65.Name = "label65";
             label65.Size = new Size(57, 15);
             label65.TabIndex = 37;
@@ -2350,7 +2353,7 @@
             drumKitSelect.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             drumKitSelect.DropDownStyle = ComboBoxStyle.DropDownList;
             drumKitSelect.FormattingEnabled = true;
-            drumKitSelect.Location = new Point(120, 206);
+            drumKitSelect.Location = new Point(120, 231);
             drumKitSelect.Name = "drumKitSelect";
             drumKitSelect.Size = new Size(432, 23);
             drumKitSelect.TabIndex = 38;
@@ -3594,6 +3597,17 @@
             compile_input.Size = new Size(419, 23);
             compile_input.TabIndex = 2;
             // 
+            // easyOpenCheckbox
+            // 
+            easyOpenCheckbox.Anchor = AnchorStyles.Left;
+            easyOpenCheckbox.AutoSize = true;
+            easyOpenCheckbox.Location = new Point(120, 32);
+            easyOpenCheckbox.Name = "easyOpenCheckbox";
+            easyOpenCheckbox.Size = new Size(115, 19);
+            easyOpenCheckbox.TabIndex = 39;
+            easyOpenCheckbox.Text = "Easy Open Notes";
+            easyOpenCheckbox.UseVisualStyleBackColor = true;
+            // 
             // CompileSong
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -3962,5 +3976,6 @@
         private Label dlcChecksum;
         private ToolStripSeparator toolStripSeparator2;
         private ToolStripMenuItem exportSongArchiveToolStripMenuItem;
+        private CheckBox easyOpenCheckbox;
     }
 }
