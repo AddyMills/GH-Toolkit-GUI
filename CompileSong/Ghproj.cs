@@ -99,6 +99,12 @@ namespace GH_Toolkit_GUI
             public string dSkeleton { get; set; } = "";
             [DefaultValue("Default")]
             public string vSkeleton { get; set; } = "";
+            [DefaultValue("Modern Rock")]
+            public string ghwtDrumkit { get; set; } = "Modern Rock";
+            [DefaultValue("Modern Rock")]
+            public string gh5Drumkit { get; set; } = "Modern Rock";
+            [DefaultValue("Modern Rock")]
+            public string ghworDrumkit { get; set; } = "Modern Rock";
             [DefaultValue(-1)]
             public int artistText { get; set; } = 0;
             public int songYear { get; set; } = 2024;
@@ -133,12 +139,7 @@ namespace GH_Toolkit_GUI
             public int beat16thLow { get; set; } = 1;
             [DefaultValue(120)]
             public int beat16thHigh { get; set; } = 120;
-            [DefaultValue(-1)]
-            public int ghwtDrumkit { get; set; } = 0;
-            [DefaultValue(-1)]
-            public int gh5Drumkit { get; set; } = 0;
-            [DefaultValue(-1)]
-            public int ghworDrumkit { get; set; } = 0;
+
             public decimal gtrVolumeGh3 { get; set; } = 0;
             public decimal bandVolumeGh3 { get; set; } = 0;
             [DefaultValue(1)]
@@ -155,6 +156,7 @@ namespace GH_Toolkit_GUI
             public bool isP2Rhythm { get; set; } = false;
             public bool isCoopAudio { get; set; } = false;
             public bool useRenderedPreview { get; set; } = false;
+            public bool useRenderedPreviewGh3 { get; set; } = false;
             public bool setEnd { get; set; } = false;
             public bool useBeatTrack { get; set; } = false;
             public bool guitarMic { get; set; } = false;
@@ -225,6 +227,7 @@ namespace GH_Toolkit_GUI
                 crowdPath = crowdInput.Text,
                 previewAudioPath = previewInput.Text,
                 previewVolume = previewVolume.Value,
+                useRenderedPreview = renderedPreviewCheck.Checked,
                 // Song Data
                 midiPath = midiFileInput.Text,
                 easyOpen = easyOpenCheckbox.Checked,
@@ -280,7 +283,7 @@ namespace GH_Toolkit_GUI
                 bassistSelect = bassist_select_gh3.SelectedIndex,
                 isP2Rhythm = p2_rhythm_check.Checked,
                 isCoopAudio = coop_audio_check.Checked,
-                useRenderedPreview = gh3_rendered_preview_check.Checked,
+                useRenderedPreviewGh3 = gh3_rendered_preview_check.Checked,
                 setEnd = gh3_set_end.Checked,
                 // Other
                 compilePath = compile_input.Text,
@@ -336,6 +339,7 @@ namespace GH_Toolkit_GUI
             crowd_input_gh3.Text = data.crowdPathGh3;
             preview_audio_input_gh3.Text = data.previewAudioPathGh3;
             previewVolumeGh3.Value = data.previewVolumeGh3;
+            gh3_rendered_preview_check.Checked = data.useRenderedPreviewGh3;
 
             // GH3 Song Data
             midi_file_input_gh3.Text = data.midiPathGh3;
@@ -392,6 +396,7 @@ namespace GH_Toolkit_GUI
             crowdInput.Text = data.crowdPath;
             previewInput.Text = data.previewAudioPath;
             previewVolume.Value = data.previewVolume;
+            renderedPreviewCheck.Checked = data.useRenderedPreview;
 
             // Song Data
             midiFileInput.Text = data.midiPath;
@@ -405,6 +410,14 @@ namespace GH_Toolkit_GUI
             gameDrumKits["GHWT"] = data.ghwtDrumkit;
             gameDrumKits["GH5"] = data.gh5Drumkit;
             gameDrumKits["GHWoR"] = data.ghworDrumkit;
+            try
+            {
+                drumKitSelect.SelectedItem = gameDrumKits[CurrentGame];
+            }
+            catch
+            {
+
+            }
             vocalGenderSelect.SelectedIndex = data.vocalGender;
             vocalScrollSpeed.Value = data.vocalScrollSpeed;
             vocalTuningCents.Value = data.vocalTuningCents;

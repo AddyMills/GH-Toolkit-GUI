@@ -55,11 +55,11 @@ namespace GH_Toolkit_GUI
             { "GHWoR", 0 }
         };
         // Dictionary to hold the selected drum kit for each game
-        private Dictionary<string, int> gameDrumKits = new Dictionary<string, int>()
+        private Dictionary<string, string> gameDrumKits = new Dictionary<string, string>()
         {
-            { "GHWT", 0 },
-            { "GH5", 0 },
-            { "GHWoR", 0 }
+            { "GHWT", "Modern Rock" },
+            { "GH5", "Modern Rock" },
+            { "GHWoR", "Modern Rock" }
         };
         // Dictionary to hold the compile folder path for each platform and each game
         private Dictionary<string, Dictionary<string, string>> gamePlatformCompilePaths = new Dictionary<string, Dictionary<string, string>>();
@@ -501,11 +501,16 @@ namespace GH_Toolkit_GUI
             List<string> drumKitBase = new List<string> { "Classic Rock", "Electro", "Fusion", "Heavy Rock", "Hip Hop", "Modern Rock" };
             List<string> drumKitWt = new List<string> { "Blip Hop", "Cheesy", "Computight", "Conga", "Dub", "Eightys", "Gunshot",
                                        "House", "India", "Jazzy", "Old School", "Orchestral", "Scratch", "Scratch_Electro" };
+            List<string> drumKitWtde = new List<string> { "And Justice For All" };
             List<string> drumKitGh5 = new List<string> { "Bigroom Rock", "Dance", "Metal", "Noise", "Standard Rock" };
 
             if (CurrentGame == "GHWT")
             {
                 drumKitBase.AddRange(drumKitWt);
+                if (CurrentPlatform == "PC")
+                {
+                    drumKitBase.AddRange(drumKitWtde);
+                }
             }
             else
             {
@@ -514,11 +519,28 @@ namespace GH_Toolkit_GUI
 
             drumKitBase.Sort();
 
+            string? tempDrumkit = "";
+
+            if (drumKitSelect.SelectedItem != null)
+            {
+                tempDrumkit = drumKitSelect.SelectedItem.ToString();
+            }
+
             // Clear drumKitSelect ComboBox entries
             drumKitSelect.Items.Clear();
 
             // Add the drum kits to the drumKitSelect ComboBox
             drumKitSelect.Items.AddRange(drumKitBase.ToArray());
+
+            // Set the drum kit to the previously selected drum kit
+            if (drumKitSelect.Items.Contains(tempDrumkit))
+            {
+                drumKitSelect.SelectedItem = tempDrumkit;
+            }
+            else
+            {
+                drumKitSelect.SelectedItem = "Modern Rock";
+            }
         }
         private void SetGh3Fields(string game)
         {
@@ -1318,6 +1340,11 @@ namespace GH_Toolkit_GUI
             {
                 songInfo.Keys.AddKey("MicForGuitarist", "1");
             }
+            if (drumKitSelect.SelectedIndex != -1)
+            {
+                string drumKit = drumKitSelect.SelectedItem.ToString().Replace(" ", "").ToLower();
+                songInfo.Keys.AddKey("DrumKit", drumKit);
+            }
             if (Pref.OverrideBeatLines)
             {
                 songInfo.Keys.AddKey("Low8Bars", beat8thLow.Value.ToString());
@@ -1947,7 +1974,15 @@ namespace GH_Toolkit_GUI
             {
                 return;
             }
-            gameDrumKits[CurrentGame] = drumKitSelect.SelectedIndex;
+            try
+            {
+                gameDrumKits[CurrentGame] = drumKitSelect.SelectedItem.ToString();
+            }
+            catch
+            {
+
+            }
+            
         }
 
         private void import_from_other_Click(object sender, EventArgs e)
