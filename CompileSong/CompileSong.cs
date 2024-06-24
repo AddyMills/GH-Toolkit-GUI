@@ -1444,9 +1444,9 @@ namespace GH_Toolkit_GUI
                 await Task.WhenAll(tasksToAwait.ToArray());
 
                 // Create the preview audio
-                if (gh3_rendered_preview_check.Checked)
+                if (gh3_rendered_preview_check.Checked && File.Exists(preview_audio_input_gh3.Text))
                 {
-                    Task previewStem = fsb.ConvertToMp3(gtrOutput, previewOutput);
+                    Task previewStem = fsb.ConvertToMp3(preview_audio_input_gh3.Text, previewOutput);
                     await previewStem;
                 }
                 else
@@ -1555,9 +1555,9 @@ namespace GH_Toolkit_GUI
                 await Task.WhenAll(tasksToAwait.ToArray());
 
                 // Create the preview audio
-                if (renderedPreviewCheck.Checked)
+                if (renderedPreviewCheck.Checked && File.Exists(previewInput.Text))
                 {
-                    Task previewStem = fsb.ConvertToMp3(guitarOutput, previewOutput);
+                    Task previewStem = fsb.ConvertToMp3(previewInput.Text, previewOutput);
                     await previewStem;
                 }
                 else
