@@ -1182,6 +1182,27 @@ namespace GH_Toolkit_GUI
             }
             // Add code to delete the folder after processing eventually
         }
+        private void CompileGh5PakFile()
+        {
+            string venue = GetVenue(venueSource.SelectedIndex);
+
+            string pakFile = PAK.CreateSongPackage(
+                midiPath: midiFileInput.Text,
+                savePath: compile_input.Text,
+                songName: song_checksum.Text,
+                game: CurrentGame,
+                gameConsole: CurrentPlatform,
+                hopoThreshold: (int)HmxHopoVal.Value,
+                skaPath: skaFilesInput.Text,
+                perfOverride: perfOverrideInput.Text,
+                songScripts: songScriptInput.Text,
+                skaSource: GetSkaSourceGhwt(),
+                venueSource: venue,
+                overrideBeat: use_beat_check.Checked,
+                hopoType: hopo_mode_select.SelectedIndex,
+                easyOpens: easyOpenCheckbox.Checked);
+
+        }
         private void WriteWtdeIni(string saveFolder)
         {
             var config = new IniParserConfiguration();
@@ -1765,6 +1786,26 @@ namespace GH_Toolkit_GUI
             }
             return success;
         }
+        private bool CompilePakGh5(bool ghwor = true) 
+        {             
+            bool success = false;
+            try
+            {
+                SaveProject();
+                PreCompileCheck();
+                CompileGh5PakFile();
+                success = true;
+            }
+            catch (MidiCompileException ex)
+            {
+                MidiFailException(ex);
+            }
+            catch (Exception ex)
+            {
+                HandleException(ex, "Compile Failed!");
+            }
+            return success;
+        }
         private void compile_pak_button_Click(object sender, EventArgs e)
         {
             Console.WriteLine($"Compiling song for {CurrentGame}");
@@ -1778,6 +1819,10 @@ namespace GH_Toolkit_GUI
             else if (CurrentGame == GAME_GHWT)
             {
                 success = CompilePakGhwt();
+            }
+            else
+            {
+                success = CompilePakGh5();
             }
 
             if (success && (CurrentPlatform == "PS3" || CurrentPlatform == platform_360.Text))

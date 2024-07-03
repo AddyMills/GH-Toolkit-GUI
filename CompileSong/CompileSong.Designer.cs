@@ -192,6 +192,7 @@
             bassMicCheck = new CheckBox();
             label65 = new Label();
             drumKitSelect = new ComboBox();
+            easyOpenCheckbox = new CheckBox();
             song_data_tab_gh3 = new TabPage();
             tableLayoutPanel7 = new TableLayoutPanel();
             label11 = new Label();
@@ -299,7 +300,6 @@
             compile_select = new Button();
             project_select = new Button();
             compile_input = new TextBox();
-            easyOpenCheckbox = new CheckBox();
             compiler_tabs.SuspendLayout();
             metadata_tab.SuspendLayout();
             tableLayoutPanel2.SuspendLayout();
@@ -729,7 +729,6 @@
             // radioButton5
             // 
             radioButton5.AutoSize = true;
-            radioButton5.Enabled = false;
             radioButton5.Location = new Point(487, 3);
             radioButton5.Name = "radioButton5";
             radioButton5.Size = new Size(67, 19);
@@ -2359,6 +2358,17 @@
             drumKitSelect.TabIndex = 38;
             drumKitSelect.SelectedIndexChanged += drumKitSelect_SelectedIndexChanged;
             // 
+            // easyOpenCheckbox
+            // 
+            easyOpenCheckbox.Anchor = AnchorStyles.Left;
+            easyOpenCheckbox.AutoSize = true;
+            easyOpenCheckbox.Location = new Point(120, 32);
+            easyOpenCheckbox.Name = "easyOpenCheckbox";
+            easyOpenCheckbox.Size = new Size(115, 19);
+            easyOpenCheckbox.TabIndex = 39;
+            easyOpenCheckbox.Text = "Easy Open Notes";
+            easyOpenCheckbox.UseVisualStyleBackColor = true;
+            // 
             // song_data_tab_gh3
             // 
             song_data_tab_gh3.Controls.Add(tableLayoutPanel7);
@@ -3596,17 +3606,6 @@
             compile_input.Name = "compile_input";
             compile_input.Size = new Size(419, 23);
             compile_input.TabIndex = 2;
-            // 
-            // easyOpenCheckbox
-            // 
-            easyOpenCheckbox.Anchor = AnchorStyles.Left;
-            easyOpenCheckbox.AutoSize = true;
-            easyOpenCheckbox.Location = new Point(120, 32);
-            easyOpenCheckbox.Name = "easyOpenCheckbox";
-            easyOpenCheckbox.Size = new Size(115, 19);
-            easyOpenCheckbox.TabIndex = 39;
-            easyOpenCheckbox.Text = "Easy Open Notes";
-            easyOpenCheckbox.UseVisualStyleBackColor = true;
             // 
             // CompileSong
             // 
