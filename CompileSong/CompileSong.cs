@@ -1100,7 +1100,7 @@ namespace GH_Toolkit_GUI
 
             string checksum = GetSongChecksum();
 
-            string pakFile = PAK.CreateSongPackage(
+            var (pakFile, doubleKick) = PAK.CreateSongPackage(
                 midiPath: midi_file_input_gh3.Text,
                 savePath: compile_input.Text,
                 songName: checksum,
@@ -1152,7 +1152,7 @@ namespace GH_Toolkit_GUI
 
             string venue = GetVenue(venueSource.SelectedIndex);
 
-            string pakFile = PAK.CreateSongPackage(
+            var (pakFile, doubleKick) = PAK.CreateSongPackage(
                 midiPath: midiFileInput.Text,
                 savePath: compile_input.Text,
                 songName: song_checksum.Text,
@@ -1182,14 +1182,14 @@ namespace GH_Toolkit_GUI
             }
             // Add code to delete the folder after processing eventually
         }
-        private void CompileGh5PakFile()
+        private bool CompileGh5PakFile()
         {
             string venue = GetVenue(venueSource.SelectedIndex);
 
-            string pakFile = PAK.CreateSongPackage(
+            var (pakFile, doubleKick) = PAK.CreateSongPackage(
                 midiPath: midiFileInput.Text,
                 savePath: compile_input.Text,
-                songName: song_checksum.Text,
+                songName: GetSongChecksum(),
                 game: CurrentGame,
                 gameConsole: CurrentPlatform,
                 hopoThreshold: (int)HmxHopoVal.Value,
@@ -1202,6 +1202,33 @@ namespace GH_Toolkit_GUI
                 hopoType: hopo_mode_select.SelectedIndex,
                 easyOpens: easyOpenCheckbox.Checked);
 
+
+
+            var metadata = PackageMetadataGhwtPlus(doubleKick);
+            var (songlist, qsStrings) = metadata.GenerateGh5SongListEntry();
+
+            Directory.CreateDirectory(ConsoleCompile);
+            string currCheck = GetSongChecksum();
+
+            File.Copy(pakFile, Path.Combine(ConsoleCompile, $"b{currCheck}_song.pak"), true);
+            for (int i = 1; i < 4; i++)
+            {
+                string audio = Path.Combine(compile_input.Text, $"{currCheck}_{i}.fsb");
+                if (!File.Exists(audio))
+                {
+                    throw new FileNotFoundException($"Missing audio file {audio} for download file creation.");
+                }
+                File.Copy(audio, Path.Combine(ConsoleCompile, $"a{currCheck}_{i}.fsb"), true);
+            }
+            if (!File.Exists(Path.Combine(compile_input.Text, $"{currCheck}_preview.fsb")))
+            {
+                throw new FileNotFoundException($"Missing preview audio file {currCheck}_preview.fsb for download file creation.");
+            }
+            File.Copy(Path.Combine(compile_input.Text, $"{currCheck}_preview.fsb"), Path.Combine(ConsoleCompile, $"a{currCheck}_preview.fsb"), true);
+            
+            CreateConsoleDownloadFilesGh5(ConsoleChecksum, CurrentGame, CurrentPlatform, ConsoleCompile, ResourcePath, songlist, qsStrings, metadata.PackageName);
+            
+            return true;
         }
         private void WriteWtdeIni(string saveFolder)
         {
@@ -1240,7 +1267,7 @@ namespace GH_Toolkit_GUI
             }
             File.Move(audioPath, savePath, true);
         }
-        private GhMetadata PackageMetadata()
+        private GhMetadata PackageMetadata(bool doubleKick = false)
         {
             return new GhMetadata
             {
@@ -1270,6 +1297,41 @@ namespace GH_Toolkit_GUI
                 GtrVol = (float)gh3_gtr_vol.Value,
                 Countoff = countoff_select_gh3.Text,
                 HopoThreshold = 500f
+            };
+        }
+        private GhMetadata PackageMetadataGhwtPlus(bool doubleKick = false)
+        {
+            return new GhMetadata
+            {
+                Checksum = GetSongChecksum(),
+                CompileFolder = compile_input.Text,
+                Title = $"\\L{title_input.Text}",
+                Artist = $"\\L{artist_input.Text}",
+                ArtistTextSelect = artist_text_select.Text,
+                ArtistTextCustom = artistTextCustom.Text,
+                Year = (int)year_input.Value,
+                CoverArtist = cover_artist_input.Text,
+                CoverYear = (int)cover_year_input.Value,
+                Genre = genre_input.Text,
+                ChartAuthor = chart_author_input.Text,
+                Singer = vocalGenderSelect.Text,
+                IsArtistFamousBy = IsArtistFamousBy(),
+                Beat8thLow = (int)beat8thLow.Value,
+                Beat8thHigh = (int)beat8thHigh.Value,
+                Beat16thLow = (int)beat16thLow.Value,
+                Beat16thHigh = (int)beat16thHigh.Value,
+                OverrideBeatLines = Pref.OverrideBeatLines,
+                BandVol = (float)overallVolume.Value,
+                Countoff = countoffSelect.Text,
+                DoubleKick = doubleKick,
+                VocalTuningCents = (int)vocalTuningCents.Value,
+                SustainThreshold = (float)sustainThreshold.Value,
+                VocalScrollSpeed = (float)vocalScrollSpeed.Value,
+                GuitarMic = guitarMicCheck.Checked,
+                BassMic = bassMicCheck.Checked,
+                DrumKit = drumKitSelect.Text,
+                Duration = GetAudioLength(),
+                Game = CurrentGame
             };
         }
         private QBStruct.QBStructData GenerateGh3SongListEntry()
@@ -1431,10 +1493,14 @@ namespace GH_Toolkit_GUI
         {
             var otherChecksum = $"download\\dl{ConsoleChecksum}.qb";
             Directory.CreateDirectory(ConsoleCompile);
-            CreateConsoleDownloadFiles(ConsoleChecksum, CurrentGame, CurrentPlatform, ConsoleCompile, ResourcePath, [GenerateGh3SongListEntry()]);
+            CreateConsoleDownloadFilesGh3(ConsoleChecksum, CurrentGame, CurrentPlatform, ConsoleCompile, ResourcePath, [GenerateGh3SongListEntry()]);
             //CreateConsoleDownloadScriptsGh3();
             // text pak is download\download_song{x}.qb where x is the checksum
             // other pak is download\dl{x}.qb where x is the checksum
+        }
+        private void CreateConsoleFilesGh5()
+        {
+            
         }
         private void CreateConsolePackage()
         {
@@ -1551,21 +1617,22 @@ namespace GH_Toolkit_GUI
                 }
             }
         }
-        private async Task CompileGhwtAudio()
+        private async Task CompileGhwtAudio(bool encrypt = false)
         {
-            string drums1Output = Path.Combine(compile_input.Text, $"{song_checksum.Text}_drums1.mp3");
-            string drums2Output = Path.Combine(compile_input.Text, $"{song_checksum.Text}_drums2.mp3");
-            string drums3Output = Path.Combine(compile_input.Text, $"{song_checksum.Text}_drums3.mp3");
-            string drums4Output = Path.Combine(compile_input.Text, $"{song_checksum.Text}_drums4.mp3");
+            string songChecksum = GetSongChecksum();
+            string drums1Output = Path.Combine(compile_input.Text, $"{songChecksum}_drums1.mp3");
+            string drums2Output = Path.Combine(compile_input.Text, $"{songChecksum}_drums2.mp3");
+            string drums3Output = Path.Combine(compile_input.Text, $"{songChecksum}_drums3.mp3");
+            string drums4Output = Path.Combine(compile_input.Text, $"{songChecksum}_drums4.mp3");
 
-            string guitarOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_guitar.mp3");
-            string rhythmOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_rhythm.mp3");
-            string vocalsOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_vocals.mp3");
+            string guitarOutput = Path.Combine(compile_input.Text, $"{songChecksum}_guitar.mp3");
+            string rhythmOutput = Path.Combine(compile_input.Text, $"{songChecksum}_rhythm.mp3");
+            string vocalsOutput = Path.Combine(compile_input.Text, $"{songChecksum}_vocals.mp3");
 
-            string crowdOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_crowd.mp3");
-            string backingOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_song.mp3");
+            string crowdOutput = Path.Combine(compile_input.Text, $"{songChecksum}_crowd.mp3");
+            string backingOutput = Path.Combine(compile_input.Text, $"{songChecksum}_song.mp3");
 
-            string previewOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}_preview.mp3");
+            string previewOutput = Path.Combine(compile_input.Text, $"{songChecksum}_preview.mp3");
 
             string[] drumFiles = { drums1Output, drums2Output, drums3Output, drums4Output };
             string[] otherFiles = { guitarOutput, rhythmOutput, vocalsOutput };
@@ -1577,7 +1644,7 @@ namespace GH_Toolkit_GUI
             filesToProcess.AddRange(backingFiles);
             filesToProcess.Add(previewOutput);
 
-            string fsbOutput = Path.Combine(compile_input.Text, $"{song_checksum.Text}");
+            string fsbOutput = Path.Combine(compile_input.Text, $"{songChecksum}");
             try
             {
                 Console.WriteLine("Compiling Audio...");
@@ -1623,7 +1690,7 @@ namespace GH_Toolkit_GUI
                     await previewStem;
                 }
                 Console.WriteLine("Combining Audio...");
-                var fsbList = fsb.CombineFSB4File(drumFiles, otherFiles, backingFiles, [previewOutput], fsbOutput);
+                var fsbList = fsb.CombineFSB4File(drumFiles, otherFiles, backingFiles, [previewOutput], fsbOutput, encrypt);
 
                 if (CurrentPlatform == "PC")
                 {
@@ -1649,6 +1716,28 @@ namespace GH_Toolkit_GUI
                     }
                 }
             }
+        }
+        private int GetAudioLength()
+        {
+            var fsb = new FSB();
+            var backing = backingInput.Items.Cast<string>().ToArray();
+            var allAudio = new List<string> { kickInput.Text, snareInput.Text, cymbalsInput.Text, tomsInput.Text, guitarInput.Text, bassInput.Text, vocalsInput.Text };
+            allAudio.AddRange(backing);
+            int duration = 0;
+            foreach (string audio in allAudio)
+            {
+                try
+                {
+                    var timespan = fsb.GetAudioDuration(audio);
+                    duration = Math.Max(duration, (int)Math.Round(timespan.TotalSeconds));
+                }
+                catch
+                {
+
+                }
+
+            }
+            return duration;
         }
         private async Task CompileAll()
         {
@@ -1680,6 +1769,11 @@ namespace GH_Toolkit_GUI
                         compileSuccess = true;
                     }
                 }
+                else
+                {
+                    await CompileGhwtAudio(true);
+                    compileSuccess = CompilePakGh5();
+                }
                 if (!isExport && compileSuccess && (CurrentPlatform == "PS3" || CurrentPlatform == platform_360.Text))
                 {
                     CreateConsolePackage();
@@ -1709,13 +1803,17 @@ namespace GH_Toolkit_GUI
                 }
             }
         }
+        private void PreChecks()
+        {
+            SaveProject();
+            PreCompileCheck();
+        }
         private bool CompilePakGh3()
         {
             bool success = false;
             try
             {
-                SaveProject();
-                PreCompileCheck();
+                PreChecks();
                 CompileGh3PakFile();
                 success = true;
             }
@@ -1771,8 +1869,7 @@ namespace GH_Toolkit_GUI
             bool success = false;
             try
             {
-                SaveProject();
-                PreCompileCheck();
+                PreChecks();
                 CompileGhwtPakFile();
                 success = true;
             }
@@ -1791,8 +1888,7 @@ namespace GH_Toolkit_GUI
             bool success = false;
             try
             {
-                SaveProject();
-                PreCompileCheck();
+                PreChecks();
                 CompileGh5PakFile();
                 success = true;
             }
@@ -1834,6 +1930,7 @@ namespace GH_Toolkit_GUI
                 catch (Exception ex)
                 {
                     HandleException(ex, "Console Package Creation Failed!");
+                    success = false;
                 }
             }
             var time2 = DateTime.Now;
