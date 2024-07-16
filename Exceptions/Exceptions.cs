@@ -40,7 +40,10 @@ namespace GH_Toolkit_Exceptions
 
         public static void MidiFailException(Exception ex)
         {
-            Console.WriteLine($"Errors were found while compiling the MIDI:\n\n{ex.Message}\n\nCompilation has been cancelled.");
+            Console.WriteLine($"Errors were found while compiling the MIDI:");
+            Console.WriteLine(ex.Message);
+            Console.WriteLine("Compilation has been cancelled.");
+            MessageBox.Show("Errors were found while compiling the MIDI.\nPlease refer to the log on the toolkit's main window.", "MIDI Compilation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             // Make a custom error handler in the near future
         }
     }
