@@ -191,7 +191,7 @@ namespace GH_Toolkit_GUI
                 {
                     string sghName = $"{SghFolder}_{platform}";
                     string sghFolderName = ReplaceNonAlphanumeric(Path.GetFileName(SghFolder));
-                    CreateConsoleDownloadFiles(checksum, GAME_GH3, platform, compilePath, ResourcePath, toImport);
+                    CreateConsoleDownloadFilesGh3(checksum, GAME_GH3, platform, compilePath, ResourcePath, toImport);
                     string[] onyxArgs;
                     if (platform == CONSOLE_PS3)
                     {
