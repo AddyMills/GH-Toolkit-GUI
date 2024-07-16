@@ -357,7 +357,7 @@ namespace GH_Toolkit_GUI
             cover_year_input.Value = data.coverYear;
             gameSelectedGenres["GHWT"] = data.wtGenre;
             gameSelectedGenres["GH5"] = data.gh5Genre;
-            gameSelectedGenres["WOR"] = data.worGenre;
+            gameSelectedGenres["GHWoR"] = data.worGenre;
 
             HmxHopoVal.Value = data.hmxHopoVal;
             hopo_mode_select.SelectedIndex = data.hopoMode;
