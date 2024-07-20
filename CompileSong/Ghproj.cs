@@ -139,7 +139,16 @@ namespace GH_Toolkit_GUI
             public int beat16thLow { get; set; } = 1;
             [DefaultValue(120)]
             public int beat16thHigh { get; set; } = 120;
-
+            [DefaultValue(1)]
+            public int bandTier { get; set; } = 1;
+            [DefaultValue(1)]
+            public int guitarTier { get; set; } = 1;
+            [DefaultValue(1)]
+            public int bassTier { get; set; } = 1;
+            [DefaultValue(1)]
+            public int drumsTier { get; set; } = 1;
+            [DefaultValue(1)]
+            public int vocalsTier { get; set; } = 1;
             public decimal gtrVolumeGh3 { get; set; } = 0;
             public decimal bandVolumeGh3 { get; set; } = 0;
             [DefaultValue(1)]
@@ -257,6 +266,13 @@ namespace GH_Toolkit_GUI
                 vSkeleton = vSkeletonSelect.Text,
                 useNewClips = useNewClipsCheck.Checked,
                 modernStrobes = modernStrobesCheck.Checked,
+
+                // WoR Tiers
+                bandTier = (int)bandTierValue.Value,
+                guitarTier = (int)guitarTierValue.Value,
+                bassTier = (int)bassTierValue.Value,
+                drumsTier = (int)drumsTierValue.Value,
+                vocalsTier = (int)vocalsTierValue.Value,
 
                 // GH3
                 // Audio
@@ -441,6 +457,12 @@ namespace GH_Toolkit_GUI
             UpdatePreviewFields(); // This needs to be changed. Currently broken
             isProgrammaticChange = false;
 
+            // WoR Tiers
+            bandTierValue.Value = data.bandTier;
+            guitarTierValue.Value = data.guitarTier;
+            bassTierValue.Value = data.bassTier;
+            drumsTierValue.Value = data.drumsTier;
+            vocalsTierValue.Value = data.vocalsTier;
 
             SetAll();
         }
@@ -541,156 +563,146 @@ namespace GH_Toolkit_GUI
                 else if (Regex.IsMatch(file, audioRegex))
                 {
                     string fileNoExt = Path.GetFileNameWithoutExtension(file);
-                    if (isOld)
+                    // GH3 filepaths
+                    switch (fileNoExt)
                     {
-                        switch (fileNoExt)
-                        {
-                            case "guitar":
-                                if (backing_input_gh3.Items.Count != 0)
-                                {
-                                    guitar_input_gh3.Text = file;
-                                }
-                                else
-                                {
-                                    backing_input_gh3.Items.Add(file);
-                                }
-                                break;
-                            case "rhythm":
-                                if (rhythm_input_gh3.Text != string.Empty)
-                                {
-                                    backing_input_gh3.Items.Add(file);
-                                }
-                                else
-                                {
-                                    rhythm_input_gh3.Text = file;
-                                }
-                                break;
-                            case "bass":
-                                if (rhythm_input_gh3.Text != string.Empty)
-                                {
-                                    backing_input_gh3.Items.Add(rhythm_input_gh3.Text);
-                                }
+                        case "guitar":
+                            if (backing_input_gh3.Items.Count != 0)
+                            {
+                                guitar_input_gh3.Text = file;
+                            }
+                            else
+                            {
+                                backing_input_gh3.Items.Add(file);
+                            }
+                            break;
+                        case "rhythm":
+                            if (rhythm_input_gh3.Text != string.Empty)
+                            {
+                                backing_input_gh3.Items.Add(file);
+                            }
+                            else
+                            {
                                 rhythm_input_gh3.Text = file;
-                                break;
-                            case "crowd":
-                                crowd_input_gh3.Text = file;
-                                break;
-                            case "preview":
-                                gh3_rendered_preview_check.Checked = true;
-                                preview_audio_input_gh3.Text = file;
-                                break;
-                            case "song":
-                                bool removeGtr = false;
-                                if (backing_input_gh3.Items.Count != 0)
+                            }
+                            break;
+                        case "bass":
+                            if (rhythm_input_gh3.Text != string.Empty)
+                            {
+                                backing_input_gh3.Items.Add(rhythm_input_gh3.Text);
+                            }
+                            rhythm_input_gh3.Text = file;
+                            break;
+                        case "crowd":
+                            crowd_input_gh3.Text = file;
+                            break;
+                        case "preview":
+                            gh3_rendered_preview_check.Checked = true;
+                            preview_audio_input_gh3.Text = file;
+                            break;
+                        case "song":
+                            bool removeGtr = false;
+                            if (backing_input_gh3.Items.Count != 0)
+                            {
+                                foreach (string gtrCheck in backing_input_gh3.Items)
                                 {
-                                    foreach (string gtrCheck in backing_input_gh3.Items)
+                                    if (gtrCheck.ToLower().Contains("guitar"))
                                     {
-                                        if (gtrCheck.ToLower().Contains("guitar"))
-                                        {
-                                            guitar_input_gh3.Text = gtrCheck;
-                                            removeGtr = true;
-                                        }
-                                    }
-                                    if (removeGtr)
-                                    {
-                                        backing_input_gh3.Items.Remove(guitar_input_gh3.Text);
+                                        guitar_input_gh3.Text = gtrCheck;
+                                        removeGtr = true;
                                     }
                                 }
-                                backing_input_gh3.Items.Add(file);
-                                break;
-                            default:
-                                backing_input_gh3.Items.Add(file);
-                                break;
-                        }
+                                if (removeGtr)
+                                {
+                                    backing_input_gh3.Items.Remove(guitar_input_gh3.Text);
+                                }
+                            }
+                            backing_input_gh3.Items.Add(file);
+                            break;
+                        default:
+                            backing_input_gh3.Items.Add(file);
+                            break;
                     }
-                    else
+                    // Modern GH filepaths
+                    switch (fileNoExt)
                     {
-                        switch (fileNoExt)
-                        {
-                            case "drums_1":
-                                kickInput.Text = file;
-                                break;
-                            case "drums_2":
-                                snareInput.Text = file;
-                                break;
-                            case "drums_3":
-                                cymbalsInput.Text = file;
-                                break;
-                            case "drums_4":
-                                tomsInput.Text = file;
-                                break;
-                            case "guitar":
-                                if (backingInput.Items.Count != 0)
-                                {
-                                    guitarInput.Text = file;
-                                }
-                                else
-                                {
-                                    backingInput.Items.Add(file);
-                                }
-                                break;
-                            case "bass":
-                                if (bassInput.Text != string.Empty)
-                                {
-                                    backingInput.Items.Add(bassInput.Text);
-                                }
+                        case "drums_1":
+                            kickInput.Text = file;
+                            break;
+                        case "drums_2":
+                            snareInput.Text = file;
+                            break;
+                        case "drums_3":
+                            cymbalsInput.Text = file;
+                            break;
+                        case "drums_4":
+                            tomsInput.Text = file;
+                            break;
+                        case "guitar":
+                            if (backingInput.Items.Count != 0)
+                            {
+                                guitarInput.Text = file;
+                            }
+                            else
+                            {
+                                backingInput.Items.Add(file);
+                            }
+                            break;
+                        case "bass":
+                            if (bassInput.Text != string.Empty)
+                            {
+                                backingInput.Items.Add(bassInput.Text);
+                            }
+                            bassInput.Text = file;
+                            break;
+                        case "rhythm":
+                            if (bassInput.Text != string.Empty)
+                            {
+                                backingInput.Items.Add(file);
+                            }
+                            else
+                            {
                                 bassInput.Text = file;
-                                break;
-                            case "rhythm":
-                                if (bassInput.Text != string.Empty)
+                            }
+                            break;
+                        case "vocals":
+                            vocalsInput.Text = file;
+                            break;
+                        case "crowd":
+                            crowdInput.Text = file;
+                            break;
+                        case "song":
+                            bool removeGtr = false;
+                            if (backingInput.Items.Count != 0)
+                            {
+                                foreach (string gtrCheck in backingInput.Items)
                                 {
-                                    backingInput.Items.Add(file);
-                                }
-                                else
-                                {
-                                    bassInput.Text = file;
-                                }
-                                break;
-                            case "vocals":
-                                vocalsInput.Text = file;
-                                break;
-                            case "crowd":
-                                crowdInput.Text = file;
-                                break;
-                            case "song":
-                                bool removeGtr = false;
-                                if (backingInput.Items.Count != 0)
-                                {
-                                    foreach (string gtrCheck in backingInput.Items)
+                                    if (gtrCheck.ToLower().Contains("guitar"))
                                     {
-                                        if (gtrCheck.ToLower().Contains("guitar"))
-                                        {
-                                            guitarInput.Text = gtrCheck;
-                                            removeGtr = true;
-                                        }
-                                    }
-                                    if (removeGtr)
-                                    {
-                                        backingInput.Items.Remove(guitarInput.Text);
+                                        guitarInput.Text = gtrCheck;
+                                        removeGtr = true;
                                     }
                                 }
-                                backingInput.Items.Add(file);
-                                break;
-                            case "preview":
-                                renderedPreviewCheck.Checked = true;
-                                previewInput.Text = file;
-                                break;
-                            default:
-                                backingInput.Items.Add(file);
-                                break;
-                        }
+                                if (removeGtr)
+                                {
+                                    backingInput.Items.Remove(guitarInput.Text);
+                                }
+                            }
+                            backingInput.Items.Add(file);
+                            break;
+                        case "preview":
+                            renderedPreviewCheck.Checked = true;
+                            previewInput.Text = file;
+                            break;
+                        default:
+                            backingInput.Items.Add(file);
+                            break;
                     }
                 }
                 else if (Regex.IsMatch(file, midiRegexCh))
                 {
-                    if (isOld)
-                    {
-                        midi_file_input_gh3.Text = file;
-                    }
-                    else
-                    {
-                        midiFileInput.Text = file;
-                    }
+                    midi_file_input_gh3.Text = file;
+                    midiFileInput.Text = file;
                 }
             }
             UpdatePreviewFields();
@@ -725,11 +737,19 @@ namespace GH_Toolkit_GUI
                         year_input.Value = int.Parse(key.Value);
                         break;
                     case "diff_band":
+                        bandTierValue.Value = ChDiffToGh(key.Value);
+                        break;
                     case "diff_guitar":
+                        guitarTierValue.Value = ChDiffToGh(key.Value);
+                        break;
                     case "diff_bass":
+                        bassTierValue.Value = ChDiffToGh(key.Value);
+                        break;
                     case "diff_drums":
+                        drumsTierValue.Value = ChDiffToGh(key.Value);
+                        break;
                     case "diff_vocals":
-                        // Not supported yet
+                        vocalsTierValue.Value = ChDiffToGh(key.Value);
                         break;
                     case "sustain_cutoff_threshold":
                         sustainThreshold.Value = decimal.Parse(key.Value) / 480;
@@ -745,6 +765,16 @@ namespace GH_Toolkit_GUI
                         break;
                 }
             }
+        }
+        private int ChDiffToGh(string chDiff)
+        {
+            int chParsed = int.Parse(chDiff)+1;
+            if (chParsed <= 0)
+            {
+                return 0;
+            }
+            int ghDiff = (int)Math.Round(chParsed * 10f / 7f);
+            return Math.Clamp(ghDiff, 1, 10);
         }
     }
 }

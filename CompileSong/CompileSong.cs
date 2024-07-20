@@ -87,6 +87,10 @@ namespace GH_Toolkit_GUI
         private bool isLoading = false;
         private bool isExport = false;
         private UserPreferences Pref = UserPreferences.Default;
+        private List<QB.QBItem> SongList = new List<QB.QBItem>();
+        private string[] QsStrings = [];
+        private GhMetadata Metadata = new GhMetadata();
+        private string PakFilePath = "";
 
 
         public CompileSong(string ghproj = "")
@@ -282,7 +286,9 @@ namespace GH_Toolkit_GUI
                 { "audio_tab_gh3", audio_tab_gh3 },
                 { "song_data_gh3", song_data_tab_gh3 },
                 { "compile_tab", compile_tab },
-                { "wtde_settings", wtde_settings }
+                { "wtde_settings", wtde_settings },
+                { "wor_settings", wor_settings }
+
             };
         }
         private void SetButtons()
@@ -582,6 +588,10 @@ namespace GH_Toolkit_GUI
             if (CurrentGame == GAME_GHWT && CurrentPlatform == "PC")
             {
                 compiler_tabs.TabPages.Add(wtde_settings);
+            }
+            else if (CurrentGame == GAME_GHWOR)
+            {
+                compiler_tabs.TabPages.Add(wor_settings);
             }
         }
         public string GetGame()
@@ -1117,7 +1127,7 @@ namespace GH_Toolkit_GUI
                 hopoType: hopo_mode_select.SelectedIndex,
                 isSteven: vocal_gender_select_gh3.Text == "Steven Tyler");
 
-            if (isExport) 
+            if (isExport)
             {
                 File.Move(pakFile, Path.Combine(ConsoleCompile, $"{checksum}_song.pak"), true);
                 var songEntry = GenerateGh3SongListEntry();
@@ -1185,49 +1195,40 @@ namespace GH_Toolkit_GUI
         private bool CompileGh5PakFile()
         {
             string venue = GetVenue(venueSource.SelectedIndex);
-
-            var (pakFile, doubleKick) = PAK.CreateSongPackage(
-                midiPath: midiFileInput.Text,
-                savePath: compile_input.Text,
-                songName: GetSongChecksum(),
-                game: CurrentGame,
-                gameConsole: CurrentPlatform,
-                hopoThreshold: (int)HmxHopoVal.Value,
-                skaPath: skaFilesInput.Text,
-                perfOverride: perfOverrideInput.Text,
-                songScripts: songScriptInput.Text,
-                skaSource: GetSkaSourceGhwt(),
-                venueSource: venue,
-                overrideBeat: use_beat_check.Checked,
-                hopoType: hopo_mode_select.SelectedIndex,
-                easyOpens: easyOpenCheckbox.Checked);
-
-
-
-            var metadata = PackageMetadataGhwtPlus(doubleKick);
-            var (songlist, qsStrings) = metadata.GenerateGh5SongListEntry();
-
-            Directory.CreateDirectory(ConsoleCompile);
-            string currCheck = GetSongChecksum();
-
-            File.Copy(pakFile, Path.Combine(ConsoleCompile, $"b{currCheck}_song.pak"), true);
-            for (int i = 1; i < 4; i++)
+            var diffs = new Dictionary<string, int>()
             {
-                string audio = Path.Combine(compile_input.Text, $"{currCheck}_{i}.fsb");
-                if (!File.Exists(audio))
-                {
-                    throw new FileNotFoundException($"Missing audio file {audio} for download file creation.");
-                }
-                File.Copy(audio, Path.Combine(ConsoleCompile, $"a{currCheck}_{i}.fsb"), true);
-            }
-            if (!File.Exists(Path.Combine(compile_input.Text, $"{currCheck}_preview.fsb")))
-            {
-                throw new FileNotFoundException($"Missing preview audio file {currCheck}_preview.fsb for download file creation.");
-            }
-            File.Copy(Path.Combine(compile_input.Text, $"{currCheck}_preview.fsb"), Path.Combine(ConsoleCompile, $"a{currCheck}_preview.fsb"), true);
-            
-            CreateConsoleDownloadFilesGh5(ConsoleChecksum, CurrentGame, CurrentPlatform, ConsoleCompile, ResourcePath, songlist, qsStrings, metadata.PackageName);
-            
+                {"guitar", (int)guitarTierValue.Value },
+                {"bass", (int)bassTierValue.Value },
+                {"drums", (int)drumsTierValue.Value },
+                {"vocals", (int)vocalsTierValue.Value }
+            };
+
+            (PakFilePath, var doubleKick) = PAK.CreateSongPackage(
+               midiPath: midiFileInput.Text,
+               savePath: compile_input.Text,
+               songName: GetSongChecksum(),
+               game: CurrentGame,
+               gameConsole: CurrentPlatform,
+               hopoThreshold: (int)HmxHopoVal.Value,
+               skaPath: skaFilesInput.Text,
+               perfOverride: perfOverrideInput.Text,
+               songScripts: songScriptInput.Text,
+               skaSource: GetSkaSourceGhwt(),
+               venueSource: venue,
+               overrideBeat: use_beat_check.Checked,
+               hopoType: hopo_mode_select.SelectedIndex,
+               easyOpens: easyOpenCheckbox.Checked,
+               diffs: diffs);
+
+            guitarTierValue.Value = diffs["guitar"];
+            bassTierValue.Value = diffs["bass"];
+            drumsTierValue.Value = diffs["drums"];
+            vocalsTierValue.Value = diffs["vocals"];
+
+            Metadata = PackageMetadataGhwtPlus(doubleKick);
+            (SongList, QsStrings) = Metadata.GenerateGh5SongListEntry();
+
+
             return true;
         }
         private void WriteWtdeIni(string saveFolder)
@@ -1331,7 +1332,12 @@ namespace GH_Toolkit_GUI
                 BassMic = bassMicCheck.Checked,
                 DrumKit = drumKitSelect.Text,
                 Duration = GetAudioLength(),
-                Game = CurrentGame
+                Game = CurrentGame,
+                GuitarTier = (int)guitarTierValue.Value,
+                BassTier = (int)bassTierValue.Value,
+                DrumsTier = (int)drumsTierValue.Value,
+                VocalsTier = (int)vocalsTierValue.Value,
+                BandTier = (int)bandTierValue.Value,
             };
         }
         private QBStruct.QBStructData GenerateGh3SongListEntry()
@@ -1373,7 +1379,7 @@ namespace GH_Toolkit_GUI
             songInfo.Keys.AddKey("ArtistText", GetArtistText());
             if (cover)
             {
-                songInfo.Keys.AddKey("CoverArtist", cover_artist_input.Text);   
+                songInfo.Keys.AddKey("CoverArtist", cover_artist_input.Text);
                 songInfo.Keys.AddKey("CoverYear", cover_year_input.Value.ToString("G0", Murica));
             }
             songInfo.Keys.AddKey("OriginalArtist", cover ? "0" : "1");
@@ -1500,12 +1506,16 @@ namespace GH_Toolkit_GUI
         }
         private void CreateConsoleFilesGh5()
         {
-            
+
         }
         private void CreateConsolePackage()
         {
-            var metadata = PackageMetadata();
-            metadata.CreateConsolePackage(CurrentGame, CurrentPlatform, ConsoleCompile, ResourcePath, Pref.OnyxCliPath);
+            if (CurrentGame == GAME_GH3 || CurrentGame == GAME_GHA)
+            {
+                Metadata = PackageMetadata();
+            }
+            
+            Metadata.CreateConsolePackage(CurrentGame, CurrentPlatform, ConsoleCompile, ResourcePath, Pref.OnyxCliPath);
         }
         private async Task CompileGh3Audio()
         {
@@ -1620,10 +1630,10 @@ namespace GH_Toolkit_GUI
         private async Task CompileGhwtAudio(bool encrypt = false)
         {
             string songChecksum = GetSongChecksum();
-            string drums1Output = Path.Combine(compile_input.Text, $"{songChecksum}_drums1.mp3");
-            string drums2Output = Path.Combine(compile_input.Text, $"{songChecksum}_drums2.mp3");
-            string drums3Output = Path.Combine(compile_input.Text, $"{songChecksum}_drums3.mp3");
-            string drums4Output = Path.Combine(compile_input.Text, $"{songChecksum}_drums4.mp3");
+            string drumsKickOutput = Path.Combine(compile_input.Text, $"{songChecksum}_drumsKick.mp3");
+            string drumsSnareOutput = Path.Combine(compile_input.Text, $"{songChecksum}_drumsSnare.mp3");
+            string drumsTomsOutput = Path.Combine(compile_input.Text, $"{songChecksum}_drumsToms.mp3");
+            string drumsCymbalOutput = Path.Combine(compile_input.Text, $"{songChecksum}_drumsCymbal.mp3");
 
             string guitarOutput = Path.Combine(compile_input.Text, $"{songChecksum}_guitar.mp3");
             string rhythmOutput = Path.Combine(compile_input.Text, $"{songChecksum}_rhythm.mp3");
@@ -1634,7 +1644,7 @@ namespace GH_Toolkit_GUI
 
             string previewOutput = Path.Combine(compile_input.Text, $"{songChecksum}_preview.mp3");
 
-            string[] drumFiles = { drums1Output, drums2Output, drums3Output, drums4Output };
+            string[] drumFiles = { drumsKickOutput, drumsSnareOutput, drumsTomsOutput, drumsCymbalOutput };
             string[] otherFiles = { guitarOutput, rhythmOutput, vocalsOutput };
             string[] backingFiles = { backingOutput, crowdOutput };
 
@@ -1652,10 +1662,10 @@ namespace GH_Toolkit_GUI
 
                 FSB fsb = new FSB();
 
-                Task drums1Stem = fsb.ConvertToMp3(kickInput.Text, drums1Output);
-                Task drums2Stem = fsb.ConvertToMp3(snareInput.Text, drums2Output);
-                Task drums3Stem = fsb.ConvertToMp3(cymbalsInput.Text, drums3Output);
-                Task drums4Stem = fsb.ConvertToMp3(tomsInput.Text, drums4Output);
+                Task drums1Stem = fsb.ConvertToMp3(kickInput.Text, drumsKickOutput);
+                Task drums2Stem = fsb.ConvertToMp3(snareInput.Text, drumsSnareOutput);
+                Task drums3Stem = fsb.ConvertToMp3(cymbalsInput.Text, drumsCymbalOutput);
+                Task drums4Stem = fsb.ConvertToMp3(tomsInput.Text, drumsTomsOutput);
 
                 Task guitarStem = fsb.ConvertToMp3(guitarInput.Text, guitarOutput);
                 Task rhythmStem = fsb.ConvertToMp3(bassInput.Text, rhythmOutput);
@@ -1677,7 +1687,7 @@ namespace GH_Toolkit_GUI
                 }
                 else
                 {
-                    string[] previewFiles = { drums1Output, drums2Output, drums3Output, drums4Output, guitarOutput, rhythmOutput, vocalsOutput, backingOutput };
+                    string[] previewFiles = { drumsKickOutput, drumsSnareOutput, drumsCymbalOutput, drumsTomsOutput, guitarOutput, rhythmOutput, vocalsOutput, backingOutput };
                     decimal previewStart = previewStartTime / 1000m;
                     decimal previewLength = previewEndTime / 1000m;
                     if (setEndTime.Checked)
@@ -1771,8 +1781,14 @@ namespace GH_Toolkit_GUI
                 }
                 else
                 {
-                    await CompileGhwtAudio(true);
-                    compileSuccess = CompilePakGh5();
+                    pakSuccess = CompilePakGh5();
+                    if (pakSuccess)
+                    {
+                        await CompileGhwtAudio(true);
+                        compileSuccess = true;
+                    }
+                    MoveGh5Files();
+                    CreateConsoleDownloadFilesGh5(ConsoleChecksum, CurrentGame, CurrentPlatform, ConsoleCompile, ResourcePath, SongList, QsStrings, Metadata.PackageName);
                 }
                 if (!isExport && compileSuccess && (CurrentPlatform == "PS3" || CurrentPlatform == platform_360.Text))
                 {
@@ -1883,8 +1899,8 @@ namespace GH_Toolkit_GUI
             }
             return success;
         }
-        private bool CompilePakGh5(bool ghwor = true) 
-        {             
+        private bool CompilePakGh5(bool ghwor = true)
+        {
             bool success = false;
             try
             {
@@ -1901,6 +1917,27 @@ namespace GH_Toolkit_GUI
                 HandleException(ex, "Compile Failed!");
             }
             return success;
+        }
+        private void MoveGh5Files()
+        {
+            Directory.CreateDirectory(ConsoleCompile);
+            string currCheck = GetSongChecksum();
+
+            File.Copy(PakFilePath, Path.Combine(ConsoleCompile, $"b{currCheck}_song.pak"), true);
+            for (int i = 1; i < 4; i++)
+            {
+                string audio = Path.Combine(compile_input.Text, $"{currCheck}_{i}.fsb");
+                if (!File.Exists(audio))
+                {
+                    throw new FileNotFoundException($"Missing audio file {audio} for download file creation.");
+                }
+                File.Copy(audio, Path.Combine(ConsoleCompile, $"a{currCheck}_{i}.fsb"), true);
+            }
+            if (!File.Exists(Path.Combine(compile_input.Text, $"{currCheck}_preview.fsb")))
+            {
+                throw new FileNotFoundException($"Missing preview audio file {currCheck}_preview.fsb for download file creation.");
+            }
+            File.Copy(Path.Combine(compile_input.Text, $"{currCheck}_preview.fsb"), Path.Combine(ConsoleCompile, $"a{currCheck}_preview.fsb"), true);
         }
         private void compile_pak_button_Click(object sender, EventArgs e)
         {
@@ -1919,6 +1956,8 @@ namespace GH_Toolkit_GUI
             else
             {
                 success = CompilePakGh5();
+                MoveGh5Files();
+                CreateConsoleDownloadFilesGh5(ConsoleChecksum, CurrentGame, CurrentPlatform, ConsoleCompile, ResourcePath, SongList, QsStrings, Metadata.PackageName);
             }
 
             if (success && (CurrentPlatform == "PS3" || CurrentPlatform == platform_360.Text))
@@ -1951,7 +1990,7 @@ namespace GH_Toolkit_GUI
         private void ShowPostCompile()
         {
             if (isExport)
-            { 
+            {
                 MessageBox.Show("Export has completed successfully!\n\nYour song has been packaged up and is ready to be shared with others.\n\nIt can be found where you defined the song to be compiled to or next to your .ghproj file.", "Export Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else if (CurrentPlatform == platform_pc.Text)
@@ -2124,7 +2163,7 @@ namespace GH_Toolkit_GUI
             {
 
             }
-            
+
         }
 
         private void import_from_other_Click(object sender, EventArgs e)
