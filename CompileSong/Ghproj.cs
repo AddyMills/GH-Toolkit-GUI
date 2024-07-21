@@ -633,10 +633,10 @@ namespace GH_Toolkit_GUI
                             snareInput.Text = file;
                             break;
                         case "drums_3":
-                            cymbalsInput.Text = file;
+                            tomsInput.Text = file;
                             break;
                         case "drums_4":
-                            tomsInput.Text = file;
+                            cymbalsInput.Text = file;
                             break;
                         case "guitar":
                             if (backingInput.Items.Count != 0)
