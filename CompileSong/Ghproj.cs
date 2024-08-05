@@ -80,6 +80,8 @@ namespace GH_Toolkit_GUI
             [DefaultValue("")]
             public string skaPath { get; set; } = "";
             [DefaultValue("")]
+            public string lipsyncPath { get; set; } = "";
+            [DefaultValue("")]
             public string songScriptPath { get; set; } = "";
             [DefaultValue("")]
             public string compilePath { get; set; } = "";
@@ -242,6 +244,7 @@ namespace GH_Toolkit_GUI
                 easyOpen = easyOpenCheckbox.Checked,
                 perfPath = perfOverrideInput.Text,
                 skaPath = skaFilesInput.Text,
+                lipsyncPath = gh3SkaFilesInput.Text,
                 songScriptPath = songScriptInput.Text,
                 skaSource = skaFileSource.SelectedIndex,
                 venueSource = venueSource.SelectedIndex,
@@ -419,6 +422,7 @@ namespace GH_Toolkit_GUI
             easyOpenCheckbox.Checked = data.easyOpen;
             perfOverrideInput.Text = data.perfPath;
             skaFilesInput.Text = data.skaPath;
+            gh3SkaFilesInput.Text = data.lipsyncPath;
             songScriptInput.Text = data.songScriptPath;
             skaFileSource.SelectedIndex = data.skaSource;
             venueSource.SelectedIndex = data.venueSource;

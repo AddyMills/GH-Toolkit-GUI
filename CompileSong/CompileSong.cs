@@ -18,10 +18,12 @@ using GH_Toolkit_Core.PS360;
 using IniParser.Model;
 using IniParser;
 using IniParser.Model.Configuration;
+using GH_Toolkit_Core.SKA;
 using GH_Toolkit_Core.Methods;
 using GH_Toolkit_Core.Checksum;
 using GH_Toolkit_Core.PS360;
 using System;
+using Microsoft.VisualBasic.Devices;
 
 namespace GH_Toolkit_GUI
 {
@@ -91,6 +93,7 @@ namespace GH_Toolkit_GUI
         private string[] QsStrings = [];
         private GhMetadata Metadata = new GhMetadata();
         private string PakFilePath = "";
+        private TimeSpan Duration = new TimeSpan();
 
 
         public CompileSong(string ghproj = "")
@@ -386,12 +389,14 @@ namespace GH_Toolkit_GUI
             midiFileSelect.Tag = new Tuple<TextBox, string, string>(midiFileInput, "file", midiFileFilter);
             perfOverrideSelect.Tag = new Tuple<TextBox, string, string>(perfOverrideInput, "file", qFileFilter);
             skaFilesSelect.Tag = new Tuple<TextBox, string, string>(skaFilesInput, "folder", "");
+            gh3SkaFilesSelect.Tag = new Tuple<TextBox, string, string>(gh3SkaFilesInput, "folder", "");
             songScriptSelect.Tag = new Tuple<TextBox, string, string>(songScriptInput, "file", qFileFilter);
 
             // Attach the event handlers to all GHWT+ Song Data tab buttons
             midiFileSelect.Click += SelectFileFolder;
             perfOverrideSelect.Click += SelectFileFolder;
             skaFilesSelect.Click += SelectFileFolder;
+            gh3SkaFilesSelect.Click += SelectFileFolder;
             songScriptSelect.Click += SelectFileFolder;
         }
         public void SetGameFields()
@@ -609,7 +614,8 @@ namespace GH_Toolkit_GUI
         }
         public string GetSkaSourceGhwt()
         {
-            return GetSkaSource(skaFileSource.SelectedIndex);
+            return GAME_GHWT;
+            //return GetSkaSource(skaFileSource.SelectedIndex);
         }
         private string GetSkaSource(int skaSource)
         {
@@ -1154,7 +1160,7 @@ namespace GH_Toolkit_GUI
         }
         private void SetConsoleChecksum()
         {
-            string qbString = $"{CurrentGame}{artist_input.Text}{title_input.Text}{year_input.Value}{isCover.Checked}";
+            string qbString = $"{CurrentGame}{artist_input.Text}{title_input.Text}{year_input.Value}{chart_author_input.Text}{isCover.Checked}";
             ConsoleChecksum = MakeConsoleChecksum([qbString]);
         }
         private void CompileGhwtPakFile()
@@ -1226,7 +1232,7 @@ namespace GH_Toolkit_GUI
             vocalsTierValue.Value = diffs["vocals"];
 
             Metadata = PackageMetadataGhwtPlus(doubleKick);
-            (SongList, QsStrings) = Metadata.GenerateGh5SongListEntry();
+
 
 
             return true;
@@ -1395,7 +1401,7 @@ namespace GH_Toolkit_GUI
             }
             if (!string.IsNullOrEmpty(gameCategoryInput.Text))
             {
-                songInfo.Keys.AddKey("SongIcon", gameCategoryInput.Text);
+                songInfo.Keys.AddKey("GameCategory", gameCategoryInput.Text);
             }
             if (!string.IsNullOrEmpty(bandInput.Text))
             {
@@ -1700,7 +1706,7 @@ namespace GH_Toolkit_GUI
                     await previewStem;
                 }
                 Console.WriteLine("Combining Audio...");
-                var fsbList = fsb.CombineFSB4File(drumFiles, otherFiles, backingFiles, [previewOutput], fsbOutput, encrypt);
+                var fsbList = fsb.CombineFSB4File(drumFiles, otherFiles, backingFiles, [previewOutput], fsbOutput);
 
                 if (CurrentPlatform == "PC")
                 {
@@ -1749,6 +1755,35 @@ namespace GH_Toolkit_GUI
             }
             return duration;
         }
+        private void ConvertLipsyncToWT()
+        {
+
+            string lipSyncPath = gh3SkaFilesInput.Text;
+            string skaPath = skaFilesInput.Text;
+            if (!Directory.Exists(skaFilesInput.Text))
+            {
+                skaFilesInput.Text = lipSyncPath+"-temp";
+                skaPath = skaFilesInput.Text;
+                Directory.CreateDirectory(skaPath);
+            }
+            
+            if (Directory.Exists(lipSyncPath))
+            {
+
+                foreach (string file in Directory.GetFiles(lipSyncPath, "*.ska*", SearchOption.AllDirectories))
+                {
+                    string relPath = Path.GetRelativePath(lipSyncPath, file);
+                    string skaFile = Path.Combine(skaPath, relPath);
+                    var skaBytes = new SkaFile(file, "big");
+                    float multiplier = skaFileSource.SelectedIndex;
+                    if (File.Exists(skaFile))
+                    {
+                        File.Delete(skaFile);
+                    }
+                    File.WriteAllBytes(skaFile, skaBytes.WriteModernStyleSka(SKELETON_WT_ROCKER, CurrentGame, multiplier));
+                }
+            }
+        }
         private async Task CompileAll()
         {
             Console.WriteLine($"Compiling chart and audio for {CurrentGame}");
@@ -1788,6 +1823,7 @@ namespace GH_Toolkit_GUI
                         compileSuccess = true;
                     }
                     MoveGh5Files();
+                    (SongList, QsStrings) = Metadata.GenerateGh5SongListEntry();
                     CreateConsoleDownloadFilesGh5(ConsoleChecksum, CurrentGame, CurrentPlatform, ConsoleCompile, ResourcePath, SongList, QsStrings, Metadata.PackageName);
                 }
                 if (!isExport && compileSuccess && (CurrentPlatform == "PS3" || CurrentPlatform == platform_360.Text))
@@ -1886,6 +1922,7 @@ namespace GH_Toolkit_GUI
             try
             {
                 PreChecks();
+                ConvertLipsyncToWT();
                 CompileGhwtPakFile();
                 success = true;
             }
@@ -1905,6 +1942,7 @@ namespace GH_Toolkit_GUI
             try
             {
                 PreChecks();
+                ConvertLipsyncToWT();
                 CompileGh5PakFile();
                 success = true;
             }
@@ -1923,6 +1961,8 @@ namespace GH_Toolkit_GUI
             Directory.CreateDirectory(ConsoleCompile);
             string currCheck = GetSongChecksum();
 
+            int duration = 0;
+
             File.Copy(PakFilePath, Path.Combine(ConsoleCompile, $"b{currCheck}_song.pak"), true);
             for (int i = 1; i < 4; i++)
             {
@@ -1931,13 +1971,27 @@ namespace GH_Toolkit_GUI
                 {
                     throw new FileNotFoundException($"Missing audio file {audio} for download file creation.");
                 }
-                File.Copy(audio, Path.Combine(ConsoleCompile, $"a{currCheck}_{i}.fsb"), true);
+                if (duration == 0) 
+                {
+                    var fileInfo = new FileInfo(audio);
+                    var length = fileInfo.Length - 128; // Data starts at 128
+                    duration = (int)Math.Round(length / 4 / 384 * 1152 / 48000f);
+                }
+                var encryptString = Path.GetFileNameWithoutExtension(audio);
+                var encryptedAudio = EncryptDecrypt.EncryptFSB4(File.ReadAllBytes(audio), encryptString);
+                var savePath = Path.Combine(ConsoleCompile, $"a{currCheck}_{i}.fsb");
+                File.WriteAllBytes(savePath, encryptedAudio);
+                //File.Copy(audio, Path.Combine(ConsoleCompile, $"a{currCheck}_{i}.fsb"), true);
             }
+            Metadata.Duration = duration;
             if (!File.Exists(Path.Combine(compile_input.Text, $"{currCheck}_preview.fsb")))
             {
                 throw new FileNotFoundException($"Missing preview audio file {currCheck}_preview.fsb for download file creation.");
             }
-            File.Copy(Path.Combine(compile_input.Text, $"{currCheck}_preview.fsb"), Path.Combine(ConsoleCompile, $"a{currCheck}_preview.fsb"), true);
+            var previewPath = Path.Combine(compile_input.Text, $"{currCheck}_preview.fsb");
+            var previewSave = Path.Combine(ConsoleCompile, $"a{currCheck}_preview.fsb");
+            var previewEncryptString = Path.GetFileNameWithoutExtension(previewPath);
+            File.WriteAllBytes(previewSave, EncryptDecrypt.EncryptFSB4(File.ReadAllBytes(previewPath), previewEncryptString));
         }
         private void compile_pak_button_Click(object sender, EventArgs e)
         {
@@ -1957,6 +2011,7 @@ namespace GH_Toolkit_GUI
             {
                 success = CompilePakGh5();
                 MoveGh5Files();
+                (SongList, QsStrings) = Metadata.GenerateGh5SongListEntry();
                 CreateConsoleDownloadFilesGh5(ConsoleChecksum, CurrentGame, CurrentPlatform, ConsoleCompile, ResourcePath, SongList, QsStrings, Metadata.PackageName);
             }
 
