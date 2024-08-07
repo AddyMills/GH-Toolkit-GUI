@@ -1,8 +1,7 @@
 {
   "profiles": {
     "GH-Toolkit-GUI": {
-      "commandName": "Project",
-      "commandLineArgs": "\"D:\\RB\\Songs\\DragonForce\\Revolution DeathSquad RB\\Compile GH\\revodeath.ghproj\""
+      "commandName": "Project"
     }
   }
 }
